@@ -50,7 +50,7 @@
     "@aws-cdk/aws-kinesisfirehose-destinations-alpha": "^2.140.0-alpha.0",
     "@aws-sdk/client-cloudwatch": "^3.572.0",
     "@aws-sdk/client-kinesis": "^3.569.0",
-    "@aws-sdk/client-ssm": "^3.569.0",
+    "@aws-sdk/client-ssm": "^3.606.0",
     "aws-cdk-lib": "2.140.0",
     "cdk-nag": "^2.28.103",
     "constructs": "^10.3.0"
