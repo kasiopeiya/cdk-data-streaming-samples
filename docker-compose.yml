@@ -1,0 +1,11 @@
+version: '3.9'
+services:
+  cdk:
+    container_name: cdk-streaming-samples-dev
+    build: ./
+    tty: true
+    volumes:
+      - ${HOME}/.aws/credentials:/root/.aws/credentials:ro
+      - ${HOME}/.aws/config:/root/.aws/config:ro
+      - ./.devcontainer/.vimrc:/root/.vimrc:ro
+      - ./:/workspace:cached

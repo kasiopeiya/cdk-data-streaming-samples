@@ -1,0 +1,22 @@
+########################################################################
+# pull requestにラベルを付与
+########################################################################
+
+name: pull-request-labeler-action
+run-name: ${{ github.workflow }} workflow
+on:
+  pull_request:
+jobs:
+  label:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - run: cat $GITHUB_EVENT_PATH
+      - run: lsb_release -d
+      - run: gh --version
+
+      - uses: actions/labeler@v5
+        with:
+          configuration-path: .github/configs/labeler.yml

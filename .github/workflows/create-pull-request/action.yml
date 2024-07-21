@@ -1,0 +1,27 @@
+########################################################################
+# pull requst作成
+########################################################################
+
+name: "create pull request aciton"
+runs:
+  using: "composite"
+  steps:
+    - name: check if pull request exists
+      id: check_pr
+      run: |
+        echo ${{ env.TITLE }}
+        echo "PR_COUNT=$(gh pr list -S ${{ env.TITLE }}' in:title' | wc -l)" >> "$GITHUB_ENV"
+      shell: bash
+
+    - name: create a pull request
+      if: ${{ env.PR_COUNT == 0 }}
+      env:
+        HEAD_MESSAGE: ${{ github.event.head_commit.message }}
+      run: |
+        COMMIT_MESSAGE=$(echo "${HEAD_MESSAGE}" | sed -n -e 1p)
+        gh pr create \
+          -B ${{ env.BRANCH }} \
+          -t "【${{ env.TITLE }}】$COMMIT_MESSAGE" \
+          -a "${{ github.actor }}" \
+          --body-file ./.github/PULL_REQUEST_TEMPLATE.md
+      shell: bash

@@ -1,0 +1,67 @@
+{
+  "name": "infra-repo",
+  "version": "0.1.10",
+  "bin": {
+    "infra-repo": "bin/infra-repo.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "watch": "tsc -w",
+    "test": "jest",
+    "test:snap": "jest ./test/**/snapshot.test.ts",
+    "cdk": "cdk",
+    "prepare": "husky",
+    "format": "prettier --write '*/**/*.ts'",
+    "format:ci": "prettier --check '*/**/*.ts'",
+    "lint": "eslint '*/**/*.ts' --max-warnings 0 --fix",
+    "lint:ci": "eslint '*/**/*.ts' --max-warnings 0",
+    "lint-fix": "prettier --write '*/**/*.ts' && eslint '*/**/*.ts' --max-warnings 0",
+    "md-lint-fix": "prettier --write '*/**/*.md' && markdownlint-cli2 '*/**/*.md'",
+    "release": "standard-version && git push --follow-tags",
+    "depcheck": "depcheck"
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^19.3.0",
+    "@commitlint/config-conventional": "^19.2.2",
+    "@types/jest": "^29.5.12",
+    "@types/node": "20.12.4",
+    "@typescript-eslint/eslint-plugin": "^6.4.1",
+    "aws-cdk": "2.139.0",
+    "depcheck": "^1.4.7",
+    "esbuild": "^0.20.2",
+    "eslint": "^8.57.0",
+    "eslint-config-standard-with-typescript": "^43.0.1",
+    "eslint-plugin-import": "^2.29.1",
+    "eslint-plugin-n": "^16.6.2",
+    "eslint-plugin-promise": "^6.1.1",
+    "husky": "^9.0.11",
+    "jest": "^29.7.0",
+    "lint-staged": "^15.2.2",
+    "markdownlint-cli2": "^0.13.0",
+    "prettier": "^3.3.0",
+    "standard-version": "^9.5.0",
+    "ts-jest": "^29.1.4",
+    "ts-node": "^10.9.2",
+    "typescript": "~5.4.5",
+    "winston": "^3.13.0"
+  },
+  "dependencies": {
+    "@aws-cdk/aws-kinesisfirehose-alpha": "^2.140.0-alpha.0",
+    "@aws-cdk/aws-kinesisfirehose-destinations-alpha": "^2.140.0-alpha.0",
+    "@aws-sdk/client-cloudwatch": "^3.572.0",
+    "@aws-sdk/client-kinesis": "^3.569.0",
+    "@aws-sdk/client-ssm": "^3.569.0",
+    "aws-cdk-lib": "2.140.0",
+    "cdk-nag": "^2.28.103",
+    "constructs": "^10.3.0"
+  },
+  "lint-staged": {
+    "*.{ts,tsx}": "npm run lint-fix",
+    "*.md": "npm run md-lint-fix"
+  },
+  "commitlint": {
+    "extends": [
+      "@commitlint/config-conventional"
+    ]
+  }
+}

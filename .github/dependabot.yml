@@ -1,0 +1,22 @@
+version: 2
+updates:
+  - package-ecosystem: 'npm'
+    directory: '/'
+    open-pull-requests-limit: 30
+    schedule:
+      interval: 'weekly'
+      day: 'monday'
+      time: '08:00'
+      timezone: 'Asia/Tokyo'
+    ignore:
+      - dependency-name: '@types/node'
+        versions: '>=20'
+  # Actionsの更新
+  - package-ecosystem: 'github-actions'
+    directory: '/'
+    open-pull-requests-limit: 30
+    schedule:
+      interval: 'weekly'
+      day: 'monday'
+      time: '08:00'
+      timezone: 'Asia/Tokyo'

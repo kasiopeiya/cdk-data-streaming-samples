@@ -1,0 +1,81 @@
+########################################################################
+# 静的解析、パッケージの依存関係チェック、テスト、差分確認
+########################################################################
+
+name: "built test action"
+inputs:
+  env_name:
+    required: true
+runs:
+  using: "composite"
+  steps:
+    - name: Use Node.js 18.19.x
+      uses: actions/setup-node@v4
+      with:
+        node-version: 18.19.x
+
+    - name: Cache dependencies
+      id: node_modules_cache_id
+      uses: actions/cache@v4
+      with:
+        path: '**/node_modules'
+        key: node-modules-${{ hashFiles('**/package-lock.json') }}
+
+    - name: Setup dependencies
+      if: ${{ steps.node_modules_cache_id.outputs.cache-hit != 'true' }}
+      run: npm ci
+      shell: bash
+
+    - name:  depcheck
+      run: npm run depcheck
+      shell: bash
+
+    - name:  check format
+      run: npm run format:ci
+      shell: bash
+
+    - name:  lint
+      run: npm run lint:ci
+      shell: bash
+
+    - name:  cdk diff
+      id: diff
+      run: npx cdk diff "${{ inputs.env_name }}/*"> diff_job_summary 2>&1
+      shell: bash
+
+    - name:  snapshot tests
+      id: snapshot
+      run: npm run test:snap > snapshot_job_summary 2>&1
+      shell: bash
+      continue-on-error: true
+
+    - name: fine-grained assertions tests
+      id: fga
+      run: npm run test:fga > fga_job_summary 2>&1
+      shell: bash
+      continue-on-error: true
+
+    - name: create job summary
+      uses: actions/github-script@v7
+      with:
+        github-token: ${{ env.GITHUB_TOKEN }}
+        script: |
+          const fs = require('fs')
+          const diff = await fs.readFileSync("./diff_job_summary")
+          const snapshot = await fs.readFileSync("./snapshot_job_summary")
+          const fga = await fs.readFileSync("./fga_job_summary")
+          await core.summary
+            .addHeading('CDK Diff report')
+            .addCodeBlock(diff)
+            .addHeading('Snapshot testing report')
+            .addCodeBlock(snapshot)
+            .addHeading('Fine-Grained asssertions testing report')
+            .addCodeBlock(fga)
+            .write()
+
+    - name: Error handling
+      if: ${{ steps.snapshot.outcome == 'failure' || steps.fga.outcome == 'failure' }}
+      run: |
+        echo "Error handling"
+        exit 1
+      shell: bash

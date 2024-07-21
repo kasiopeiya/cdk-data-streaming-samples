@@ -1,0 +1,50 @@
+########################################################################
+# 本番環境用ビルド、テスト
+########################################################################
+
+name: prod-build-test-action
+run-name: ${{ github.workflow }} workflow
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+jobs:
+  build-test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    environment:
+      name: prd
+    permissions:
+      id-token: write
+      contents: write
+    steps:
+      - run: cat $GITHUB_EVENT_PATH
+      - run: lsb_release -d
+      - run: gh --version
+      - run: aws --version
+
+      - uses: actions/checkout@v4
+
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.ROLE_TO_ASSUME }}
+          aws-region: ap-northeast-1
+      - run: aws sts get-caller-identity
+
+      - name: set env variables
+        env:
+          ENV_NAME: ${{ vars.ENV_NAME }}
+        run: |
+          echo "ENV_NAME=${{ env.ENV_NAME }}"
+          echo "ENV_NAME=${{ env.ENV_NAME }}" >> $GITHUB_ENV
+          echo "DEV_ACCOUNT_ID=${{ secrets.DEV_ACCOUNT_ID }}" >> $GITHUB_ENV
+          echo "PROD_ACCOUNT_ID=${{ secrets.PROD_ACCOUNT_ID }}" >> $GITHUB_ENV
+
+      - name: build test
+        uses: ./.github/workflows/build_test
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          env_name: ${{ env.ENV_NAME }}
+

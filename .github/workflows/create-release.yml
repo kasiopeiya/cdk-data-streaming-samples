@@ -1,0 +1,51 @@
+name: create release action
+run-name: ${{ github.workflow }} workflow
+on:
+  push:
+    tags:
+      - v*
+jobs:
+  create-release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - run: cat $GITHUB_EVENT_PATH
+      - run: lsb_release -d
+      - run: gh --version
+
+      - uses: actions/checkout@v4
+
+      - name: get latest tag
+        id: get-latest-tag
+        run: |
+          echo "LATEST_TAG=${GITHUB_REF##*/}" >> $GITHUB_ENV
+
+      - name: create release
+        id: create-release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: '${{ env.LATEST_TAG }}'
+          release_name: 'Release ${{ env.LATEST_TAG }}'
+          body: 'Please see [CHANGELOG](https://github.com/kasiopeiya/cdk-project-template/blob/main/CHANGELOG.md) for details.'
+          draft: false
+          prerelease: true
+
+      - name: create template
+        run: |
+          rm -rf .git docs test/dev/__snapshots__ test/prod/__snapshots__
+          echo "" > CHANGELOG.md
+          echo "" > README.md
+          zip -r cdk-project-template.zip ./
+
+      - name: upload asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create-release.outputs.upload_url }}
+          asset_path: ./cdk-project-template.zip
+          asset_name: cdk-project-template.zip
+          asset_content_type: application/zip
