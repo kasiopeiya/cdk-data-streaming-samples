@@ -1,3 +1,5 @@
+import * as path from 'path'
+
 import { Duration, Stack, type StackProps, RemovalPolicy } from 'aws-cdk-lib'
 import { type Construct } from 'constructs'
 import { type Bucket } from 'aws-cdk-lib/aws-s3'
@@ -17,16 +19,15 @@ interface DeliveryS3StackProps extends StackProps {
   bucket: Bucket
   /** 配信のバッファリング秒数 0 ~ 900, 動的パーティショニング使用時は 60 ~ 900 */
   bufferingInterval?: Duration
-  /** Lambda関数による加工オプション */
-  lambdaProcessing?: {
-    /** Lambda加工有効化フラグ */
-    enable: boolean
-    /** バックアップ用S3バケット */
-    bkBucket: Bucket
-    /** Firehoseと連携するLambda関数コードのパス */
-    lambdaEntry: string
-    /** Lambda関数加工処理のバッファリング秒数 0 ~ 900 */
-    processorBufferingInterval?: Duration
+  /** Lambda関数による加工処理有効化フラグ */
+  enableLambdaProcessor?: boolean
+  /** Lambda関数加工処理設定 */
+  dataProcessorOptions?: kinesisfirehose_alpha.DataProcessorProps
+  /** バックアップ配信設定 */
+  s3BackupOptions?: {
+    bucket: kinesisfirehose_destination_alpha.DestinationS3BackupProps['bucket']
+    bufferingInterval?: kinesisfirehose_destination_alpha.DestinationS3BackupProps['bufferingInterval']
+    bufferingSize?: kinesisfirehose_destination_alpha.DestinationS3BackupProps['bufferingSize']
   }
 }
 
@@ -36,6 +37,8 @@ interface DeliveryS3StackProps extends StackProps {
 export class DeliveryS3Stack extends Stack {
   constructor(scope: Construct, id: string, props: DeliveryS3StackProps) {
     super(scope, id, props)
+
+    props.enableLambdaProcessor = false
 
     /*
     * Kinesis Data Streams
@@ -50,25 +53,27 @@ export class DeliveryS3Stack extends Stack {
     let deliveryStream: kinesisfirehose_alpha.DeliveryStream
     let lambdaFunc: LambdaFunction | undefined
 
-    if (props.lambdaProcessing?.enable === true) {
-      // 動的パーティショニング
-      if (props.bufferingInterval !== undefined && props.bufferingInterval < Duration.seconds(60)) {
-        // 動的パーティショニング使用時は最小値が60秒のため
-        props.bufferingInterval = Duration.seconds(60)
-      }
-      props.lambdaProcessing.processorBufferingInterval ??= Duration.seconds(5)
-      const myFirehoseWithLambda = new FirehoseWithLambda(this, 'FirehoseWithLambda', {
+    if (props.enableLambdaProcessor) {
+      // Lambda加工処理を実施する場合
+      const lambdaEntry = path.join(
+        'resources',
+        'lambda',
+        'firehoseProcessor',
+        'dynamicPartitioning',
+        'python'
+      )
+      const firehoseWithLambda = new FirehoseWithLambda(this, 'FirehoseWithLambda', {
         sourceStream: myDataStream.dataStream,
         destinationBucket: props.bucket,
-        backupBucket: props.lambdaProcessing.bkBucket,
-        lambadEntry: props.lambdaProcessing.lambdaEntry,
-        bufferingInterval: props.bufferingInterval,
-        processorBufferingInterval: props.lambdaProcessing.processorBufferingInterval
+        lambadEntry: lambdaEntry,
+        s3BackupOptions: {
+          bucket: props.s3BackupOptions?.bucket
+        }
       })
-      deliveryStream = myFirehoseWithLambda.deliveryStream
-      lambdaFunc = myFirehoseWithLambda.lambdaFunc
+      deliveryStream = firehoseWithLambda.deliveryStream
+      lambdaFunc = firehoseWithLambda.lambdaFunc
     } else {
-      // 配信のみ
+      // 配信のみの場合
       props.bufferingInterval ??= Duration.seconds(5)
 
       const s3Destination = new kinesisfirehose_destination_alpha.S3Bucket(props.bucket, {

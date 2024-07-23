@@ -1,7 +1,8 @@
+/** 本番環境用ステージ */
 import { Stack, type StageProps, type IAspect, Aspects } from 'aws-cdk-lib'
 import { type IConstruct, type Construct } from 'constructs'
 
-import { prodConfig } from '../../config'
+import { prodConfig as config } from '../../config'
 import { StageBase } from './stageBase'
 
 export class ProdStage extends StageBase {
@@ -20,8 +21,7 @@ export class ProdStage extends StageBase {
     // 各環境にのみデプロイするスタックを生成
     // const hogeStack = new HogeStack(this, 'HogeStack')
     return {
-      ...super.createCommonStacks(this, prodConfig)
-      // hogeStack
+      ...super.createCommonStacks(this, config)
     }
   }
 }
@@ -31,9 +31,9 @@ export class ProdStage extends StageBase {
  */
 class AddTerminationProtection implements IAspect {
   public visit(node: IConstruct): void {
-    // スタックの場合のみ termination protection を設定
+    // sampleのためfalse(=削除保護無効)
     if (Stack.isStack(node)) {
-      node.terminationProtection = true
+      node.terminationProtection = false
     }
   }
 }

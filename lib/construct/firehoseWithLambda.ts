@@ -1,4 +1,4 @@
-import { Duration, Stack, Size, RemovalPolicy } from 'aws-cdk-lib'
+import { Duration, RemovalPolicy } from 'aws-cdk-lib'
 import { Construct } from 'constructs'
 import { type Stream } from 'aws-cdk-lib/aws-kinesis'
 import { type Bucket } from 'aws-cdk-lib/aws-s3'
@@ -13,14 +13,18 @@ interface FirehoseWithLambdaProps {
   sourceStream: Stream
   /** 配信先S3バケット */
   destinationBucket: Bucket
-  /** バックアップ先S3バケット */
-  backupBucket: Bucket
   /** Firehoseと連携するLambda関数コードのパス */
   lambadEntry: string
   /** 配信のバッファリング秒数 */
   bufferingInterval?: Duration
-  /** Lambda関数加工処理のバッファリング秒数 */
-  processorBufferingInterval?: Duration
+  /** Lambda関数加工処理設定 */
+  dataProcessorOptions?: kinesisfirehose_alpha.DataProcessorProps
+  /** バックアップ配信設定 */
+  s3BackupOptions?: {
+    bucket: kinesisfirehose_destination_alpha.DestinationS3BackupProps['bucket']
+    bufferingInterval?: kinesisfirehose_destination_alpha.DestinationS3BackupProps['bufferingInterval']
+    bufferingSize?: kinesisfirehose_destination_alpha.DestinationS3BackupProps['bufferingSize']
+  }
 }
 
 /**
@@ -33,8 +37,11 @@ export class FirehoseWithLambda extends Construct {
   constructor(scope: Construct, id: string, props: FirehoseWithLambdaProps) {
     super(scope, id)
 
-    props.bufferingInterval ??= Duration.seconds(10)
-    props.processorBufferingInterval ??= Duration.seconds(10)
+    // 動的パーティショニング使用時はバッファリング間隔は最低60秒
+    props.bufferingInterval ??= Duration.seconds(60)
+    if (props.bufferingInterval.toSeconds() < 60) {
+      throw new Error('bufferingInterval must be at least 60 seconds.')
+    }
 
     /*
     * Lambda
@@ -42,9 +49,7 @@ export class FirehoseWithLambda extends Construct {
     this.lambdaFunc = new lambda.Function(this, 'Function', {
       runtime: lambda.Runtime.PYTHON_3_12,
       handler: 'index.lambda_handler',
-      code: lambda.Code.fromAsset(props.lambadEntry),
-      functionName: `${Stack.of(this).stackName}-func`,
-      insightsVersion: lambda.LambdaInsightsVersion.VERSION_1_0_229_0
+      code: lambda.Code.fromAsset(props.lambadEntry)
     })
 
     /*
@@ -69,20 +74,23 @@ export class FirehoseWithLambda extends Construct {
       retention: logs.RetentionDays.ONE_DAY
     })
 
+    /*
+    * Data Firehose
+    -------------------------------------------------------------------------- */
     // S3配信設定
     const s3Destination = new kinesisfirehose_destination_alpha.S3Bucket(props.destinationBucket, {
       bufferingInterval: props.bufferingInterval,
       dataOutputPrefix: 'data/!{partitionKeyFromLambda:dataType}/!{timestamp:yyyy/MM/dd/HH}/',
       errorOutputPrefix: 'error/!{firehose:error-output-type}/!{timestamp:yyyy/MM/dd/HH}/',
       processor: new kinesisfirehose_alpha.LambdaFunctionProcessor(this.lambdaFunc, {
-        bufferInterval: props.processorBufferingInterval,
-        bufferSize: Size.mebibytes(3)
+        bufferInterval: props.dataProcessorOptions?.bufferInterval,
+        bufferSize: props.dataProcessorOptions?.bufferSize
       }),
       logGroup: s3DestinationErrorLogGroup,
       s3Backup: {
-        bucket: props.backupBucket,
-        bufferingInterval: Duration.seconds(60),
-        bufferingSize: Size.mebibytes(5),
+        bucket: props.s3BackupOptions?.bucket,
+        bufferingInterval: props.s3BackupOptions?.bufferingInterval,
+        bufferingSize: props.s3BackupOptions?.bufferingSize,
         logGroup: s3BkErrorLogGroup,
         mode: kinesisfirehose_destination_alpha.BackupMode.ALL // ALLしか設定できない
       }

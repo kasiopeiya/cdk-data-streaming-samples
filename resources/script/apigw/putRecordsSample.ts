@@ -115,7 +115,7 @@ async function signHttpReqeust(req: HttpRequest_): Promise<HttpRequest_> {
     service: 'execute-api',
     sha256: Sha256
   })
-  return await signer.sign(req)
+  return signer.sign(req)
 }
 
 /**

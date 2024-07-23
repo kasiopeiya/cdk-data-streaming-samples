@@ -1,5 +1,4 @@
-import * as path from 'path'
-import { type Stack, Stage, Duration } from 'aws-cdk-lib'
+import { type Stack, Stage } from 'aws-cdk-lib'
 import { type Construct } from 'constructs'
 
 import { type Config } from '../../config'
@@ -11,22 +10,21 @@ export abstract class StageBase extends Stage {
     const prefix: string = config.prefix
     const env = config.env
 
-    const baseStack = new BaseStack(scope, `${prefix}-base-stack`, { env })
+    /*
+    * ステートフルリソース用スタック
+    -------------------------------------------------------------------------- */
+    const baseStack = new BaseStack(scope, 'base-stack', { env })
+
+    /*
+    * S3配信構成用スタック
+    -------------------------------------------------------------------------- */
     const deliveryS3Stack = new DeliveryS3Stack(scope, `${prefix}-delivery-s3-stack`, {
       env,
       prefix: config.prefix,
       bucket: baseStack.firehoseBucket,
-      bufferingInterval: Duration.seconds(0),
-      lambdaProcessing: {
-        enable: false,
-        bkBucket: baseStack.firehoseBkBucket,
-        lambdaEntry: path.join(
-          'resources',
-          'lambda',
-          'firehoseProcessor',
-          'dynamicPartitioning',
-          'python'
-        )
+      enableLambdaProcessor: true,
+      s3BackupOptions: {
+        bucket: baseStack.firehoseBkBucket
       }
     })
 

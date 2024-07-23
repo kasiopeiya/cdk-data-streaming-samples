@@ -14,7 +14,9 @@ export class KdsDataStream extends Construct {
   constructor(scope: Construct, id: string, props: KdsDataStreamProps) {
     super(scope, id)
 
-    // Kinesis Data Streams
+    /*
+    * Kinesis Data Streams
+    -------------------------------------------------------------------------- */
     this.dataStream = new Stream(this, 'Resource', {
       shardCount: props.dataStreamProps?.shardCount ?? 1,
       streamMode: StreamMode.PROVISIONED,
@@ -23,7 +25,11 @@ export class KdsDataStream extends Construct {
       ...props.dataStreamProps
     })
 
-    // SSM Parameter Store
+    /*
+    *  SSM Parameter Store
+    -------------------------------------------------------------------------- */
+    // dataStream名を登録
+    // producer scriptで利用
     new ssm.StringParameter(this, 'parameter', {
       parameterName: props.parameterKeyName,
       stringValue: this.dataStream.streamName

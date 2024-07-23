@@ -1,7 +1,8 @@
+/** 開発環境用ステージ */
 import { type Stack, type StageProps } from 'aws-cdk-lib'
 import { type Construct } from 'constructs'
 
-import { devConfig } from '../../config'
+import { devConfig as config } from '../../config'
 import { StageBase } from './stageBase'
 
 export class DevStage extends StageBase {
@@ -15,8 +16,7 @@ export class DevStage extends StageBase {
     // 各環境にのみデプロイするスタックを生成
     // const hogeStack = new HogeStack(this, 'HogeStack')
     return {
-      ...super.createCommonStacks(this, devConfig)
-      // hogeStack
+      ...super.createCommonStacks(this, config)
     }
   }
 }
