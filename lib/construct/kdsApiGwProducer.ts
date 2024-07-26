@@ -5,6 +5,7 @@ import * as apigw from 'aws-cdk-lib/aws-apigateway'
 import * as ec2 from 'aws-cdk-lib/aws-ec2'
 import * as logs from 'aws-cdk-lib/aws-logs'
 import { type Stream } from 'aws-cdk-lib/aws-kinesis'
+import * as ssm from 'aws-cdk-lib/aws-ssm'
 
 interface KdsPrivateApiGwProducerProps {
   dataStream: Stream
@@ -98,6 +99,14 @@ export class KdsPrivateApiGwProducer extends Construct {
     // メソッド追加
     recordsResource.addMethod('PUT', putRecordAwsIntegration, methodOptions)
     recordsResource.addMethod('PUT', putRecordsAwsIntegration, methodOptions)
+
+    /*
+    * Parameter Store
+    -------------------------------------------------------------------------- */
+    new ssm.StringParameter(this, 'APIGWUrlParameter', {
+      parameterName: `apiGwKds/${Stack.of(this).stackName}/url`,
+      stringValue: this.restApi.url
+    })
   }
 
   /**
