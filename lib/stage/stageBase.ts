@@ -13,12 +13,12 @@ export abstract class StageBase extends Stage {
     /*
     * ステートフルリソース用スタック
     -------------------------------------------------------------------------- */
-    const baseStack = new BaseStack(scope, 'base-stack', { env })
+    const baseStack = new BaseStack(scope, `${prefix}-base-stack`, { env })
 
     /*
     * S3配信構成用スタック
     -------------------------------------------------------------------------- */
-    const deliveryS3Stack = new DeliveryS3Stack(scope, `${prefix}-delivery-s3-stack`, {
+    const deliveryS3Stack = new DeliveryS3Stack(scope, `${prefix}-sample-delivery-s3-stack`, {
       env,
       prefix: config.prefix,
       bucket: baseStack.firehoseBucket,
