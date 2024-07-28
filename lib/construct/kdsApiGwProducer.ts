@@ -26,7 +26,7 @@ export class KdsPrivateApiGwProducer extends Construct {
   private readonly role: iam.Role
   private readonly stageOption: apigw.StageOptions
   private readonly vpcEndpoint: ec2.InterfaceVpcEndpoint
-  private readonly restApi: apigw.RestApi
+  public readonly restApi: apigw.RestApi
 
   constructor(scope: Construct, id: string, props: KdsPrivateApiGwProducerProps) {
     super(scope, id)
@@ -67,6 +67,7 @@ export class KdsPrivateApiGwProducer extends Construct {
 
     // リソース(パス)
     const streamsResource = this.restApi.root.addResource('streams')
+    const recordResource = streamsResource.addResource('record')
     const recordsResource = streamsResource.addResource('records')
 
     // AWS統合設定: KDS PutRecords API
@@ -97,14 +98,14 @@ export class KdsPrivateApiGwProducer extends Construct {
       ]
     }
     // メソッド追加
-    recordsResource.addMethod('PUT', putRecordAwsIntegration, methodOptions)
+    recordResource.addMethod('PUT', putRecordAwsIntegration, methodOptions)
     recordsResource.addMethod('PUT', putRecordsAwsIntegration, methodOptions)
 
     /*
     * Parameter Store
     -------------------------------------------------------------------------- */
     new ssm.StringParameter(this, 'APIGWUrlParameter', {
-      parameterName: `apiGwKds/${Stack.of(this).stackName}/url`,
+      parameterName: `/apiGwKds/${Stack.of(this).stackName}/url`,
       stringValue: this.restApi.url
     })
   }

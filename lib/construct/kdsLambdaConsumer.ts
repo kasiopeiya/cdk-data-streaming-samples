@@ -28,6 +28,7 @@ interface KdsLambdaConsumerProps {
  */
 export class KdsLambdaConsumer extends Construct {
   public readonly kdsConsumerFunction: lambda_.Function
+  public readonly logGroup: logs.LogGroup
 
   constructor(scope: Construct, id: string, props: KdsLambdaConsumerProps) {
     super(scope, id)
@@ -67,7 +68,7 @@ export class KdsLambdaConsumer extends Construct {
     )
     const customlayer = new lambda_.LayerVersion(this, 'CustomLayer', {
       removalPolicy: RemovalPolicy.DESTROY,
-      code: lambda_.Code.fromAsset(path.join('resources', 'lambda_layer', 'kinesis')),
+      code: lambda_.Code.fromAsset(path.join('resources', 'layer', 'logging')),
       compatibleArchitectures: [lambda_.Architecture.X86_64, lambda_.Architecture.ARM_64]
     })
 
@@ -141,7 +142,7 @@ export class KdsLambdaConsumer extends Construct {
     }
 
     // CloudWatch Logs: LogGroup
-    new logs.LogGroup(this, 'LambdaLogGroup', {
+    this.logGroup = new logs.LogGroup(this, 'LambdaLogGroup', {
       logGroupName: `/aws/lambda/${this.kdsConsumerFunction.functionName}`,
       removalPolicy: RemovalPolicy.DESTROY,
       retention: logs.RetentionDays.ONE_DAY
