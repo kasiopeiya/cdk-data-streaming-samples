@@ -1,4 +1,4 @@
-import { Stack, type StackProps } from 'aws-cdk-lib'
+import { RemovalPolicy, Stack, type StackProps } from 'aws-cdk-lib'
 import { type Construct } from 'constructs'
 import * as kds from 'aws-cdk-lib/aws-kinesis'
 import * as dynamodb from 'aws-cdk-lib/aws-dynamodb'
@@ -27,7 +27,7 @@ export class ApiGwKdsLambdaStack extends Stack {
     const dataStream = new kds.Stream(this, 'KDS', {
       streamMode: kds.StreamMode.PROVISIONED,
       shardCount: 1,
-      streamName: `${props.prefix}-stream`
+      removalPolicy: RemovalPolicy.DESTROY
     })
 
     /*

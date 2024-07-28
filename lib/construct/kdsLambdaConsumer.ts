@@ -1,7 +1,7 @@
 import * as path from 'path'
 
 import { Construct } from 'constructs'
-import { Duration, RemovalPolicy, Stack } from 'aws-cdk-lib'
+import { Duration, RemovalPolicy } from 'aws-cdk-lib'
 import * as logs from 'aws-cdk-lib/aws-logs'
 import * as nodejsLambda from 'aws-cdk-lib/aws-lambda-nodejs'
 import * as lambda_ from 'aws-cdk-lib/aws-lambda'
@@ -61,14 +61,9 @@ export class KdsLambdaConsumer extends Construct {
     const kdsDlq = new sqs.Queue(this, 'KinesisDeadLetterQueue')
 
     // Lambda Layer
-    const powertoolsLayer = lambda_.LayerVersion.fromLayerVersionArn(
-      this,
-      'PowertoolsLayer',
-      `arn:aws:lambda:${Stack.of(this).region}:094274105915:layer:AWSLambdaPowertoolsTypscriptv2:6`
-    )
     const customlayer = new lambda_.LayerVersion(this, 'CustomLayer', {
       removalPolicy: RemovalPolicy.DESTROY,
-      code: lambda_.Code.fromAsset(path.join('resources', 'layer', 'logging')),
+      code: lambda_.Code.fromAsset(path.join('resources', 'layer', 'kdsConsumer')),
       compatibleArchitectures: [lambda_.Architecture.X86_64, lambda_.Architecture.ARM_64]
     })
 
@@ -98,7 +93,7 @@ export class KdsLambdaConsumer extends Construct {
         METRIC_NAME: 'LambdaBatchSize',
         NAMESPACE: 'Custom/LambdaMetrics'
       },
-      layers: [powertoolsLayer, customlayer],
+      layers: [customlayer],
       tracing: lambda_.Tracing.ACTIVE,
       insightsVersion: lambda_.LambdaInsightsVersion.VERSION_1_0_229_0
     })
