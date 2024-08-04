@@ -193,6 +193,7 @@ const signHttpReqeust = async (req: HttpRequest_): Promise<HttpRequest_> => {
     service: 'execute-api',
     sha256: Sha256
   })
+  // eslint-disable-next-line @typescript-eslint/return-await
   return await signer.sign(req)
 }
 
