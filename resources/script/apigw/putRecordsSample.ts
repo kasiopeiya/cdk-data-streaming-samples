@@ -1,5 +1,6 @@
 /**
  * API Gateway - Kinesis Data Streams構成用のサンプルデータ送信スクリプト
+ * 複数レコードを同時に送信するKDS PutRecords API使用バージョン
  * IAM認可設定のためリクストの署名が必要、署名には環境変数のアクセスキー、なければIAM Roleを使用する
  * 接続先API GWのURLがParamemter Storeに登録されている必要あり
  */
@@ -76,6 +77,9 @@ interface Payload {
   records: KinesisRecord[]
 }
 
+/**
+ * APIGWからのレスポンスデータ
+ */
 interface ApiGwResponseData {
   Code: string
   Message: string
