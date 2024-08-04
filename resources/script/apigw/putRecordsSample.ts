@@ -1,33 +1,51 @@
-import axios from 'axios'
+/**
+ * API Gateway - Kinesis Data Streams構成用のサンプルデータ送信スクリプト
+ * IAM認可設定のためリクストの署名が必要、署名には環境変数のアクセスキー、なければIAM Roleを使用する
+ * 接続先API GWのURLがParamemter Storeに登録されている必要あり
+ */
+import axios, { type AxiosError } from 'axios'
 import { SignatureV4 } from '@aws-sdk/signature-v4'
 import { HttpRequest } from '@aws-sdk/protocol-http'
-import { type HttpRequest as HttpRequest_, type AwsCredentialIdentity } from '@smithy/types'
+import {
+  type HttpRequest as HttpRequest_,
+  type AwsCredentialIdentity,
+  type Provider
+} from '@smithy/types'
 import { Sha256 } from '@aws-crypto/sha256-js'
 import { Agent as HttpsAgent } from 'https'
 import * as winston from 'winston'
+import plimit, { type LimitFunction } from 'p-limit'
+import { faker } from '@faker-js/faker'
+import {
+  GetParameterCommand,
+  type GetParameterHistoryCommandInput,
+  SSMClient
+} from '@aws-sdk/client-ssm'
+import { defaultProvider } from '@aws-sdk/credential-provider-node'
+
+import { config } from './putRecordsSampleConfig'
+import { generateSampleRecord, type RecordData } from '../recordData'
 
 // 実行条件
-const executionCount = 1 // リクエスト送信回数
-const executionInterval = 5 // 送信インターバル(秒)
-const recordNumberPerRequest = 300 // リクエストあたりレコード数
-const recordSize = 10 // １レコードのサイズ
+const region = config.region
+const concurrentExecution = config.concurrentExecution
+const totalSendCount = config.totalSendCount
+const sendInterval = config.sendInterval
+const baseRecordNumberPerRequest = config.baseRecordNumberPerRequest
+const baseRecordSize = config.baseRecordSize
+const retryInterval = config.retryInterval
+const maxRetryCount = config.maxRetryCount
+const apiGwUrlParamKey = config.apiGwUrlParamKey
+const apiGwPath = config.apiGwPath
 
-// API GW設定
-const streamName = 'test-kds-sample-adv-stream'
-const url_ = new URL(
-  `https://a313aumlu1.execute-api.ap-northeast-1.amazonaws.com/dev/streams/${streamName}/records`
-)
+// カウントアップパラメータ
+const incrementalParameters = config.incrementalParameters ?? {}
+const maxRecordNumberPerRequest =
+  incrementalParameters.maxRecordNumberPerRequest ?? baseRecordNumberPerRequest
+const maxRecordSize = incrementalParameters.maxRecordSize ?? baseRecordSize
 
-// 認証情報: 環境変数にセット済み前提
-const accessKey_ = process.env.AWS_ACCESS_KEY
-const secretAccessKey_ = process.env.AWS_SECRET_ACCESS_KEY
-if (accessKey_ === undefined || secretAccessKey_ === undefined) {
-  throw new Error('AccessKey or SecretAccessKey is undefined')
-}
-const credentials_: AwsCredentialIdentity = {
-  accessKeyId: accessKey_,
-  secretAccessKey: secretAccessKey_
-}
+// 並列実行数の制御
+const limit: LimitFunction = plimit(concurrentExecution)
 
 // Logger
 const logger = winston.createLogger({
@@ -39,57 +57,141 @@ const logger = winston.createLogger({
   ),
   transports: [
     new winston.transports.Console(),
-    new winston.transports.File({ filename: 'kinesisPutRecordSample.log' })
+    new winston.transports.File({ filename: 'PutRecordsSample.log' })
   ]
 })
 
-interface KinesisRecordType {
+/**
+ * Kinesis Recordのインターフェース
+ */
+interface KinesisRecord {
+  /** 送信したいデータをstring変換したもの */
   data: string
-  'partition-key': string
+  PartitionKey: string
 }
-interface PayloadIF {
-  records: KinesisRecordType[]
+/**
+ * HTTPリクエスト送信時のインターフェース
+ */
+interface Payload {
+  records: KinesisRecord[]
+}
+
+interface ApiGwResponseData {
+  Code: string
+  Message: string
+  FailedRecordCount: string
+}
+
+/**
+ * エントリーポイント
+ */
+const main = async (): Promise<void> => {
+  const url_ = await createApiGwUrlWithPath(apiGwPath)
+  for (let currentSendCount = 1; currentSendCount <= totalSendCount; currentSendCount++) {
+    // 送信レコード数計算
+    let numOfData: number = baseRecordNumberPerRequest + (currentSendCount - 1)
+    if (maxRecordNumberPerRequest <= numOfData) {
+      numOfData = maxRecordNumberPerRequest
+    }
+
+    // データサイズ計算
+    let recordSize: number = baseRecordSize + (currentSendCount - 1)
+    if (maxRecordSize <= recordSize) {
+      recordSize = maxRecordSize
+    }
+
+    console.log(
+      `${currentSendCount}/${totalSendCount} ${numOfData} records per request, ${recordSize} bytes per record`
+    )
+
+    const tasks: Array<Promise<void>> = []
+    for (let concurrentIndex = 1; concurrentIndex <= concurrentExecution; concurrentIndex++) {
+      // リクエスト追跡用のIDを採番
+      const requestIdPrefix = `${currentSendCount}-${concurrentIndex}-`
+      const requestIdLength = 20
+      const requestId = `${requestIdPrefix}${faker.string.alphanumeric(requestIdLength - requestIdPrefix.length)}`
+      // 送信データ作成
+      const payload: Payload = { records: generateRecords(requestId, numOfData, recordSize) }
+      // HTTPリクエスト作成
+      const request = createHTTPRequest(url_, payload)
+      // リクエスト署名: APIGW IAM認可機能
+      const signedRequest = await signHttpReqeust(request)
+      tasks.push(
+        limit(async () => {
+          await sendRequest(url_, signedRequest, requestId, maxRetryCount)
+        })
+      )
+    }
+
+    // リクエスト送信
+    await Promise.all(tasks)
+
+    // インターバル
+    await wait(sendInterval)
+  }
+}
+
+/**
+ * 接続先API GWのURLオブジェクトを生成
+ * @param path 接続先URLのパス部分、先頭の'/'歯含めない
+ * @example createApiGwUrlWithPath('streams/records')
+ * @returns
+ */
+const createApiGwUrlWithPath = async (path: string): Promise<URL> => {
+  const apiUrl = await getParameter(apiGwUrlParamKey)
+  return new URL(`${apiUrl}${path}`)
+}
+
+/**
+ * Parameter Storeに登録されたデータ取得
+ * @param key
+ * @returns
+ */
+const getParameter = async (key: string): Promise<string> => {
+  const client = new SSMClient({ region })
+  const params: GetParameterHistoryCommandInput = {
+    Name: key,
+    WithDecryption: false
+  }
+  const command = new GetParameterCommand(params)
+  const store = await client.send(command)
+  if (store.Parameter?.Value === undefined) {
+    throw new Error('ParameterStoreからのデータ取得に失敗しました')
+  }
+  return store.Parameter.Value
 }
 
 /**
  * テストデータを生成する
- * @param startAt レコードIdの初期値
- * @param numOfData  生成したいレコード数
- * @param idSuffix レコードIdのサフィックス
- * @returns 生成されたレコードリスト
+ * @param requestId 追跡用のリクエストID
+ * @param numOfData 生成するレコード数
+ * @param recordSize 生成するレコードサイズ
+ * @returns
  */
-function generateRecords(
-  startAt: number = 1,
-  numOfData: number = 10,
-  idSuffix: number = 1
-): KinesisRecordType[] {
-  const records: KinesisRecordType[] = []
+const generateRecords = (
+  requestId: string,
+  numOfData: number,
+  recordSize: number
+): KinesisRecord[] => {
+  const records: KinesisRecord[] = []
 
-  const dataTypes = ['free', 'normal', 'premium'] as const
-  const dataBody = 'A'.repeat(recordSize)
-
-  for (let i = startAt; i < startAt + numOfData; i++) {
-    const id = `id-${i}-${idSuffix}`
-    const systemId = 'HogeSystem'
-    const timeStamp = Date.now()
-    const email = `hoge${i}_${idSuffix}@mail.com`
-    const dataType = dataTypes[Math.floor(Math.random() * dataTypes.length)]
-    const record: KinesisRecordType = {
-      data: `${id},${systemId},${timeStamp},${email},${dataType},${dataBody}`,
-      'partition-key': id
+  for (let recordIndex = 1; recordIndex <= numOfData; recordIndex++) {
+    const recordData: RecordData = generateSampleRecord(recordSize, requestId)
+    const record: KinesisRecord = {
+      data: JSON.stringify(recordData),
+      PartitionKey: recordData.recordId
     }
     records.push(record)
   }
-
   return records
 }
 
 /**
- * HTTPリクエストを作成する
+ * HTTPリクエストを作成
  * @param payload
  * @returns
  */
-function createHTTPRequest(payload: PayloadIF): HttpRequest_ {
+function createHTTPRequest(url_: URL, payload: Payload): HttpRequest_ {
   const req = new HttpRequest({
     method: 'PUT',
     path: url_.pathname,
@@ -108,14 +210,31 @@ function createHTTPRequest(payload: PayloadIF): HttpRequest_ {
  * @param req
  * @returns
  */
-async function signHttpReqeust(req: HttpRequest_): Promise<HttpRequest_> {
+const signHttpReqeust = async (req: HttpRequest_): Promise<HttpRequest_> => {
   const signer = new SignatureV4({
-    credentials: credentials_,
+    credentials: createAWSCredentials(),
     region: 'ap-northeast-1',
     service: 'execute-api',
     sha256: Sha256
   })
-  return signer.sign(req)
+  return await signer.sign(req)
+}
+
+/**
+ * AWS Credential情報を生成する
+ */
+const createAWSCredentials = (): AwsCredentialIdentity | Provider<AwsCredentialIdentity> => {
+  const accessKey = process.env.AWS_ACCESS_KEY
+  const secretAccessKey_ = process.env.AWS_SECRET_ACCESS_KEY
+  if (accessKey !== undefined && secretAccessKey_ !== undefined) {
+    // 環境変数からCredential生成
+    return {
+      accessKeyId: accessKey,
+      secretAccessKey: secretAccessKey_
+    }
+  }
+  // IAM RoleからCredential生成(EC2, CodeBuildなど)
+  return defaultProvider()
 }
 
 /**
@@ -123,7 +242,12 @@ async function signHttpReqeust(req: HttpRequest_): Promise<HttpRequest_> {
  * @param httpRequest
  * @param retries
  */
-async function sendRequest(httpRequest: HttpRequest_, retries: number = 3): Promise<void> {
+const sendRequest = async (
+  url_: URL,
+  httpRequest: HttpRequest_,
+  requestId: string,
+  retries: number = 3
+): Promise<void> => {
   try {
     const response = await axios.request({
       method: httpRequest.method,
@@ -134,15 +258,29 @@ async function sendRequest(httpRequest: HttpRequest_, retries: number = 3): Prom
       }),
       data: httpRequest.body
     })
-    logger.info(`status: ${response.status}, data: ${response.data}`)
+    const data: ApiGwResponseData = response.data
+    logger.info(
+      `SUCCESS: requestId: ${requestId}, status: ${response.status} ${response.statusText}, FailedRecordCount: ${data.FailedRecordCount}`
+    )
   } catch (e: any) {
-    if (retries > 0) {
-      // スロットリングエラーの場合、即時リトライしてもエラーになるので待機
-      await wait(1)
-      logger.warn(`Request failed. Retrying... (${retries} retries left)`)
-      await sendRequest(httpRequest, retries - 1)
+    if ((e as AxiosError).response === undefined) {
+      // レスポンスがない場合
+      logger.warn('No respnose received.')
     } else {
-      logger.error(e)
+      // エラーレスポンス出力
+      logger.warn(
+        `WARNING: requestId: ${requestId}, status: ${e.response.status} ${JSON.stringify(e.response.data)}`
+      )
+    }
+
+    if (retries > 0) {
+      // リトライ
+      logger.warn(` RETRY: Request ${requestId} failed. Retrying... (${retries} retries left)`)
+      await wait(retryInterval)
+      await sendRequest(url_, httpRequest, requestId, retries - 1)
+    } else {
+      // 以上終了
+      logger.error(`  FAILED: Request ${requestId} failed.`)
     }
   }
 }
@@ -151,7 +289,7 @@ async function sendRequest(httpRequest: HttpRequest_, retries: number = 3): Prom
  * 指定した秒数待機する
  * @param ms
  */
-async function wait(second: number): Promise<void> {
+const wait = async (second: number): Promise<void> => {
   await new Promise<void>((resolve) => {
     setTimeout(() => {
       resolve()
@@ -159,44 +297,4 @@ async function wait(second: number): Promise<void> {
   })
 }
 
-const main = async (): Promise<void> => {
-  for (let i = 1; i <= executionCount; i++) {
-    console.log(`${i}/${executionCount}`)
-
-    // 送信データ作成
-    const payload1: PayloadIF = { records: generateRecords(1, recordNumberPerRequest, i) }
-    const payload2: PayloadIF = {
-      records: generateRecords(1 + recordNumberPerRequest, recordNumberPerRequest, i)
-    }
-    const payload3: PayloadIF = {
-      records: generateRecords(
-        1 + recordNumberPerRequest + recordNumberPerRequest,
-        recordNumberPerRequest,
-        i
-      )
-    }
-
-    // HTTPリクエスト作成
-    const request1 = createHTTPRequest(payload1)
-    const request2 = createHTTPRequest(payload2)
-    const request3 = createHTTPRequest(payload3)
-
-    // リクエスト署名: IAM認証
-    const signedRequest1 = await signHttpReqeust(request1)
-    const signedRequest2 = await signHttpReqeust(request2)
-    const signedRequest3 = await signHttpReqeust(request3)
-
-    // リクエスト送信
-    void Promise.all([
-      sendRequest(signedRequest1),
-      sendRequest(signedRequest2),
-      sendRequest(signedRequest3)
-    ])
-
-    // 待機
-    await new Promise<void>((resolve) => setTimeout(resolve, executionInterval * 1000))
-  }
-}
-
 void main()
-logger.info('hoge')

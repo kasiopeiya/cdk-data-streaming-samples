@@ -1,0 +1,18 @@
+{
+  "type": "module",
+  "dependencies": {
+    "ts-node": "^10.9.2",
+    "typescript": "~5.4.5",
+    "winston": "^3.13.0",
+    "@aws-sdk/client-kinesis": "^3.569.0",
+    "@aws-sdk/client-ssm": "^3.623.0",
+    "@aws-sdk/protocol-http": "^3.374.0",
+    "@aws-sdk/signature-v4": "^3.374.0",
+    "@faker-js/faker": "^8.4.1",
+    "@middy/core": "^5.4.5",
+    "@smithy/signature-v4": "^4.1.0",
+    "axios": "^1.7.3",
+    "p-limit": "^6.1.0",
+    "zod": "^3.23.8"
+  }
+}

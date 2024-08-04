@@ -1,4 +1,4 @@
-FROM node:18
+FROM node:18.18.2
 
 # AWS CLIのインストール
 RUN curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
