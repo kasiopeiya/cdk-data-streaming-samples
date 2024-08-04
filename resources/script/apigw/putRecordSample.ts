@@ -110,8 +110,9 @@ const main = async (): Promise<void> => {
       const signedRequest = await signHttpReqeust(request)
       // ランダム時間待機後リクエストを送信するタスクリスト作成
       tasks.push(
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
         limit(async () => {
-          await new Promise((resolve) => setInterval(resolve, interval))
+          await new Promise((resolve) => setTimeout(resolve, interval))
           await sendRequest(url_, signedRequest, requestId, maxRetryCount)
         })
       )

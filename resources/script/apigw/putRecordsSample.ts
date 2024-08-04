@@ -121,6 +121,7 @@ const main = async (): Promise<void> => {
       // リクエスト署名: APIGW IAM認可機能
       const signedRequest = await signHttpReqeust(request)
       tasks.push(
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
         limit(async () => {
           await sendRequest(url_, signedRequest, requestId, maxRetryCount)
         })
