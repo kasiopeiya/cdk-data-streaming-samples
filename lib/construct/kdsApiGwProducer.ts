@@ -254,7 +254,7 @@ export class KdsPrivateApiGwProducer extends Construct {
         },
         {
           statusCode: '500',
-          selectionPattern: '5d{2}',
+          selectionPattern: '5\\d{2}',
           responseTemplates: {
             'application/json': `
 {
