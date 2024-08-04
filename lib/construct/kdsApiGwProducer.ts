@@ -93,6 +93,9 @@ export class KdsPrivateApiGwProducer extends Construct {
           statusCode: '200'
         },
         {
+          statusCode: '400'
+        },
+        {
           statusCode: '500'
         }
       ]
@@ -253,14 +256,24 @@ export class KdsPrivateApiGwProducer extends Construct {
           }
         },
         {
+          statusCode: '400',
+          selectionPattern: '4\\d{2}',
+          responseTemplates: {
+            'application/json': `
+{
+"Code": "400",
+"Message": "KinesisClientError"
+}`
+          }
+        },
+        {
           statusCode: '500',
           selectionPattern: '5\\d{2}',
           responseTemplates: {
             'application/json': `
 {
 "Code": "500",
-"Message": "ServerError",
-"FailedRecordCount": "$input.path('$.FailedRecordCount')"
+"Message": "KinesisServerError"
 }`
           }
         }
@@ -299,6 +312,17 @@ export class KdsPrivateApiGwProducer extends Construct {
 "Message": "OK",
 "SequenceNumber": "$input.path('$.sequnceNumber')",
 "shardId": "$input.path('$.shardId')",
+}`
+          }
+        },
+        {
+          statusCode: '400',
+          selectionPattern: '4\\d{2}',
+          responseTemplates: {
+            'application/json': `
+{
+"Code": "400",
+"Message": "KinesisClientError"
 }`
           }
         },
