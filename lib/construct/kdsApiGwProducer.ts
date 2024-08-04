@@ -248,7 +248,7 @@ export class KdsPrivateApiGwProducer extends Construct {
 "FailedRecordCount": "$input.path('$.FailedRecordCount')"
 }
 #if($input.path('$.FailedRecordCount') != '0')
-#set($context.responseOverride.status) = 500
+#set($context.responseOverride.status = 500)
 #end`
           }
         },
