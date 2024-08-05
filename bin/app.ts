@@ -14,7 +14,7 @@ new DevStage(app, 'dev', {
   env: devConfig.env
 })
 
-new ProdStage(app, 'prod', {
+new ProdStage(app, 'prd', {
   env: prodConfig.env
 })
 
