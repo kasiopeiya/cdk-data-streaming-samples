@@ -1,0 +1,1919 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`apiGwKdsLambdaStack 1`] = `
+{
+  "Conditions": {
+    "AwsCdkKinesisEncryptedStreamsUnsupportedRegions": {
+      "Fn::Or": [
+        {
+          "Fn::Equals": [
+            {
+              "Ref": "AWS::Region",
+            },
+            "cn-north-1",
+          ],
+        },
+        {
+          "Fn::Equals": [
+            {
+              "Ref": "AWS::Region",
+            },
+            "cn-northwest-1",
+          ],
+        },
+      ],
+    },
+  },
+  "Outputs": {
+    "Exportproddatastrsampleapigwkdslambdastacklambdaloglivetailclicommand": {
+      "Export": {
+        "Name": "prod-data-str-sample-apigw-kds-lambda-stack-lambda-log-live-tail-cli-command",
+      },
+      "Value": {
+        "Fn::Join": [
+          "",
+          [
+            "aws logs start-live-tail --log-group-identifiers arn:aws:logs:ap-northeast-1:134161968696:log-group:",
+            {
+              "Ref": "KdsLambdaConsumerLambdaLogGroup4A5C0225",
+            },
+          ],
+        ],
+      },
+    },
+    "KdsPrivateApiGwProducerEndpointF590D4F1": {
+      "Value": {
+        "Fn::Join": [
+          "",
+          [
+            "https://",
+            {
+              "Ref": "KdsPrivateApiGwProducer4C63EDB2",
+            },
+            ".execute-api.ap-northeast-1.",
+            {
+              "Ref": "AWS::URLSuffix",
+            },
+            "/",
+            {
+              "Ref": "KdsPrivateApiGwProducerDeploymentStagev122026BC6",
+            },
+            "/",
+          ],
+        ],
+      },
+    },
+  },
+  "Parameters": {
+    "BootstrapVersion": {
+      "Default": "/cdk-bootstrap/hnb659fds/version",
+      "Description": "Version of the CDK Bootstrap resources in this environment, automatically retrieved from SSM Parameter Store. [cdk:skip]",
+      "Type": "AWS::SSM::Parameter::Value<String>",
+    },
+  },
+  "Resources": {
+    "KDSB6F9C0AD": {
+      "DeletionPolicy": "Delete",
+      "Properties": {
+        "RetentionPeriodHours": 24,
+        "ShardCount": 1,
+        "StreamEncryption": {
+          "Fn::If": [
+            "AwsCdkKinesisEncryptedStreamsUnsupportedRegions",
+            {
+              "Ref": "AWS::NoValue",
+            },
+            {
+              "EncryptionType": "KMS",
+              "KeyId": "alias/aws/kinesis",
+            },
+          ],
+        },
+        "StreamModeDetails": {
+          "StreamMode": "PROVISIONED",
+        },
+      },
+      "Type": "AWS::Kinesis::Stream",
+      "UpdateReplacePolicy": "Delete",
+    },
+    "KdsCWDashboradDashboard45FE56EE": {
+      "Properties": {
+        "DashboardBody": {
+          "Fn::Join": [
+            "",
+            [
+              "{"start":"-PT1H","widgets":[{"type":"text","width":24,"height":2,"x":0,"y":0,"properties":{"markdown":"# API Gateway Metrics\\n## 5××エラーの例\\n- 504 INTEGRATIONN_FAILURE, INTEGRATION_TIMEOUT\\n  - バックエンドとの統合失敗\\n\\n## 4××エラーの例\\n- 400 Kinesis WriteProvisionedThroughputExceeded\\n  - kinesisの書き込みスループット超過エラー\\n- 403 EXPIRED_TOKEN, INVALID_API_KEY, INVALID_SIGNATUREなど\\n  - API KeyやAWS署名などの認証関連エラー\\n"}},{"type":"metric","width":12,"height":8,"x":0,"y":2,"properties":{"view":"timeSeries","title":"エラー発生数 4×× 5××(Sum)","region":"",
+              {
+                "Ref": "AWS::Region",
+              },
+              "","metrics":[["AWS/ApiGateway","4XXError","ApiName","Default",{"stat":"Sum"}],["AWS/ApiGateway","5XXError","ApiName","Default",{"stat":"Sum","yAxis":"right"}]],"yAxis":{"left":{"min":0}},"period":60,"stat":"Sum"}},{"type":"metric","width":12,"height":8,"x":12,"y":2,"properties":{"view":"timeSeries","title":"レイテンシー(Max, p99, Avg, Min)","region":"",
+              {
+                "Ref": "AWS::Region",
+              },
+              "","metrics":[["AWS/ApiGateway","Latency","ApiName","Default",{"stat":"Maximum"}],["AWS/ApiGateway","Latency","ApiName","Default",{"stat":"p99"}],["AWS/ApiGateway","Latency","ApiName","Default"],["AWS/ApiGateway","Latency","ApiName","Default",{"stat":"Minimum"}]],"yAxis":{"left":{"min":0}},"period":60}},{"type":"text","width":24,"height":2,"x":0,"y":10,"properties":{"markdown":"# Kinesis Metrics"}},{"type":"metric","width":12,"height":8,"x":0,"y":12,"properties":{"view":"timeSeries","title":"書き込み制限エラー数(Sum)と分あたり送信レコードByte(Sum)","region":"",
+              {
+                "Ref": "AWS::Region",
+              },
+              "","metrics":[["AWS/Kinesis","PutRecords.ThrottledRecords","StreamName","",
+              {
+                "Ref": "KDSB6F9C0AD",
+              },
+              "",{"period":60,"stat":"Sum"}],[{"label":"incommingBytes","expression":"e1/60","yAxis":"right"}],["AWS/Kinesis","IncomingBytes","StreamName","",
+              {
+                "Ref": "KDSB6F9C0AD",
+              },
+              "",{"stat":"Sum","visible":false,"id":"e1"}]],"yAxis":{"left":{"min":0},"right":{"min":0}},"period":60,"stat":"Sum"}},{"type":"metric","width":12,"height":8,"x":12,"y":20,"properties":{"view":"timeSeries","title":"読み込み制限エラー数(Sum)","region":"",
+              {
+                "Ref": "AWS::Region",
+              },
+              "","metrics":[["AWS/Kinesis","PutRecords.ThrottledRecords","StreamName","",
+              {
+                "Ref": "KDSB6F9C0AD",
+              },
+              ""]],"yAxis":{"left":{"min":0}},"period":60,"stat":"Sum"}},{"type":"metric","width":12,"height":8,"x":0,"y":28,"properties":{"view":"timeSeries","title":"書き込み制限エラー数(Sum)と分あたり送信レコード数(Sum)","region":"",
+              {
+                "Ref": "AWS::Region",
+              },
+              "","metrics":[["AWS/Kinesis","PutRecords.ThrottledRecords","StreamName","",
+              {
+                "Ref": "KDSB6F9C0AD",
+              },
+              "",{"period":60,"stat":"Sum"}],[{"label":"incommingRecords","expression":"e1/60","yAxis":"right"}],["AWS/Kinesis","IncomingRecords","StreamName","",
+              {
+                "Ref": "KDSB6F9C0AD",
+              },
+              "",{"stat":"Sum","visible":false,"id":"e1"}]],"yAxis":{"left":{"min":0},"right":{"min":0}},"period":60,"stat":"Sum"}},{"type":"metric","width":12,"height":8,"x":12,"y":20,"properties":{"view":"timeSeries","title":"読み込み制限エラー数(Sum)","region":"",
+              {
+                "Ref": "AWS::Region",
+              },
+              "","metrics":[["AWS/Kinesis","PutRecords.ThrottledRecords","StreamName","",
+              {
+                "Ref": "KDSB6F9C0AD",
+              },
+              ""]],"yAxis":{"left":{"min":0}},"period":60,"stat":"Sum"}},{"type":"metric","width":12,"height":8,"x":0,"y":28,"properties":{"view":"timeSeries","title":"書き込み制限エラー数(Sum)と分あたり送信レコード数(Sum)","region":"",
+              {
+                "Ref": "AWS::Region",
+              },
+              "","metrics":[["AWS/Kinesis","PutRecords.ThrottledRecords","StreamName","",
+              {
+                "Ref": "KDSB6F9C0AD",
+              },
+              "",{"period":60,"stat":"Sum"}],[{"label":"incommingRecords","expression":"e1/60","yAxis":"right"}],["AWS/Kinesis","IncomingRecords","StreamName","",
+              {
+                "Ref": "KDSB6F9C0AD",
+              },
+              "",{"stat":"Sum","visible":false,"id":"e1"}]],"yAxis":{"left":{"min":0},"right":{"min":0}},"period":60,"stat":"Sum"}},{"type":"metric","width":12,"height":8,"x":12,"y":28,"properties":{"view":"timeSeries","title":"データストリーム内での待機時間(Max, p99, Avg, Min)","region":"",
+              {
+                "Ref": "AWS::Region",
+              },
+              "","metrics":[["AWS/Kinesis","GetRecords.IteratorAgeMilliseconds","StreamName","",
+              {
+                "Ref": "KDSB6F9C0AD",
+              },
+              "",{"stat":"Maximum"}],["AWS/Kinesis","GetRecords.IteratorAgeMilliseconds","StreamName","",
+              {
+                "Ref": "KDSB6F9C0AD",
+              },
+              "",{"stat":"p99"}],["AWS/Kinesis","GetRecords.IteratorAgeMilliseconds","StreamName","",
+              {
+                "Ref": "KDSB6F9C0AD",
+              },
+              ""],["AWS/Kinesis","GetRecords.IteratorAgeMilliseconds","StreamName","",
+              {
+                "Ref": "KDSB6F9C0AD",
+              },
+              "",{"stat":"Minimum"}]],"yAxis":{"left":{"min":0}},"period":60}},{"type":"text","width":24,"height":2,"x":0,"y":36,"properties":{"markdown":"# Lambda Metrics"}},{"type":"metric","width":12,"height":8,"x":0,"y":38,"properties":{"view":"timeSeries","title":"関数起動数(Sum)","region":"",
+              {
+                "Ref": "AWS::Region",
+              },
+              "","metrics":[["AWS/Lambda","Invocations","FunctionName","",
+              {
+                "Ref": "KdsLambdaConsumerLambdaFunc571FC7AA",
+              },
+              "",{"stat":"Sum"}]],"yAxis":{"left":{"min":0}},"period":60,"stat":"Sum"}},{"type":"metric","width":12,"height":8,"x":12,"y":38,"properties":{"view":"timeSeries","title":"関数実行時間(Max, p99, Avg, Min)","region":"",
+              {
+                "Ref": "AWS::Region",
+              },
+              "","metrics":[["AWS/Lambda","Duration","FunctionName","",
+              {
+                "Ref": "KdsLambdaConsumerLambdaFunc571FC7AA",
+              },
+              "",{"stat":"Maximum"}],["AWS/Lambda","Duration","FunctionName","",
+              {
+                "Ref": "KdsLambdaConsumerLambdaFunc571FC7AA",
+              },
+              "",{"stat":"p99"}],["AWS/Lambda","Duration","FunctionName","",
+              {
+                "Ref": "KdsLambdaConsumerLambdaFunc571FC7AA",
+              },
+              ""],["AWS/Lambda","Duration","FunctionName","",
+              {
+                "Ref": "KdsLambdaConsumerLambdaFunc571FC7AA",
+              },
+              "",{"stat":"Minimum"}]],"yAxis":{"left":{"min":0}},"period":60}},{"type":"metric","width":12,"height":8,"x":0,"y":46,"properties":{"view":"timeSeries","title":"関数同時実行数(Max)","region":"",
+              {
+                "Ref": "AWS::Region",
+              },
+              "","metrics":[["AWS/Lambda","ConcurrentExecutions","FunctionName","",
+              {
+                "Ref": "KdsLambdaConsumerLambdaFunc571FC7AA",
+              },
+              ""]],"yAxis":{"left":{"min":0}},"period":60,"stat":"Maximum"}},{"type":"metric","width":12,"height":8,"x":12,"y":46,"properties":{"view":"timeSeries","title":"メモリ使用率(Max)","region":"",
+              {
+                "Ref": "AWS::Region",
+              },
+              "","metrics":[["LambdaInsights","memory_utilization","function_name","",
+              {
+                "Ref": "KdsLambdaConsumerLambdaFunc571FC7AA",
+              },
+              "",{"stat":"Maximum"}]],"yAxis":{"left":{"min":0}},"period":60}},{"type":"metric","width":12,"height":8,"x":0,"y":54,"properties":{"view":"timeSeries","title":"スロットリング発生数(Sum)","region":"",
+              {
+                "Ref": "AWS::Region",
+              },
+              "","metrics":[["AWS/Lambda","Errors","FunctionName","",
+              {
+                "Ref": "KdsLambdaConsumerLambdaFunc571FC7AA",
+              },
+              "",{"stat":"Sum"}]],"yAxis":{"left":{"min":0}},"period":60,"stat":"Sum"}},{"type":"metric","width":12,"height":8,"x":12,"y":54,"properties":{"view":"timeSeries","title":"エラー数(Sum)","region":"",
+              {
+                "Ref": "AWS::Region",
+              },
+              "","metrics":[["AWS/Lambda","Errors","FunctionName","",
+              {
+                "Ref": "KdsLambdaConsumerLambdaFunc571FC7AA",
+              },
+              "",{"stat":"Sum"}]],"yAxis":{"left":{"min":0}},"period":60,"stat":"Sum"}},{"type":"metric","width":12,"height":8,"x":0,"y":62,"properties":{"view":"timeSeries","title":"バッチサイズ：関数あたりの処理レコード数(Max, Avg, Min)","region":"",
+              {
+                "Ref": "AWS::Region",
+              },
+              "","metrics":[["Custom/LambdaMetrics","LambdaBatchSize","functionName","",
+              {
+                "Ref": "KdsLambdaConsumerLambdaFunc571FC7AA",
+              },
+              "",{"stat":"Maximum"}],["Custom/LambdaMetrics","LambdaBatchSize","functionName","",
+              {
+                "Ref": "KdsLambdaConsumerLambdaFunc571FC7AA",
+              },
+              ""],["Custom/LambdaMetrics","LambdaBatchSize","functionName","",
+              {
+                "Ref": "KdsLambdaConsumerLambdaFunc571FC7AA",
+              },
+              "",{"stat":"Minimum"}]],"yAxis":{"left":{"min":0},"right":{"min":0}}}},{"type":"text","width":24,"height":1,"x":0,"y":70,"properties":{"markdown":"# Logs"}},{"type":"text","width":12,"height":4,"x":0,"y":71,"properties":{"markdown":"# Producer\\nAPI GWに対してリクエストを送信するクライアントスクリプトのログ情報\\n- Success_Requests: 送信成功したリクエスト数, 「Success_Requests * レコード数(/request) = Success_Records」なら欠損レコードなし\\n- Retried_Requests: リトライしたリクエスト数\\n- Failed_Requests: 送信できなかったリクエスト数, １つでもあれば欠損あり\\n        "}},{"type":"text","width":12,"height":4,"x":12,"y":71,"properties":{"markdown":"# Consumer\\nLambda関数から出力されるログ情報\\n- Success_Records: 処理が正常に完了したレコード数\\n- Retried_Records: DynamoDBのPK重複エラー数\\n- Failed_Records: レコード重複以外のエラー数(DynamoDBのスロットリングなど), リトライ対象\\n        "}},{"type":"log","width":12,"height":3,"x":0,"y":75,"properties":{"view":"table","title":"Producer側スクリプトログサマリ(Sum)","region":"",
+              {
+                "Ref": "AWS::Region",
+              },
+              "","query":"SOURCE '/apigw/client/putRecords' | fields @message\\n| parse @message \\"SUCCESS\\" as @Success\\n| parse @message \\"RETRY\\" as @Retry\\n| parse @message \\"FAILED\\" as @Failed\\n| stats count(@Success) as Success_Requests, count(@Retry) as Retried_Requests, count(@Failed) as Failed_Requests"}},{"type":"log","width":12,"height":3,"x":12,"y":75,"properties":{"view":"table","title":"Consmer側Lambda関数ログサマリ(Sum)","region":"",
+              {
+                "Ref": "AWS::Region",
+              },
+              "","query":"SOURCE '/aws/lambda/",
+              {
+                "Ref": "KdsLambdaConsumerLambdaFunc571FC7AA",
+              },
+              "' | fields @message\\n| parse @message \\"SUCCESS\\" as @Success\\n| parse @message \\"RETRY\\" as @Retry\\n| parse @message \\"FAILED\\" as @Failed\\n| stats count(@Success) as Success_Records, count(@Retry) as Retried_Records, count(@Failed) as Failed_Records"}},{"type":"log","width":12,"height":15,"x":0,"y":78,"properties":{"view":"table","title":"Producer側スクリプトエラーログ詳細: スロットリングエラーを除く","region":"",
+              {
+                "Ref": "AWS::Region",
+              },
+              "","query":"SOURCE '/apigw/client/putRecords' | fields @message\\n| parse @message like \\"Request failed with status code\\"\\n| parse @message not like \\"Request failed with status code 400\\""}},{"type":"log","width":12,"height":15,"x":12,"y":78,"properties":{"view":"table","title":"Consumer側スクリプトエラーログ詳細","region":"",
+              {
+                "Ref": "AWS::Region",
+              },
+              "","query":"SOURCE '/aws/lambda/",
+              {
+                "Ref": "KdsLambdaConsumerLambdaFunc571FC7AA",
+              },
+              "' | fields @message\\n| parse @message like \\"FAILED\\""}}]}",
+            ],
+          ],
+        },
+        "DashboardName": "prod-data-str-sample-apigw-kds-lambda-stack-dashboard-ap-northeast-1",
+      },
+      "Type": "AWS::CloudWatch::Dashboard",
+    },
+    "KdsLambdaConsumerCustomLayerC00DB53B": {
+      "DeletionPolicy": "Delete",
+      "Properties": {
+        "CompatibleArchitectures": [
+          "x86_64",
+          "arm64",
+        ],
+        "Content": {
+          "S3Bucket": "cdk-hnb659fds-assets-134161968696-ap-northeast-1",
+          "S3Key": "6293539ca2e90c72793535bd2b05df8bedeb4aab54225571bb67a65a6409679f.zip",
+        },
+      },
+      "Type": "AWS::Lambda::LayerVersion",
+      "UpdateReplacePolicy": "Delete",
+    },
+    "KdsLambdaConsumerKinesisDeadLetterQueue4D912974": {
+      "DeletionPolicy": "Delete",
+      "Type": "AWS::SQS::Queue",
+      "UpdateReplacePolicy": "Delete",
+    },
+    "KdsLambdaConsumerLambdaFunc571FC7AA": {
+      "DependsOn": [
+        "KdsLambdaConsumerLambdaFuncServiceRoleDefaultPolicy948474E5",
+        "KdsLambdaConsumerLambdaFuncServiceRoleCF9C7104",
+      ],
+      "Properties": {
+        "Architectures": [
+          "arm64",
+        ],
+        "Code": {
+          "S3Bucket": "cdk-hnb659fds-assets-134161968696-ap-northeast-1",
+          "S3Key": "8b38c7cd3dcc0f42fdae5f5710b4982651ace2711342d3604bb98bb7c49b281e.zip",
+        },
+        "Environment": {
+          "Variables": {
+            "AWS_NODEJS_CONNECTION_REUSE_ENABLED": "1",
+            "FUNCTION_NAME": "data-str-kds-consumer-func",
+            "METRIC_NAME": "LambdaBatchSize",
+            "NAMESPACE": "Custom/LambdaMetrics",
+            "TABLE_NAME": {
+              "Ref": "KdsLambdaConsumerTableACA57DBE",
+            },
+          },
+        },
+        "FunctionName": "data-str-kds-consumer-func",
+        "Handler": "index.handler",
+        "Layers": [
+          {
+            "Ref": "KdsLambdaConsumerCustomLayerC00DB53B",
+          },
+          "arn:aws:lambda:ap-northeast-1:580247275435:layer:LambdaInsightsExtension-Arm64:11",
+        ],
+        "MemorySize": 512,
+        "Role": {
+          "Fn::GetAtt": [
+            "KdsLambdaConsumerLambdaFuncServiceRoleCF9C7104",
+            "Arn",
+          ],
+        },
+        "Runtime": "nodejs20.x",
+        "Timeout": 180,
+        "TracingConfig": {
+          "Mode": "Active",
+        },
+      },
+      "Type": "AWS::Lambda::Function",
+    },
+    "KdsLambdaConsumerLambdaFuncEventSourceMapping50E5FCE1": {
+      "Properties": {
+        "BatchSize": 300,
+        "BisectBatchOnFunctionError": true,
+        "DestinationConfig": {
+          "OnFailure": {
+            "Destination": {
+              "Fn::GetAtt": [
+                "KdsLambdaConsumerKinesisDeadLetterQueue4D912974",
+                "Arn",
+              ],
+            },
+          },
+        },
+        "Enabled": true,
+        "EventSourceArn": {
+          "Fn::GetAtt": [
+            "KDSB6F9C0AD",
+            "Arn",
+          ],
+        },
+        "FilterCriteria": {
+          "Filters": [
+            {
+              "Pattern": "{"data":{"notificationFlag":[true]}}",
+            },
+          ],
+        },
+        "FunctionName": {
+          "Ref": "KdsLambdaConsumerLambdaFunc571FC7AA",
+        },
+        "FunctionResponseTypes": [
+          "ReportBatchItemFailures",
+        ],
+        "MaximumBatchingWindowInSeconds": 3,
+        "MaximumRecordAgeInSeconds": 500,
+        "MaximumRetryAttempts": 5,
+        "ParallelizationFactor": 1,
+        "StartingPosition": "TRIM_HORIZON",
+      },
+      "Type": "AWS::Lambda::EventSourceMapping",
+    },
+    "KdsLambdaConsumerLambdaFuncServiceRoleCF9C7104": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "lambda.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
+              ],
+            ],
+          },
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":iam::aws:policy/CloudWatchLambdaInsightsExecutionRolePolicy",
+              ],
+            ],
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+    },
+    "KdsLambdaConsumerLambdaFuncServiceRoleDefaultPolicy948474E5": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "xray:*",
+              "Effect": "Allow",
+              "Resource": "*",
+            },
+            {
+              "Action": [
+                "cloudwatch:PutMetricStream",
+                "cloudwatch:PutMetricData",
+              ],
+              "Effect": "Allow",
+              "Resource": "*",
+            },
+            {
+              "Action": [
+                "xray:PutTraceSegments",
+                "xray:PutTelemetryRecords",
+              ],
+              "Effect": "Allow",
+              "Resource": "*",
+            },
+            {
+              "Action": [
+                "sqs:SendMessage",
+                "sqs:GetQueueAttributes",
+                "sqs:GetQueueUrl",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::GetAtt": [
+                  "KdsLambdaConsumerKinesisDeadLetterQueue4D912974",
+                  "Arn",
+                ],
+              },
+            },
+            {
+              "Action": [
+                "dynamodb:BatchGetItem",
+                "dynamodb:GetRecords",
+                "dynamodb:GetShardIterator",
+                "dynamodb:Query",
+                "dynamodb:GetItem",
+                "dynamodb:Scan",
+                "dynamodb:ConditionCheckItem",
+                "dynamodb:BatchWriteItem",
+                "dynamodb:PutItem",
+                "dynamodb:UpdateItem",
+                "dynamodb:DeleteItem",
+                "dynamodb:DescribeTable",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::GetAtt": [
+                  "KdsLambdaConsumerTableACA57DBE",
+                  "Arn",
+                ],
+              },
+            },
+            {
+              "Action": [
+                "kinesis:DescribeStreamSummary",
+                "kinesis:GetRecords",
+                "kinesis:GetShardIterator",
+                "kinesis:ListShards",
+                "kinesis:SubscribeToShard",
+                "kinesis:DescribeStream",
+                "kinesis:ListStreams",
+                "kinesis:DescribeStreamConsumer",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::GetAtt": [
+                  "KDSB6F9C0AD",
+                  "Arn",
+                ],
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "KdsLambdaConsumerLambdaFuncServiceRoleDefaultPolicy948474E5",
+        "Roles": [
+          {
+            "Ref": "KdsLambdaConsumerLambdaFuncServiceRoleCF9C7104",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "KdsLambdaConsumerLambdaLogGroup4A5C0225": {
+      "DeletionPolicy": "Delete",
+      "Properties": {
+        "LogGroupName": {
+          "Fn::Join": [
+            "",
+            [
+              "/aws/lambda/",
+              {
+                "Ref": "KdsLambdaConsumerLambdaFunc571FC7AA",
+              },
+            ],
+          ],
+        },
+        "RetentionInDays": 1,
+      },
+      "Type": "AWS::Logs::LogGroup",
+      "UpdateReplacePolicy": "Delete",
+    },
+    "KdsLambdaConsumerTableACA57DBE": {
+      "DeletionPolicy": "Delete",
+      "Properties": {
+        "AttributeDefinitions": [
+          {
+            "AttributeName": "recordId",
+            "AttributeType": "S",
+          },
+        ],
+        "BillingMode": "PAY_PER_REQUEST",
+        "KeySchema": [
+          {
+            "AttributeName": "recordId",
+            "KeyType": "HASH",
+          },
+        ],
+        "Replicas": [
+          {
+            "ContributorInsightsSpecification": {
+              "Enabled": true,
+            },
+            "PointInTimeRecoverySpecification": {
+              "PointInTimeRecoveryEnabled": false,
+            },
+            "Region": "ap-northeast-1",
+            "TableClass": "STANDARD",
+            "Tags": [
+              {
+                "Key": "Name",
+                "Value": "data-str-lambda-consumer-deduplication-table",
+              },
+            ],
+          },
+        ],
+        "SSESpecification": {
+          "SSEEnabled": false,
+        },
+        "StreamSpecification": {
+          "StreamViewType": "NEW_IMAGE",
+        },
+        "TimeToLiveSpecification": {
+          "AttributeName": "expired",
+          "Enabled": true,
+        },
+      },
+      "Type": "AWS::DynamoDB::GlobalTable",
+      "UpdateReplacePolicy": "Delete",
+    },
+    "KdsPrivateApiGwProducer4C63EDB2": {
+      "Properties": {
+        "EndpointConfiguration": {
+          "Types": [
+            "REGIONAL",
+          ],
+        },
+        "Name": "Default",
+      },
+      "Type": "AWS::ApiGateway::RestApi",
+    },
+    "KdsPrivateApiGwProducerAPIGWUrlParameterC7447613": {
+      "Properties": {
+        "Name": "/apiGwKds/prod-data-str-sample-apigw-kds-lambda-stack/url",
+        "Type": "String",
+        "Value": {
+          "Fn::Join": [
+            "",
+            [
+              "https://",
+              {
+                "Ref": "KdsPrivateApiGwProducer4C63EDB2",
+              },
+              ".execute-api.ap-northeast-1.",
+              {
+                "Ref": "AWS::URLSuffix",
+              },
+              "/",
+              {
+                "Ref": "KdsPrivateApiGwProducerDeploymentStagev122026BC6",
+              },
+              "/",
+            ],
+          ],
+        },
+      },
+      "Type": "AWS::SSM::Parameter",
+    },
+    "KdsPrivateApiGwProducerAccount943D0C51": {
+      "DeletionPolicy": "Retain",
+      "DependsOn": [
+        "KdsPrivateApiGwProducer4C63EDB2",
+      ],
+      "Properties": {
+        "CloudWatchRoleArn": {
+          "Fn::GetAtt": [
+            "KdsPrivateApiGwProducerCloudWatchRoleF0E0428F",
+            "Arn",
+          ],
+        },
+      },
+      "Type": "AWS::ApiGateway::Account",
+      "UpdateReplacePolicy": "Retain",
+    },
+    "KdsPrivateApiGwProducerCloudWatchRoleF0E0428F": {
+      "DeletionPolicy": "Retain",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "apigateway.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":iam::aws:policy/service-role/AmazonAPIGatewayPushToCloudWatchLogs",
+              ],
+            ],
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+      "UpdateReplacePolicy": "Retain",
+    },
+    "KdsPrivateApiGwProducerDeploymentDADF549Bd4c6eab1ac7af41b798860fb93e0632c": {
+      "DependsOn": [
+        "KdsPrivateApiGwProducerstreamsrecordPUT350B36BC",
+        "KdsPrivateApiGwProducerstreamsrecord4A9F8619",
+        "KdsPrivateApiGwProducerstreamsrecordsPUTBD654217",
+        "KdsPrivateApiGwProducerstreamsrecords9CA38AEC",
+        "KdsPrivateApiGwProducerstreams92372065",
+      ],
+      "Properties": {
+        "Description": "Automatically created by the RestApi construct",
+        "RestApiId": {
+          "Ref": "KdsPrivateApiGwProducer4C63EDB2",
+        },
+      },
+      "Type": "AWS::ApiGateway::Deployment",
+    },
+    "KdsPrivateApiGwProducerDeploymentStagev122026BC6": {
+      "DependsOn": [
+        "KdsPrivateApiGwProducerAccount943D0C51",
+      ],
+      "Properties": {
+        "DeploymentId": {
+          "Ref": "KdsPrivateApiGwProducerDeploymentDADF549Bd4c6eab1ac7af41b798860fb93e0632c",
+        },
+        "MethodSettings": [
+          {
+            "DataTraceEnabled": false,
+            "HttpMethod": "*",
+            "MetricsEnabled": false,
+            "ResourcePath": "/*",
+          },
+        ],
+        "RestApiId": {
+          "Ref": "KdsPrivateApiGwProducer4C63EDB2",
+        },
+        "StageName": "v1",
+        "TracingEnabled": false,
+      },
+      "Type": "AWS::ApiGateway::Stage",
+    },
+    "KdsPrivateApiGwProducerRole37490E0D": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "apigateway.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+      },
+      "Type": "AWS::IAM::Role",
+    },
+    "KdsPrivateApiGwProducerRoleDefaultPolicy28BBC1B5": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "kinesis:ListShards",
+                "kinesis:PutRecord",
+                "kinesis:PutRecords",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::GetAtt": [
+                  "KDSB6F9C0AD",
+                  "Arn",
+                ],
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "KdsPrivateApiGwProducerRoleDefaultPolicy28BBC1B5",
+        "Roles": [
+          {
+            "Ref": "KdsPrivateApiGwProducerRole37490E0D",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "KdsPrivateApiGwProducerstreams92372065": {
+      "Properties": {
+        "ParentId": {
+          "Fn::GetAtt": [
+            "KdsPrivateApiGwProducer4C63EDB2",
+            "RootResourceId",
+          ],
+        },
+        "PathPart": "streams",
+        "RestApiId": {
+          "Ref": "KdsPrivateApiGwProducer4C63EDB2",
+        },
+      },
+      "Type": "AWS::ApiGateway::Resource",
+    },
+    "KdsPrivateApiGwProducerstreamsrecord4A9F8619": {
+      "Properties": {
+        "ParentId": {
+          "Ref": "KdsPrivateApiGwProducerstreams92372065",
+        },
+        "PathPart": "record",
+        "RestApiId": {
+          "Ref": "KdsPrivateApiGwProducer4C63EDB2",
+        },
+      },
+      "Type": "AWS::ApiGateway::Resource",
+    },
+    "KdsPrivateApiGwProducerstreamsrecordPUT350B36BC": {
+      "Properties": {
+        "AuthorizationType": "NONE",
+        "HttpMethod": "PUT",
+        "Integration": {
+          "Credentials": {
+            "Fn::GetAtt": [
+              "KdsPrivateApiGwProducerRole37490E0D",
+              "Arn",
+            ],
+          },
+          "IntegrationHttpMethod": "POST",
+          "IntegrationResponses": [
+            {
+              "ResponseTemplates": {
+                "application/json": "
+{
+"Code": "200",
+"Message": "OK",
+"SequenceNumber": "$input.path('$.sequnceNumber')",
+"shardId": "$input.path('$.shardId')",
+}",
+              },
+              "SelectionPattern": "200",
+              "StatusCode": "200",
+            },
+            {
+              "ResponseTemplates": {
+                "application/json": "
+{
+"Code": "400",
+"Message": "KinesisClientError"
+}",
+              },
+              "SelectionPattern": "4\\d{2}",
+              "StatusCode": "400",
+            },
+            {
+              "ResponseTemplates": {
+                "application/json": "
+{
+#set($inputRoot = $input.path('$'))
+"Code": "500",
+"Message": "$inputRoot.errorMessage",
+"ErrorType": "$inputRoot.errorType",
+"StackTrace": "$inputRoot.stackTrace"
+}",
+              },
+              "SelectionPattern": "5d{2}",
+              "StatusCode": "500",
+            },
+          ],
+          "PassthroughBehavior": "WHEN_NO_TEMPLATES",
+          "RequestParameters": {
+            "integration.request.header.Content-Type": "'x-amz-json-1.1'",
+          },
+          "RequestTemplates": {
+            "application/json": {
+              "Fn::Join": [
+                "",
+                [
+                  "
+{
+"StreamName": "",
+                  {
+                    "Ref": "KDSB6F9C0AD",
+                  },
+                  "",
+"Data": "$util.base64Encode($input.path('$.data'))",
+"PartitionKey": "$input.path('$.PartitionKey')"
+}",
+                ],
+              ],
+            },
+          },
+          "Type": "AWS",
+          "Uri": {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":apigateway:ap-northeast-1:kinesis:action/PutRecord",
+              ],
+            ],
+          },
+        },
+        "MethodResponses": [
+          {
+            "StatusCode": "200",
+          },
+          {
+            "StatusCode": "400",
+          },
+          {
+            "StatusCode": "500",
+          },
+        ],
+        "ResourceId": {
+          "Ref": "KdsPrivateApiGwProducerstreamsrecord4A9F8619",
+        },
+        "RestApiId": {
+          "Ref": "KdsPrivateApiGwProducer4C63EDB2",
+        },
+      },
+      "Type": "AWS::ApiGateway::Method",
+    },
+    "KdsPrivateApiGwProducerstreamsrecords9CA38AEC": {
+      "Properties": {
+        "ParentId": {
+          "Ref": "KdsPrivateApiGwProducerstreams92372065",
+        },
+        "PathPart": "records",
+        "RestApiId": {
+          "Ref": "KdsPrivateApiGwProducer4C63EDB2",
+        },
+      },
+      "Type": "AWS::ApiGateway::Resource",
+    },
+    "KdsPrivateApiGwProducerstreamsrecordsPUTBD654217": {
+      "Properties": {
+        "AuthorizationType": "NONE",
+        "HttpMethod": "PUT",
+        "Integration": {
+          "Credentials": {
+            "Fn::GetAtt": [
+              "KdsPrivateApiGwProducerRole37490E0D",
+              "Arn",
+            ],
+          },
+          "IntegrationHttpMethod": "POST",
+          "IntegrationResponses": [
+            {
+              "ResponseTemplates": {
+                "application/json": "
+{
+"Code": "200",
+"Message": "OK",
+"FailedRecordCount": "$input.path('$.FailedRecordCount')"
+}
+#if($input.path('$.FailedRecordCount') != '0')
+#set($context.responseOverride.status = 500)
+#end",
+              },
+              "SelectionPattern": "200",
+              "StatusCode": "200",
+            },
+            {
+              "ResponseTemplates": {
+                "application/json": "
+{
+"Code": "400",
+"Message": "KinesisClientError"
+}",
+              },
+              "SelectionPattern": "4\\d{2}",
+              "StatusCode": "400",
+            },
+            {
+              "ResponseTemplates": {
+                "application/json": "
+{
+"Code": "500",
+"Message": "KinesisServerError"
+}",
+              },
+              "SelectionPattern": "5\\d{2}",
+              "StatusCode": "500",
+            },
+          ],
+          "PassthroughBehavior": "WHEN_NO_TEMPLATES",
+          "RequestParameters": {
+            "integration.request.header.Content-Type": "'x-amz-json-1.1'",
+          },
+          "RequestTemplates": {
+            "application/json": {
+              "Fn::Join": [
+                "",
+                [
+                  "
+{
+"StreamName": "",
+                  {
+                    "Ref": "KDSB6F9C0AD",
+                  },
+                  "",
+"Records": [
+#foreach($elem in $input.path('$.records'))
+  {
+    "Data": "$util.base64Encode($elem.data)",
+    "PartitionKey": "$elem.PartitionKey"
+  }#if($foreach.hasNext),#end
+  #end
+]
+}",
+                ],
+              ],
+            },
+          },
+          "Type": "AWS",
+          "Uri": {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":apigateway:ap-northeast-1:kinesis:action/PutRecords",
+              ],
+            ],
+          },
+        },
+        "MethodResponses": [
+          {
+            "StatusCode": "200",
+          },
+          {
+            "StatusCode": "400",
+          },
+          {
+            "StatusCode": "500",
+          },
+        ],
+        "ResourceId": {
+          "Ref": "KdsPrivateApiGwProducerstreamsrecords9CA38AEC",
+        },
+        "RestApiId": {
+          "Ref": "KdsPrivateApiGwProducer4C63EDB2",
+        },
+      },
+      "Type": "AWS::ApiGateway::Method",
+    },
+  },
+  "Rules": {
+    "CheckBootstrapVersion": {
+      "Assertions": [
+        {
+          "Assert": {
+            "Fn::Not": [
+              {
+                "Fn::Contains": [
+                  [
+                    "1",
+                    "2",
+                    "3",
+                    "4",
+                    "5",
+                  ],
+                  {
+                    "Ref": "BootstrapVersion",
+                  },
+                ],
+              },
+            ],
+          },
+          "AssertDescription": "CDK bootstrap stack version 6 required. Please run 'cdk bootstrap' with a recent version of the CDK CLI.",
+        },
+      ],
+    },
+  },
+}
+`;
+
+exports[`baseStack 1`] = `
+{
+  "Outputs": {
+    "ExportsOutputFnGetAttFirehoseBkBucketD182A5B2Arn8DA37ED1": {
+      "Export": {
+        "Name": "prod-data-str-base-stack:ExportsOutputFnGetAttFirehoseBkBucketD182A5B2Arn8DA37ED1",
+      },
+      "Value": {
+        "Fn::GetAtt": [
+          "FirehoseBkBucketD182A5B2",
+          "Arn",
+        ],
+      },
+    },
+    "ExportsOutputFnGetAttFirehoseBucket407758F1Arn8ACCD3F6": {
+      "Export": {
+        "Name": "prod-data-str-base-stack:ExportsOutputFnGetAttFirehoseBucket407758F1Arn8ACCD3F6",
+      },
+      "Value": {
+        "Fn::GetAtt": [
+          "FirehoseBucket407758F1",
+          "Arn",
+        ],
+      },
+    },
+  },
+  "Parameters": {
+    "BootstrapVersion": {
+      "Default": "/cdk-bootstrap/hnb659fds/version",
+      "Description": "Version of the CDK Bootstrap resources in this environment, automatically retrieved from SSM Parameter Store. [cdk:skip]",
+      "Type": "AWS::SSM::Parameter::Value<String>",
+    },
+  },
+  "Resources": {
+    "ApiGWAccountRoleBB7B8DFB": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "apigateway.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":iam::aws:policy/service-role/AmazonAPIGatewayPushToCloudWatchLogs",
+              ],
+            ],
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+    },
+    "CfnAccount": {
+      "Properties": {
+        "CloudWatchRoleArn": {
+          "Fn::GetAtt": [
+            "ApiGWAccountRoleBB7B8DFB",
+            "Arn",
+          ],
+        },
+      },
+      "Type": "AWS::ApiGateway::Account",
+    },
+    "CustomS3AutoDeleteObjectsCustomResourceProviderHandler9D90184F": {
+      "DependsOn": [
+        "CustomS3AutoDeleteObjectsCustomResourceProviderRole3B1BD092",
+      ],
+      "Properties": {
+        "Code": {
+          "S3Bucket": "cdk-hnb659fds-assets-134161968696-ap-northeast-1",
+          "S3Key": "2eb6a831b107939f63cfebf68e6316e1a40f79fc99cae0fee9b333bac8d29bc4.zip",
+        },
+        "Description": {
+          "Fn::Join": [
+            "",
+            [
+              "Lambda function for auto-deleting objects in ",
+              {
+                "Ref": "FirehoseBucket407758F1",
+              },
+              " S3 bucket.",
+            ],
+          ],
+        },
+        "Handler": "index.handler",
+        "MemorySize": 128,
+        "Role": {
+          "Fn::GetAtt": [
+            "CustomS3AutoDeleteObjectsCustomResourceProviderRole3B1BD092",
+            "Arn",
+          ],
+        },
+        "Runtime": "nodejs18.x",
+        "Timeout": 900,
+      },
+      "Type": "AWS::Lambda::Function",
+    },
+    "CustomS3AutoDeleteObjectsCustomResourceProviderRole3B1BD092": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "lambda.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Sub": "arn:\${AWS::Partition}:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+    },
+    "FirehoseBkBucketAutoDeleteObjectsCustomResource34499E1B": {
+      "DeletionPolicy": "Delete",
+      "DependsOn": [
+        "FirehoseBkBucketPolicy5F3C33F8",
+      ],
+      "Properties": {
+        "BucketName": {
+          "Ref": "FirehoseBkBucketD182A5B2",
+        },
+        "ServiceToken": {
+          "Fn::GetAtt": [
+            "CustomS3AutoDeleteObjectsCustomResourceProviderHandler9D90184F",
+            "Arn",
+          ],
+        },
+      },
+      "Type": "Custom::S3AutoDeleteObjects",
+      "UpdateReplacePolicy": "Delete",
+    },
+    "FirehoseBkBucketD182A5B2": {
+      "DeletionPolicy": "Delete",
+      "Properties": {
+        "BucketEncryption": {
+          "ServerSideEncryptionConfiguration": [
+            {
+              "ServerSideEncryptionByDefault": {
+                "SSEAlgorithm": "AES256",
+              },
+            },
+          ],
+        },
+        "Tags": [
+          {
+            "Key": "aws-cdk:auto-delete-objects",
+            "Value": "true",
+          },
+        ],
+      },
+      "Type": "AWS::S3::Bucket",
+      "UpdateReplacePolicy": "Delete",
+    },
+    "FirehoseBkBucketPolicy5F3C33F8": {
+      "Properties": {
+        "Bucket": {
+          "Ref": "FirehoseBkBucketD182A5B2",
+        },
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "s3:*",
+              "Condition": {
+                "Bool": {
+                  "aws:SecureTransport": "false",
+                },
+              },
+              "Effect": "Deny",
+              "Principal": {
+                "AWS": "*",
+              },
+              "Resource": [
+                {
+                  "Fn::GetAtt": [
+                    "FirehoseBkBucketD182A5B2",
+                    "Arn",
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      {
+                        "Fn::GetAtt": [
+                          "FirehoseBkBucketD182A5B2",
+                          "Arn",
+                        ],
+                      },
+                      "/*",
+                    ],
+                  ],
+                },
+              ],
+            },
+            {
+              "Action": [
+                "s3:PutBucketPolicy",
+                "s3:GetBucket*",
+                "s3:List*",
+                "s3:DeleteObject*",
+              ],
+              "Effect": "Allow",
+              "Principal": {
+                "AWS": {
+                  "Fn::GetAtt": [
+                    "CustomS3AutoDeleteObjectsCustomResourceProviderRole3B1BD092",
+                    "Arn",
+                  ],
+                },
+              },
+              "Resource": [
+                {
+                  "Fn::GetAtt": [
+                    "FirehoseBkBucketD182A5B2",
+                    "Arn",
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      {
+                        "Fn::GetAtt": [
+                          "FirehoseBkBucketD182A5B2",
+                          "Arn",
+                        ],
+                      },
+                      "/*",
+                    ],
+                  ],
+                },
+              ],
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+      },
+      "Type": "AWS::S3::BucketPolicy",
+    },
+    "FirehoseBucket407758F1": {
+      "DeletionPolicy": "Delete",
+      "Properties": {
+        "BucketEncryption": {
+          "ServerSideEncryptionConfiguration": [
+            {
+              "ServerSideEncryptionByDefault": {
+                "SSEAlgorithm": "AES256",
+              },
+            },
+          ],
+        },
+        "Tags": [
+          {
+            "Key": "aws-cdk:auto-delete-objects",
+            "Value": "true",
+          },
+        ],
+      },
+      "Type": "AWS::S3::Bucket",
+      "UpdateReplacePolicy": "Delete",
+    },
+    "FirehoseBucketAutoDeleteObjectsCustomResourceD3E44B23": {
+      "DeletionPolicy": "Delete",
+      "DependsOn": [
+        "FirehoseBucketPolicy005BD2F0",
+      ],
+      "Properties": {
+        "BucketName": {
+          "Ref": "FirehoseBucket407758F1",
+        },
+        "ServiceToken": {
+          "Fn::GetAtt": [
+            "CustomS3AutoDeleteObjectsCustomResourceProviderHandler9D90184F",
+            "Arn",
+          ],
+        },
+      },
+      "Type": "Custom::S3AutoDeleteObjects",
+      "UpdateReplacePolicy": "Delete",
+    },
+    "FirehoseBucketPolicy005BD2F0": {
+      "Properties": {
+        "Bucket": {
+          "Ref": "FirehoseBucket407758F1",
+        },
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "s3:*",
+              "Condition": {
+                "Bool": {
+                  "aws:SecureTransport": "false",
+                },
+              },
+              "Effect": "Deny",
+              "Principal": {
+                "AWS": "*",
+              },
+              "Resource": [
+                {
+                  "Fn::GetAtt": [
+                    "FirehoseBucket407758F1",
+                    "Arn",
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      {
+                        "Fn::GetAtt": [
+                          "FirehoseBucket407758F1",
+                          "Arn",
+                        ],
+                      },
+                      "/*",
+                    ],
+                  ],
+                },
+              ],
+            },
+            {
+              "Action": [
+                "s3:PutBucketPolicy",
+                "s3:GetBucket*",
+                "s3:List*",
+                "s3:DeleteObject*",
+              ],
+              "Effect": "Allow",
+              "Principal": {
+                "AWS": {
+                  "Fn::GetAtt": [
+                    "CustomS3AutoDeleteObjectsCustomResourceProviderRole3B1BD092",
+                    "Arn",
+                  ],
+                },
+              },
+              "Resource": [
+                {
+                  "Fn::GetAtt": [
+                    "FirehoseBucket407758F1",
+                    "Arn",
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      {
+                        "Fn::GetAtt": [
+                          "FirehoseBucket407758F1",
+                          "Arn",
+                        ],
+                      },
+                      "/*",
+                    ],
+                  ],
+                },
+              ],
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+      },
+      "Type": "AWS::S3::BucketPolicy",
+    },
+  },
+  "Rules": {
+    "CheckBootstrapVersion": {
+      "Assertions": [
+        {
+          "Assert": {
+            "Fn::Not": [
+              {
+                "Fn::Contains": [
+                  [
+                    "1",
+                    "2",
+                    "3",
+                    "4",
+                    "5",
+                  ],
+                  {
+                    "Ref": "BootstrapVersion",
+                  },
+                ],
+              },
+            ],
+          },
+          "AssertDescription": "CDK bootstrap stack version 6 required. Please run 'cdk bootstrap' with a recent version of the CDK CLI.",
+        },
+      ],
+    },
+  },
+}
+`;
+
+exports[`deliveryS3Stack 1`] = `
+{
+  "Conditions": {
+    "AwsCdkKinesisEncryptedStreamsUnsupportedRegions": {
+      "Fn::Or": [
+        {
+          "Fn::Equals": [
+            {
+              "Ref": "AWS::Region",
+            },
+            "cn-north-1",
+          ],
+        },
+        {
+          "Fn::Equals": [
+            {
+              "Ref": "AWS::Region",
+            },
+            "cn-northwest-1",
+          ],
+        },
+      ],
+    },
+  },
+  "Parameters": {
+    "BootstrapVersion": {
+      "Default": "/cdk-bootstrap/hnb659fds/version",
+      "Description": "Version of the CDK Bootstrap resources in this environment, automatically retrieved from SSM Parameter Store. [cdk:skip]",
+      "Type": "AWS::SSM::Parameter::Value<String>",
+    },
+  },
+  "Resources": {
+    "DataStream80B8B961": {
+      "DeletionPolicy": "Delete",
+      "Properties": {
+        "RetentionPeriodHours": 24,
+        "ShardCount": 1,
+        "StreamEncryption": {
+          "Fn::If": [
+            "AwsCdkKinesisEncryptedStreamsUnsupportedRegions",
+            {
+              "Ref": "AWS::NoValue",
+            },
+            {
+              "EncryptionType": "KMS",
+              "KeyId": "alias/aws/kinesis",
+            },
+          ],
+        },
+        "StreamModeDetails": {
+          "StreamMode": "PROVISIONED",
+        },
+      },
+      "Type": "AWS::Kinesis::Stream",
+      "UpdateReplacePolicy": "Delete",
+    },
+    "DataStreamparameterD94E8D77": {
+      "Properties": {
+        "Name": "/firehoseS3/kds/dataStreamName",
+        "Type": "String",
+        "Value": {
+          "Ref": "DataStream80B8B961",
+        },
+      },
+      "Type": "AWS::SSM::Parameter",
+    },
+    "KdsCWDashboradDashboard45FE56EE": {
+      "Properties": {
+        "DashboardBody": {
+          "Fn::Join": [
+            "",
+            [
+              "{"start":"-PT1H","widgets":[{"type":"text","width":24,"height":2,"x":0,"y":0,"properties":{"markdown":"# Kinesis Metrics"}},{"type":"metric","width":12,"height":8,"x":0,"y":2,"properties":{"view":"timeSeries","title":"書き込み制限エラー数(Sum)と分あたり送信レコードByte(Sum)","region":"",
+              {
+                "Ref": "AWS::Region",
+              },
+              "","metrics":[["AWS/Kinesis","PutRecords.ThrottledRecords","StreamName","",
+              {
+                "Ref": "DataStream80B8B961",
+              },
+              "",{"period":60,"stat":"Sum"}],[{"label":"incommingBytes","expression":"e1/60","yAxis":"right"}],["AWS/Kinesis","IncomingBytes","StreamName","",
+              {
+                "Ref": "DataStream80B8B961",
+              },
+              "",{"stat":"Sum","visible":false,"id":"e1"}]],"yAxis":{"left":{"min":0},"right":{"min":0}},"period":60,"stat":"Sum"}},{"type":"metric","width":12,"height":8,"x":12,"y":10,"properties":{"view":"timeSeries","title":"読み込み制限エラー数(Sum)","region":"",
+              {
+                "Ref": "AWS::Region",
+              },
+              "","metrics":[["AWS/Kinesis","PutRecords.ThrottledRecords","StreamName","",
+              {
+                "Ref": "DataStream80B8B961",
+              },
+              ""]],"yAxis":{"left":{"min":0}},"period":60,"stat":"Sum"}},{"type":"metric","width":12,"height":8,"x":0,"y":18,"properties":{"view":"timeSeries","title":"書き込み制限エラー数(Sum)と分あたり送信レコード数(Sum)","region":"",
+              {
+                "Ref": "AWS::Region",
+              },
+              "","metrics":[["AWS/Kinesis","PutRecords.ThrottledRecords","StreamName","",
+              {
+                "Ref": "DataStream80B8B961",
+              },
+              "",{"period":60,"stat":"Sum"}],[{"label":"incommingRecords","expression":"e1/60","yAxis":"right"}],["AWS/Kinesis","IncomingRecords","StreamName","",
+              {
+                "Ref": "DataStream80B8B961",
+              },
+              "",{"stat":"Sum","visible":false,"id":"e1"}]],"yAxis":{"left":{"min":0},"right":{"min":0}},"period":60,"stat":"Sum"}},{"type":"metric","width":12,"height":8,"x":12,"y":10,"properties":{"view":"timeSeries","title":"読み込み制限エラー数(Sum)","region":"",
+              {
+                "Ref": "AWS::Region",
+              },
+              "","metrics":[["AWS/Kinesis","PutRecords.ThrottledRecords","StreamName","",
+              {
+                "Ref": "DataStream80B8B961",
+              },
+              ""]],"yAxis":{"left":{"min":0}},"period":60,"stat":"Sum"}},{"type":"metric","width":12,"height":8,"x":0,"y":18,"properties":{"view":"timeSeries","title":"書き込み制限エラー数(Sum)と分あたり送信レコード数(Sum)","region":"",
+              {
+                "Ref": "AWS::Region",
+              },
+              "","metrics":[["AWS/Kinesis","PutRecords.ThrottledRecords","StreamName","",
+              {
+                "Ref": "DataStream80B8B961",
+              },
+              "",{"period":60,"stat":"Sum"}],[{"label":"incommingRecords","expression":"e1/60","yAxis":"right"}],["AWS/Kinesis","IncomingRecords","StreamName","",
+              {
+                "Ref": "DataStream80B8B961",
+              },
+              "",{"stat":"Sum","visible":false,"id":"e1"}]],"yAxis":{"left":{"min":0},"right":{"min":0}},"period":60,"stat":"Sum"}},{"type":"metric","width":12,"height":8,"x":12,"y":18,"properties":{"view":"timeSeries","title":"データストリーム内での待機時間(Max, p99, Avg, Min)","region":"",
+              {
+                "Ref": "AWS::Region",
+              },
+              "","metrics":[["AWS/Kinesis","GetRecords.IteratorAgeMilliseconds","StreamName","",
+              {
+                "Ref": "DataStream80B8B961",
+              },
+              "",{"stat":"Maximum"}],["AWS/Kinesis","GetRecords.IteratorAgeMilliseconds","StreamName","",
+              {
+                "Ref": "DataStream80B8B961",
+              },
+              "",{"stat":"p99"}],["AWS/Kinesis","GetRecords.IteratorAgeMilliseconds","StreamName","",
+              {
+                "Ref": "DataStream80B8B961",
+              },
+              ""],["AWS/Kinesis","GetRecords.IteratorAgeMilliseconds","StreamName","",
+              {
+                "Ref": "DataStream80B8B961",
+              },
+              "",{"stat":"Minimum"}]],"yAxis":{"left":{"min":0}},"period":60}},{"type":"text","width":24,"height":2,"x":0,"y":26,"properties":{"markdown":"# Data Firehose Metrics"}},{"type":"metric","width":12,"height":8,"x":0,"y":28,"properties":{"view":"timeSeries","title":"KDSからの読み込みレコード数(Sum)","region":"",
+              {
+                "Ref": "AWS::Region",
+              },
+              "","metrics":[["AWS/Firehose","DataReadFromKinesisStream.Records","DeliveryStreamName","",
+              {
+                "Ref": "SampleDeliveryStream08F9F716",
+              },
+              ""]],"yAxis":{"left":{"min":0}},"period":60,"stat":"Sum"}},{"type":"metric","width":12,"height":8,"x":12,"y":28,"properties":{"view":"timeSeries","title":"KDSからの読み込みバイト数(Sum)","region":"",
+              {
+                "Ref": "AWS::Region",
+              },
+              "","metrics":[["AWS/Firehose","DataReadFromKinesisStream.Bytes","DeliveryStreamName","",
+              {
+                "Ref": "SampleDeliveryStream08F9F716",
+              },
+              ""]],"yAxis":{"left":{"min":0}},"period":60,"stat":"Sum"}},{"type":"metric","width":12,"height":8,"x":0,"y":36,"properties":{"view":"timeSeries","title":"S3への配信レコード数(Sum)","region":"",
+              {
+                "Ref": "AWS::Region",
+              },
+              "","metrics":[["AWS/Firehose","DeliveryToS3.Records","DeliveryStreamName","",
+              {
+                "Ref": "SampleDeliveryStream08F9F716",
+              },
+              ""]],"yAxis":{"left":{"min":0}},"period":60,"stat":"Sum"}},{"type":"metric","width":12,"height":8,"x":12,"y":36,"properties":{"view":"timeSeries","title":"正常に終了したS3 putコマンド合計(Sum)","region":"",
+              {
+                "Ref": "AWS::Region",
+              },
+              "","metrics":[["AWS/Firehose","DeliveryToS3.Success","DeliveryStreamName","",
+              {
+                "Ref": "SampleDeliveryStream08F9F716",
+              },
+              ""]],"yAxis":{"left":{"min":0}},"period":60,"stat":"Sum"}},{"type":"metric","width":12,"height":8,"x":0,"y":44,"properties":{"view":"timeSeries","title":"Firehose内の最も古いレコードの経過時間(Max, p99, Avg, Min)","region":"",
+              {
+                "Ref": "AWS::Region",
+              },
+              "","metrics":[["AWS/Firehose","DeliveryToS3.DataFreshness","DeliveryStreamName","",
+              {
+                "Ref": "SampleDeliveryStream08F9F716",
+              },
+              "",{"stat":"Maximum"}],["AWS/Firehose","DeliveryToS3.DataFreshness","DeliveryStreamName","",
+              {
+                "Ref": "SampleDeliveryStream08F9F716",
+              },
+              "",{"stat":"p99"}],["AWS/Firehose","DeliveryToS3.DataFreshness","DeliveryStreamName","",
+              {
+                "Ref": "SampleDeliveryStream08F9F716",
+              },
+              ""],["AWS/Firehose","DeliveryToS3.DataFreshness","DeliveryStreamName","",
+              {
+                "Ref": "SampleDeliveryStream08F9F716",
+              },
+              "",{"stat":"Minimum"}]],"yAxis":{"left":{"min":0}},"period":60}}]}",
+            ],
+          ],
+        },
+        "DashboardName": "prod-data-str-sample-delivery-s3-stack-dashboard-ap-northeast-1",
+      },
+      "Type": "AWS::CloudWatch::Dashboard",
+    },
+    "S3DestinationErrorLogGroup7A6614DC": {
+      "DeletionPolicy": "Delete",
+      "Properties": {
+        "RetentionInDays": 1,
+      },
+      "Type": "AWS::Logs::LogGroup",
+      "UpdateReplacePolicy": "Delete",
+    },
+    "S3DestinationErrorLogGroupS3DestinationE752B0E0": {
+      "DeletionPolicy": "Retain",
+      "Properties": {
+        "LogGroupName": {
+          "Ref": "S3DestinationErrorLogGroup7A6614DC",
+        },
+      },
+      "Type": "AWS::Logs::LogStream",
+      "UpdateReplacePolicy": "Retain",
+    },
+    "SampleDeliveryStream08F9F716": {
+      "DependsOn": [
+        "SampleDeliveryStreamS3DestinationRoleDefaultPolicy2F0C10FA",
+        "SampleDeliveryStreamServiceRoleDefaultPolicyE8422198",
+      ],
+      "Properties": {
+        "DeliveryStreamType": "KinesisStreamAsSource",
+        "ExtendedS3DestinationConfiguration": {
+          "BucketARN": {
+            "Fn::ImportValue": "prod-data-str-base-stack:ExportsOutputFnGetAttFirehoseBucket407758F1Arn8ACCD3F6",
+          },
+          "BufferingHints": {
+            "IntervalInSeconds": 5,
+            "SizeInMBs": 5,
+          },
+          "CloudWatchLoggingOptions": {
+            "Enabled": true,
+            "LogGroupName": {
+              "Ref": "S3DestinationErrorLogGroup7A6614DC",
+            },
+            "LogStreamName": {
+              "Ref": "S3DestinationErrorLogGroupS3DestinationE752B0E0",
+            },
+          },
+          "ErrorOutputPrefix": "error/!{firehose:error-output-type}/!{timestamp:yyyy/MM/dd/HH}/",
+          "Prefix": "data/!{timestamp:yyyy/MM/dd/HH}/",
+          "RoleARN": {
+            "Fn::GetAtt": [
+              "SampleDeliveryStreamS3DestinationRoleAB0E24F0",
+              "Arn",
+            ],
+          },
+        },
+        "KinesisStreamSourceConfiguration": {
+          "KinesisStreamARN": {
+            "Fn::GetAtt": [
+              "DataStream80B8B961",
+              "Arn",
+            ],
+          },
+          "RoleARN": {
+            "Fn::GetAtt": [
+              "SampleDeliveryStreamServiceRole4950889D",
+              "Arn",
+            ],
+          },
+        },
+      },
+      "Type": "AWS::KinesisFirehose::DeliveryStream",
+    },
+    "SampleDeliveryStreamS3DestinationRoleAB0E24F0": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "firehose.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+      },
+      "Type": "AWS::IAM::Role",
+    },
+    "SampleDeliveryStreamS3DestinationRoleDefaultPolicy2F0C10FA": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "s3:GetObject*",
+                "s3:GetBucket*",
+                "s3:List*",
+                "s3:DeleteObject*",
+                "s3:PutObject",
+                "s3:PutObjectLegalHold",
+                "s3:PutObjectRetention",
+                "s3:PutObjectTagging",
+                "s3:PutObjectVersionTagging",
+                "s3:Abort*",
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::ImportValue": "prod-data-str-base-stack:ExportsOutputFnGetAttFirehoseBucket407758F1Arn8ACCD3F6",
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      {
+                        "Fn::ImportValue": "prod-data-str-base-stack:ExportsOutputFnGetAttFirehoseBucket407758F1Arn8ACCD3F6",
+                      },
+                      "/*",
+                    ],
+                  ],
+                },
+              ],
+            },
+            {
+              "Action": [
+                "logs:CreateLogStream",
+                "logs:PutLogEvents",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::GetAtt": [
+                  "S3DestinationErrorLogGroup7A6614DC",
+                  "Arn",
+                ],
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "SampleDeliveryStreamS3DestinationRoleDefaultPolicy2F0C10FA",
+        "Roles": [
+          {
+            "Ref": "SampleDeliveryStreamS3DestinationRoleAB0E24F0",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "SampleDeliveryStreamServiceRole4950889D": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "firehose.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+      },
+      "Type": "AWS::IAM::Role",
+    },
+    "SampleDeliveryStreamServiceRoleDefaultPolicyE8422198": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "kinesis:DescribeStreamSummary",
+                "kinesis:GetRecords",
+                "kinesis:GetShardIterator",
+                "kinesis:ListShards",
+                "kinesis:SubscribeToShard",
+                "kinesis:DescribeStream",
+                "kinesis:ListStreams",
+                "kinesis:DescribeStreamConsumer",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::GetAtt": [
+                  "DataStream80B8B961",
+                  "Arn",
+                ],
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "SampleDeliveryStreamServiceRoleDefaultPolicyE8422198",
+        "Roles": [
+          {
+            "Ref": "SampleDeliveryStreamServiceRole4950889D",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+  },
+  "Rules": {
+    "CheckBootstrapVersion": {
+      "Assertions": [
+        {
+          "Assert": {
+            "Fn::Not": [
+              {
+                "Fn::Contains": [
+                  [
+                    "1",
+                    "2",
+                    "3",
+                    "4",
+                    "5",
+                  ],
+                  {
+                    "Ref": "BootstrapVersion",
+                  },
+                ],
+              },
+            ],
+          },
+          "AssertDescription": "CDK bootstrap stack version 6 required. Please run 'cdk bootstrap' with a recent version of the CDK CLI.",
+        },
+      ],
+    },
+  },
+}
+`;

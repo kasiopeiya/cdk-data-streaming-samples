@@ -40,7 +40,7 @@ runs:
 
     - name:  cdk diff
       id: diff
-      run: npx cdk diff "${{ inputs.env_name }}/*"> diff_job_summary 2>&1
+      run: npx cdk diff "${{ inputs.env_name }}/*" > diff_job_summary 2>&1
       shell: bash
 
     - name:  snapshot tests
