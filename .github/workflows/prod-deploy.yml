@@ -52,8 +52,8 @@ jobs:
           env_name: ${{ env.ENV_NAME }}
 
       - name: cdk deploy
-        run: npx cdk deploy "${{ env.ENV_NAME }}/*"
+        run: npx cdk deploy "${{ env.ENV_NAME }}/data-str-*"
 
-      # サンプルのため本番環境の方はデプロイの確認のみとする
+      # コスト削減のためデプロイの確認のみとする
       - name: cdk destroy
-        run: npx cdk destroy -f "prd/kasio-*"
+        run: npx cdk destroy -f "prd/data-str-sample-*"
