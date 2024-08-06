@@ -38,8 +38,6 @@ jobs:
         run: |
           echo "ENV_NAME=${{ env.ENV_NAME }}"
           echo "ENV_NAME=${{ env.ENV_NAME }}" >> $GITHUB_ENV
-          echo "DEV_ACCOUNT_ID=${{ secrets.DEV_ACCOUNT_ID }}" >> $GITHUB_ENV
-          echo "PROD_ACCOUNT_ID=${{ secrets.PROD_ACCOUNT_ID }}" >> $GITHUB_ENV
 
       - name: build test
         uses: ./.github/workflows/build_test
