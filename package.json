@@ -22,7 +22,7 @@
     "depcheck": "depcheck"
   },
   "devDependencies": {
-    "@commitlint/cli": "^19.3.0",
+    "@commitlint/cli": "^19.4.0",
     "@commitlint/config-conventional": "^19.2.2",
     "@types/jest": "^29.5.12",
     "@types/node": "20.12.4",
@@ -51,7 +51,7 @@
     "@aws-cdk/aws-kinesisfirehose-destinations-alpha": "^2.140.0-alpha.0",
     "@aws-lambda-powertools/tracer": "^1.18.1",
     "@aws-sdk/client-cloudwatch": "^3.572.0",
-    "@aws-sdk/client-dynamodb": "^3.620.0",
+    "@aws-sdk/client-dynamodb": "^3.624.0",
     "@aws-sdk/client-kinesis": "^3.569.0",
     "@aws-sdk/lib-dynamodb": "^3.620.0",
     "aws-cdk-lib": "2.140.0",
