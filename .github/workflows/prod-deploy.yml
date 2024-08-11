@@ -18,6 +18,8 @@ jobs:
     timeout-minutes: 10
     environment:
       name: prd
+    env:
+      PROD_ACCOUNT_ID: ${{ secrets.ACCOUNT_ID }}
     permissions:
       id-token: write
       contents: write
