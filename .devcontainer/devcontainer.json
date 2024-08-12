@@ -15,7 +15,8 @@
                 "hediet.vscode-drawio",
                 "davidanson.vscode-markdownlint",
                 "yzhang.markdown-all-in-one",
-                "csholmq.excel-to-markdown-table"
+                "csholmq.excel-to-markdown-table",
+                "github.vscode-github-actions"
             ]
         }
     },
