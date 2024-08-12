@@ -1,14 +1,12 @@
-import { App } from 'aws-cdk-lib'
+import { App, type Environment } from 'aws-cdk-lib'
 import { type Template } from 'aws-cdk-lib/assertions'
 
-import { prodConfig } from '../../config'
 import { ProdStage } from '../../lib/stage/prodStage'
 import { createTemplates } from '../testHelper'
 
 const app = new App()
-const stage = new ProdStage(app, 'prod', {
-  env: prodConfig.env
-})
+const env: Environment = { account: undefined, region: 'ap-northeast-1' }
+const stage = new ProdStage(app, 'prod', { env })
 const templates: Record<string, Template> = createTemplates(stage.stacks)
 
 for (const key in templates) {
