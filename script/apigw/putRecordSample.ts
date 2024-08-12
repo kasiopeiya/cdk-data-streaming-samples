@@ -64,15 +64,6 @@ interface KinesisRecord {
 }
 
 /**
- * APIGWからのレスポンスデータ
- */
-interface ApiGwResponseData {
-  Code: string
-  Message: string
-  FailedRecordCount: string
-}
-
-/**
  * エントリーポイント
  */
 const main = async (): Promise<void> => {
@@ -235,9 +226,8 @@ const sendRequest = async (
       }),
       data: httpRequest.body
     })
-    const data: ApiGwResponseData = response.data
     logger.info(
-      `SUCCESS: requestId: ${requestId}, status: ${response.status} ${response.statusText}, FailedRecordCount: ${data.FailedRecordCount}`
+      `SUCCESS: requestId: ${requestId}, status: ${response.status} ${response.statusText}`
     )
   } catch (e: any) {
     if ((e as AxiosError).response === undefined) {
