@@ -285,7 +285,7 @@ const sendRequest = async (
       await wait(retryInterval)
       await sendRequest(url_, httpRequest, requestId, retries - 1)
     } else {
-      // 以上終了
+      // 異常終了
       logger.error(`  FAILED: Request ${requestId} failed.`)
     }
   }

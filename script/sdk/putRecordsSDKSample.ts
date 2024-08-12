@@ -164,14 +164,17 @@ async function sendRequest(
     if (failedRecordCount === 0) {
       logger.info(`SUCCESS: requestId: ${requestId}, FailedRecordCount: ${failedRecordCount}`)
     } else {
+      // 失敗したレコードが１つ以上あった場合
       logger.warn(`WARNING: requestId: ${requestId}, FailedRecordCount: ${failedRecordCount}`)
       if (retries > 0) {
+        // リトライ
         logger.warn(` RETRY: Request ${requestId} failed. Retring..., (${retries}) retries left`)
         await wait(retryInterval)
         await sendRequest(command, requestId, retries - 1)
       }
     }
   } catch (error) {
+    // 異常終了
     console.log(error)
     logger.error(` FAILED: Request ${requestId} failed`)
   }
