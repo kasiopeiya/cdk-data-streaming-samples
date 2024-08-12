@@ -1,14 +1,24 @@
 ########################################################################
 # 開発環境用自動スタック削除
-# コスト節約のためスケジュール設定でスタックを削除する
+# コスト節約のためスケジュール設定で起動
 ########################################################################
 
-name: dev-scheduled-destroy-action
+name: dev-destroy-action
 run-name: ${{ github.workflow }} workflow
 on:
   schedule:
     - cron:  '00 4,14 * * *'
   workflow_dispatch:
+    inputs:
+      stack:
+        type: choice
+        description: target stack
+        default: dev/data-str-sample*
+        options:
+          - dev/data-str-sample*
+          - dev/data-str*
+          - dev/data-str-sample-apigw-kds-lambda-stack
+          - dev/data-str-sample-delivery-s3-stack
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
@@ -60,4 +70,4 @@ jobs:
           echo "DEV_ACCOUNT_ID=${{ secrets.DEV_ACCOUNT_ID }}" >> $GITHUB_ENV
           echo "PROD_ACCOUNT_ID=${{ secrets.PROD_ACCOUNT_ID }}" >> $GITHUB_ENV
 
-      - run: npx cdk destroy -f "${{ env.ENV_NAME }}/data-str-sample-*"
+      - run: npx cdk destroy -f ${{ github.event.inputs.stack }}
