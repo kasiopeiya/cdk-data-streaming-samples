@@ -59,8 +59,14 @@
     "constructs": "^10.3.0"
   },
   "lint-staged": {
-    "*.{ts,tsx}": "npm run lint-fix",
-    "*.md": "npm run md-lint-fix"
+    "*.{ts,tsx}": [
+      "prettier --write",
+      "eslint --max-warnings 0 --fix"
+    ],
+    "*.md": [
+      "prettier --write",
+      "markdownlint-cli2"
+    ]
   },
   "commitlint": {
     "extends": [
