@@ -1,22 +1,22 @@
 /** 開発環境用ステージ */
-import { type Stack, type StageProps } from 'aws-cdk-lib'
+import { type Stack, type StageProps, type Environment } from 'aws-cdk-lib'
 import { type Construct } from 'constructs'
 
-import { devConfig as config } from '../../config'
+import { devConfig, type Config } from '../../config'
 import { StageBase } from './stageBase'
 
 export class DevStage extends StageBase {
   public readonly stacks: Record<string, Stack>
   constructor(scope: Construct, id: string, props: StageProps) {
     super(scope, id, props)
-    this.stacks = this.createStacks()
+    const env: Environment = props.env ?? devConfig.env
+    const config: Config = devConfig
+    this.stacks = this.createStacks(config, env)
   }
 
-  createStacks(): Record<string, Stack> {
-    // 各環境にのみデプロイするスタックを生成
-    // const hogeStack = new HogeStack(this, 'HogeStack')
+  createStacks(config: Config, env: Environment): Record<string, Stack> {
     return {
-      ...super.createCommonStacks(this, config)
+      ...super.createCommonStacks(this, config, env)
     }
   }
 }
