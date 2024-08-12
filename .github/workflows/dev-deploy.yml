@@ -53,7 +53,3 @@ jobs:
 
       - name: cdk deploy
         run: npx cdk deploy "${{ env.ENV_NAME }}/data-str-*"
-
-      # コスト削減のためデプロイの確認のみとする
-      - name: cdk destroy
-        run: npx cdk destroy -f "dev/data-str-sample-*"
