@@ -29,7 +29,7 @@
     "@typescript-eslint/eslint-plugin": "^6.4.1",
     "aws-cdk": "2.151.0",
     "depcheck": "^1.4.7",
-    "esbuild": "^0.23.0",
+    "esbuild": "^0.23.1",
     "eslint": "^8.57.0",
     "eslint-config-standard-with-typescript": "^43.0.1",
     "eslint-plugin-import": "^2.29.1",
@@ -44,7 +44,7 @@
     "ts-jest": "^29.2.4",
     "ts-node": "^10.9.2",
     "typescript": "~5.5.4",
-    "winston": "^3.14.1"
+    "winston": "^3.14.2"
   },
   "dependencies": {
     "@aws-cdk/aws-kinesisfirehose-alpha": "^2.140.0-alpha.0",
