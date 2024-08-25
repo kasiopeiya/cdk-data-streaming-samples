@@ -63,7 +63,7 @@ export class KdsLambdaConsumer extends Construct {
     // Lambda Layer
     const customlayer = new lambda_.LayerVersion(this, 'CustomLayer', {
       removalPolicy: RemovalPolicy.DESTROY,
-      code: lambda_.Code.fromAsset(path.join('resources', 'layer', 'kdsConsumer')),
+      code: lambda_.Code.fromAsset(path.join('resources', 'layer', 'common')),
       compatibleArchitectures: [lambda_.Architecture.X86_64, lambda_.Architecture.ARM_64]
     })
 
@@ -95,7 +95,8 @@ export class KdsLambdaConsumer extends Construct {
       },
       layers: [customlayer],
       tracing: lambda_.Tracing.ACTIVE,
-      insightsVersion: lambda_.LambdaInsightsVersion.VERSION_1_0_229_0
+      logFormat: lambda_.LogFormat.JSON,
+      systemLogLevel: lambda_.SystemLogLevel.WARN
     })
 
     // Event Source Mapping
