@@ -1,12 +1,16 @@
-import { Duration, RemovalPolicy } from 'aws-cdk-lib'
+import * as path from 'path'
+
+import { Duration, RemovalPolicy, Stack } from 'aws-cdk-lib'
 import { Construct } from 'constructs'
 import { type Stream } from 'aws-cdk-lib/aws-kinesis'
 import { type Bucket } from 'aws-cdk-lib/aws-s3'
 import * as kinesisfirehose_alpha from '@aws-cdk/aws-kinesisfirehose-alpha'
 import * as kinesisfirehose_destination_alpha from '@aws-cdk/aws-kinesisfirehose-destinations-alpha'
-import * as lambda from 'aws-cdk-lib/aws-lambda'
+import * as lambda_ from 'aws-cdk-lib/aws-lambda'
 import { type CfnDeliveryStream } from 'aws-cdk-lib/aws-kinesisfirehose'
 import * as logs from 'aws-cdk-lib/aws-logs'
+import * as nodejsLambda from 'aws-cdk-lib/aws-lambda-nodejs'
+import * as iam from 'aws-cdk-lib/aws-iam'
 
 interface FirehoseWithLambdaProps {
   /** KDS Data Stream */
@@ -14,7 +18,7 @@ interface FirehoseWithLambdaProps {
   /** 配信先S3バケット */
   destinationBucket: Bucket
   /** Firehoseと連携するLambda関数コードのパス */
-  lambadEntry: string
+  lambdaEntry: string
   /** 配信のバッファリング秒数 */
   bufferingInterval?: Duration
   /** Lambda関数加工処理設定 */
@@ -32,7 +36,7 @@ interface FirehoseWithLambdaProps {
  */
 export class FirehoseWithLambda extends Construct {
   public readonly deliveryStream: kinesisfirehose_alpha.DeliveryStream
-  public readonly lambdaFunc: lambda.Function
+  public readonly lambdaFunc: lambda_.Function
 
   constructor(scope: Construct, id: string, props: FirehoseWithLambdaProps) {
     super(scope, id)
@@ -46,10 +50,35 @@ export class FirehoseWithLambda extends Construct {
     /*
     * Lambda
     -------------------------------------------------------------------------- */
-    this.lambdaFunc = new lambda.Function(this, 'Function', {
-      runtime: lambda.Runtime.PYTHON_3_12,
-      handler: 'index.lambda_handler',
-      code: lambda.Code.fromAsset(props.lambadEntry)
+    // Layer
+    const customlayer = new lambda_.LayerVersion(this, 'CustomLayer', {
+      removalPolicy: RemovalPolicy.DESTROY,
+      code: lambda_.Code.fromAsset(path.join('resources', 'layer', 'common')),
+      compatibleArchitectures: [lambda_.Architecture.X86_64, lambda_.Architecture.ARM_64]
+    })
+
+    // Function
+    this.lambdaFunc = new nodejsLambda.NodejsFunction(this, 'LambdaFunc', {
+      functionName: `${Stack.of(this).stackName}-func`,
+      entry: props.lambdaEntry,
+      handler: 'handler',
+      runtime: lambda_.Runtime.NODEJS_20_X,
+      architecture: lambda_.Architecture.ARM_64,
+      memorySize: 512,
+      timeout: Duration.minutes(3),
+      initialPolicy: [
+        new iam.PolicyStatement({
+          actions: ['xray:*'],
+          resources: ['*']
+        }),
+        new iam.PolicyStatement({
+          actions: ['cloudwatch:PutMetricStream', 'cloudwatch:PutMetricData'],
+          resources: ['*']
+        })
+      ],
+      layers: [customlayer],
+      logFormat: lambda_.LogFormat.JSON,
+      systemLogLevel: lambda_.SystemLogLevel.WARN
     })
 
     /*

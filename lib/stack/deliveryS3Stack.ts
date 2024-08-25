@@ -38,7 +38,7 @@ export class DeliveryS3Stack extends Stack {
   constructor(scope: Construct, id: string, props: DeliveryS3StackProps) {
     super(scope, id, props)
 
-    props.enableLambdaProcessor = false
+    props.enableLambdaProcessor ??= false
 
     /*
     * Kinesis Data Streams
@@ -55,17 +55,16 @@ export class DeliveryS3Stack extends Stack {
 
     if (props.enableLambdaProcessor) {
       // Lambda加工処理を実施する場合
-      const lambdaEntry = path.join(
-        'resources',
-        'lambda',
-        'firehoseProcessor',
-        'dynamicPartitioning',
-        'python'
-      )
       const firehoseWithLambda = new FirehoseWithLambda(this, 'FirehoseWithLambda', {
         sourceStream: myDataStream.dataStream,
         destinationBucket: props.bucket,
-        lambadEntry: lambdaEntry,
+        lambdaEntry: path.join(
+          'resources',
+          'lambda',
+          'firehoseProcessor',
+          'dynamicPartitioning',
+          'index.ts'
+        ),
         s3BackupOptions: {
           bucket: props.s3BackupOptions?.bucket
         }
