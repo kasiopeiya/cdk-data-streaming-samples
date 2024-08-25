@@ -30,9 +30,15 @@ export function generateSampleRecord(recordSize: number, requestId: string): Rec
     email: faker.internet.email(),
     dataType: faker.helpers.arrayElement(['free', 'normal', 'premium'])
   }
+  const recordDataSize: number = JSON.stringify(recordData).length
+
+  // 最小レコードサイズチェック
+  if (recordSize < recordDataSize) {
+    throw new Error(`recordSize must be greater than ${recordDataSize}`)
+  }
 
   // レコードサイズ調整のためのextraDataを設定
-  const extraDataSize = recordSize - JSON.stringify(recordData).length
+  const extraDataSize = recordSize - recordDataSize
   if (extraDataSize > 0) recordData.extraData = faker.string.alpha(extraDataSize)
 
   // zodによる型検証
