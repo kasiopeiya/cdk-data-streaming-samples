@@ -80,7 +80,7 @@ const lambdaHandler = async (event: unknown): Promise<any> => {
   // バッチサイズ
   const batchSize = (event as EventProps).Records.length
   await sendMetricToCloudWatch(batchSize)
-  console.log(`Lambda Start: batch size ${batchSize}`)
+  logger.info(`Lambda Start: batch size ${batchSize}`)
 
   for (const record of (event as EventProps).Records) {
     const decodedData: string = Buffer.from(record.kinesis.data, 'base64').toString('utf-8')
@@ -120,9 +120,8 @@ const lambdaHandler = async (event: unknown): Promise<any> => {
       }
     }
 
-    // やりたい処理を記載
     try {
-      console.log('処理実行しました')
+      // やりたい処理を記載
     } catch (e: any) {
       // 再実行のため、DynamoDBからレコード削除
       const command = new DeleteCommand({
@@ -135,7 +134,6 @@ const lambdaHandler = async (event: unknown): Promise<any> => {
       }
     }
   }
-  console.log('Lambda Finish')
 }
 
 export const handler = middy(lambdaHandler).use(captureLambdaHandler(tracer))
