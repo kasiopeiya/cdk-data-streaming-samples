@@ -25,7 +25,7 @@ import {
 import { defaultProvider } from '@aws-sdk/credential-provider-node'
 
 import { config } from './putRecordSampleConfig'
-import { generateSampleRecord, type RecordData } from '../recordData'
+import { generateSampleRecord, type RecordData } from './recordData'
 
 // 実行条件
 const region = config.region

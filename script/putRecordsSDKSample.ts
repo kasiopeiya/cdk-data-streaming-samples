@@ -15,7 +15,7 @@ import plimit, { type LimitFunction } from 'p-limit'
 import { faker } from '@faker-js/faker'
 
 import { config } from './putRecordsSDKSampleConfig'
-import { generateSampleRecord, type RecordData } from '../recordData'
+import { generateSampleRecord, type RecordData } from './recordData'
 
 // 実行条件
 const concurrentExecution = config.concurrentExecution
