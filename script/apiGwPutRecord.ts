@@ -1,6 +1,6 @@
 /**
  * API Gateway - Kinesis Data Streams構成用のサンプルデータ送信スクリプト
- * 複数レコードを同時に送信するKDS PutRecords API使用バージョン
+ * 1レコードずつ送信するKDS PutRecord API使用バージョン
  * IAM認可設定のためリクストの署名が必要、署名には環境変数のアクセスキー、なければIAM Roleを使用する
  * 接続先API GWのURLがParamemter Storeに登録されている必要あり
  */
@@ -24,29 +24,21 @@ import {
 } from '@aws-sdk/client-ssm'
 import { defaultProvider } from '@aws-sdk/credential-provider-node'
 
-import { config } from './putRecordsSampleConfig'
+import { config } from './apiGwPutRecordConfig'
 import { generateSampleRecord, type RecordData } from './recordData'
 
 // 実行条件
 const region = config.region
-const concurrentExecution = config.concurrentExecution
-const totalSendCount = config.totalSendCount
-const sendInterval = config.sendInterval
-const baseRecordNumberPerRequest = config.baseRecordNumberPerRequest
+const totalSendTimeMin = config.totalSendTimeMin
+const requestsPerMin = config.requestsPerMin
 const baseRecordSize = config.baseRecordSize
 const retryInterval = config.retryInterval
 const maxRetryCount = config.maxRetryCount
 const apiGwUrlParamKey = config.apiGwUrlParamKey
 const apiGwPath = config.apiGwPath
 
-// カウントアップパラメータ
-const incrementalParameters = config.incrementalParameters ?? {}
-const maxRecordNumberPerRequest =
-  incrementalParameters.maxRecordNumberPerRequest ?? baseRecordNumberPerRequest
-const maxRecordSize = incrementalParameters.maxRecordSize ?? baseRecordSize
-
 // 並列実行数の制御
-const limit: LimitFunction = plimit(concurrentExecution)
+const limit: LimitFunction = plimit(requestsPerMin)
 
 // Logger
 const logger = winston.createLogger({
@@ -58,7 +50,7 @@ const logger = winston.createLogger({
   ),
   transports: [
     new winston.transports.Console(),
-    new winston.transports.File({ filename: 'PutRecordsSample.log' })
+    new winston.transports.File({ filename: 'PutRecordSample.log' })
   ]
 })
 
@@ -70,69 +62,54 @@ interface KinesisRecord {
   data: string
   PartitionKey: string
 }
-/**
- * HTTPリクエスト送信時のインターフェース
- */
-interface Payload {
-  records: KinesisRecord[]
-}
-
-/**
- * APIGWからのレスポンスデータ
- */
-interface ApiGwResponseData {
-  Code: string
-  Message: string
-  FailedRecordCount: string
-}
 
 /**
  * エントリーポイント
  */
 const main = async (): Promise<void> => {
   const url_ = await createApiGwUrlWithPath(apiGwPath)
-  for (let currentSendCount = 1; currentSendCount <= totalSendCount; currentSendCount++) {
-    // 送信レコード数計算
-    let numOfData: number = baseRecordNumberPerRequest + (currentSendCount - 1)
-    if (maxRecordNumberPerRequest <= numOfData) {
-      numOfData = maxRecordNumberPerRequest
-    }
-
-    // データサイズ計算
-    let recordSize: number = baseRecordSize + (currentSendCount - 1)
-    if (maxRecordSize <= recordSize) {
-      recordSize = maxRecordSize
-    }
-
-    console.log(
-      `${currentSendCount}/${totalSendCount} ${numOfData} records per request, ${recordSize} bytes per record`
-    )
+  for (
+    let currentExecutionTimeMin = 1;
+    currentExecutionTimeMin <= totalSendTimeMin;
+    currentExecutionTimeMin++
+  ) {
+    console.log(`${currentExecutionTimeMin}/${totalSendTimeMin}`)
 
     const tasks: Array<Promise<void>> = []
-    for (let concurrentIndex = 1; concurrentIndex <= concurrentExecution; concurrentIndex++) {
-      // リクエスト追跡用のIDを採番
-      const requestIdPrefix = `${currentSendCount}-${concurrentIndex}-`
+    for (
+      let requetIndexInOneMin = 1;
+      requetIndexInOneMin <= requestsPerMin;
+      requetIndexInOneMin++
+    ) {
+      // 1分内でのリクエスト送信タイミングはランダムにする
+      let interval: number = getRandomRequestInterval()
+      if (requetIndexInOneMin === requestsPerMin) {
+        interval = 55 * 1000
+      }
+      const requestIdPrefix = `${currentExecutionTimeMin}-${requetIndexInOneMin}-`
       const requestIdLength = 20
       const requestId = `${requestIdPrefix}${faker.string.alphanumeric(requestIdLength - requestIdPrefix.length)}`
-      // 送信データ作成
-      const payload: Payload = { records: generateRecords(requestId, numOfData, recordSize) }
+      // レコード作成
+      const recordData: RecordData = generateSampleRecord(baseRecordSize, requestId)
+      const record: KinesisRecord = {
+        data: JSON.stringify(recordData),
+        PartitionKey: recordData.recordId
+      }
       // HTTPリクエスト作成
-      const request = createHTTPRequest(url_, payload)
+      const request = createHTTPRequest(url_, record)
       // リクエスト署名: APIGW IAM認可機能
       const signedRequest = await signHttpReqeust(request)
+      // ランダム時間待機後リクエストを送信するタスクリスト作成
       tasks.push(
         // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
         limit(async () => {
+          await new Promise((resolve) => setTimeout(resolve, interval))
           await sendRequest(url_, signedRequest, requestId, maxRetryCount)
         })
       )
     }
-
-    // リクエスト送信
+    // タスクを非同期に同時実行、リクエストは１分内でランダム分散
     await Promise.all(tasks)
-
-    // インターバル
-    await wait(sendInterval)
   }
 }
 
@@ -167,28 +144,13 @@ const getParameter = async (key: string): Promise<string> => {
 }
 
 /**
- * テストデータを生成する
- * @param requestId 追跡用のリクエストID
- * @param numOfData 生成するレコード数
- * @param recordSize 生成するレコードサイズ
- * @returns
+ * ランダムなリクエストインターバルを生成する
+ * @returns リクエストインターバル(ms)
  */
-const generateRecords = (
-  requestId: string,
-  numOfData: number,
-  recordSize: number
-): KinesisRecord[] => {
-  const records: KinesisRecord[] = []
-
-  for (let recordIndex = 1; recordIndex <= numOfData; recordIndex++) {
-    const recordData: RecordData = generateSampleRecord(recordSize, requestId)
-    const record: KinesisRecord = {
-      data: JSON.stringify(recordData),
-      PartitionKey: recordData.recordId
-    }
-    records.push(record)
-  }
-  return records
+const getRandomRequestInterval = (): number => {
+  // １分をミリ秒に変換、ただし60秒だと全リクエスト完了に１分以上かかるので、５０秒で計算
+  const oneMinInSecond = 50 * 1000
+  return Math.random() * oneMinInSecond
 }
 
 /**
@@ -196,7 +158,7 @@ const generateRecords = (
  * @param payload
  * @returns
  */
-function createHTTPRequest(url_: URL, payload: Payload): HttpRequest_ {
+function createHTTPRequest(url_: URL, record: KinesisRecord): HttpRequest_ {
   const req = new HttpRequest({
     method: 'PUT',
     path: url_.pathname,
@@ -205,7 +167,7 @@ function createHTTPRequest(url_: URL, payload: Payload): HttpRequest_ {
       'content-type': 'application/json',
       Host: url_.hostname
     },
-    body: JSON.stringify(payload)
+    body: JSON.stringify(record)
   })
   return req
 }
@@ -264,9 +226,8 @@ const sendRequest = async (
       }),
       data: httpRequest.body
     })
-    const data: ApiGwResponseData = response.data
     logger.info(
-      `SUCCESS: requestId: ${requestId}, status: ${response.status} ${response.statusText}, FailedRecordCount: ${data.FailedRecordCount}`
+      `SUCCESS: requestId: ${requestId}, status: ${response.status} ${response.statusText}`
     )
   } catch (e: any) {
     if ((e as AxiosError).response === undefined) {

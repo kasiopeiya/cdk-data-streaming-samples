@@ -14,7 +14,7 @@ import { SSMClient, GetParameterCommand } from '@aws-sdk/client-ssm'
 import plimit, { type LimitFunction } from 'p-limit'
 import { faker } from '@faker-js/faker'
 
-import { config } from './putRecordsSDKSampleConfig'
+import { config } from './sdkPutRecordsConfig'
 import { generateSampleRecord, type RecordData } from './recordData'
 
 // 実行条件
