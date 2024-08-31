@@ -76,30 +76,6 @@ exports[`apiGwKdsLambdaStack 1`] = `
     },
   },
   "Resources": {
-    "KDSB6F9C0AD": {
-      "DeletionPolicy": "Delete",
-      "Properties": {
-        "RetentionPeriodHours": 24,
-        "ShardCount": 1,
-        "StreamEncryption": {
-          "Fn::If": [
-            "AwsCdkKinesisEncryptedStreamsUnsupportedRegions",
-            {
-              "Ref": "AWS::NoValue",
-            },
-            {
-              "EncryptionType": "KMS",
-              "KeyId": "alias/aws/kinesis",
-            },
-          ],
-        },
-        "StreamModeDetails": {
-          "StreamMode": "PROVISIONED",
-        },
-      },
-      "Type": "AWS::Kinesis::Stream",
-      "UpdateReplacePolicy": "Delete",
-    },
     "KdsCWDashboradDashboard45FE56EE": {
       "Properties": {
         "DashboardBody": {
@@ -120,11 +96,11 @@ exports[`apiGwKdsLambdaStack 1`] = `
               },
               "","metrics":[["AWS/Kinesis","PutRecords.ThrottledRecords","StreamName","",
               {
-                "Ref": "KDSB6F9C0AD",
+                "Ref": "KdsDataStream7B329BF0",
               },
               "",{"period":60,"stat":"Sum"}],[{"label":"incommingBytes","expression":"e1/60","yAxis":"right"}],["AWS/Kinesis","IncomingBytes","StreamName","",
               {
-                "Ref": "KDSB6F9C0AD",
+                "Ref": "KdsDataStream7B329BF0",
               },
               "",{"stat":"Sum","visible":false,"id":"e1"}]],"yAxis":{"left":{"min":0},"right":{"min":0}},"period":60,"stat":"Sum"}},{"type":"metric","width":12,"height":8,"x":12,"y":20,"properties":{"view":"timeSeries","title":"読み込み制限エラー数(Sum)","region":"",
               {
@@ -132,7 +108,7 @@ exports[`apiGwKdsLambdaStack 1`] = `
               },
               "","metrics":[["AWS/Kinesis","PutRecords.ThrottledRecords","StreamName","",
               {
-                "Ref": "KDSB6F9C0AD",
+                "Ref": "KdsDataStream7B329BF0",
               },
               ""]],"yAxis":{"left":{"min":0}},"period":60,"stat":"Sum"}},{"type":"metric","width":12,"height":8,"x":0,"y":28,"properties":{"view":"timeSeries","title":"書き込み制限エラー数(Sum)と分あたり送信レコード数(Sum)","region":"",
               {
@@ -140,11 +116,11 @@ exports[`apiGwKdsLambdaStack 1`] = `
               },
               "","metrics":[["AWS/Kinesis","PutRecords.ThrottledRecords","StreamName","",
               {
-                "Ref": "KDSB6F9C0AD",
+                "Ref": "KdsDataStream7B329BF0",
               },
               "",{"period":60,"stat":"Sum"}],[{"label":"incommingRecords","expression":"e1/60","yAxis":"right"}],["AWS/Kinesis","IncomingRecords","StreamName","",
               {
-                "Ref": "KDSB6F9C0AD",
+                "Ref": "KdsDataStream7B329BF0",
               },
               "",{"stat":"Sum","visible":false,"id":"e1"}]],"yAxis":{"left":{"min":0},"right":{"min":0}},"period":60,"stat":"Sum"}},{"type":"metric","width":12,"height":8,"x":12,"y":20,"properties":{"view":"timeSeries","title":"読み込み制限エラー数(Sum)","region":"",
               {
@@ -152,7 +128,7 @@ exports[`apiGwKdsLambdaStack 1`] = `
               },
               "","metrics":[["AWS/Kinesis","PutRecords.ThrottledRecords","StreamName","",
               {
-                "Ref": "KDSB6F9C0AD",
+                "Ref": "KdsDataStream7B329BF0",
               },
               ""]],"yAxis":{"left":{"min":0}},"period":60,"stat":"Sum"}},{"type":"metric","width":12,"height":8,"x":0,"y":28,"properties":{"view":"timeSeries","title":"書き込み制限エラー数(Sum)と分あたり送信レコード数(Sum)","region":"",
               {
@@ -160,11 +136,11 @@ exports[`apiGwKdsLambdaStack 1`] = `
               },
               "","metrics":[["AWS/Kinesis","PutRecords.ThrottledRecords","StreamName","",
               {
-                "Ref": "KDSB6F9C0AD",
+                "Ref": "KdsDataStream7B329BF0",
               },
               "",{"period":60,"stat":"Sum"}],[{"label":"incommingRecords","expression":"e1/60","yAxis":"right"}],["AWS/Kinesis","IncomingRecords","StreamName","",
               {
-                "Ref": "KDSB6F9C0AD",
+                "Ref": "KdsDataStream7B329BF0",
               },
               "",{"stat":"Sum","visible":false,"id":"e1"}]],"yAxis":{"left":{"min":0},"right":{"min":0}},"period":60,"stat":"Sum"}},{"type":"metric","width":12,"height":8,"x":12,"y":28,"properties":{"view":"timeSeries","title":"データストリーム内での待機時間(Max, p99, Avg, Min)","region":"",
               {
@@ -172,19 +148,19 @@ exports[`apiGwKdsLambdaStack 1`] = `
               },
               "","metrics":[["AWS/Kinesis","GetRecords.IteratorAgeMilliseconds","StreamName","",
               {
-                "Ref": "KDSB6F9C0AD",
+                "Ref": "KdsDataStream7B329BF0",
               },
               "",{"stat":"Maximum"}],["AWS/Kinesis","GetRecords.IteratorAgeMilliseconds","StreamName","",
               {
-                "Ref": "KDSB6F9C0AD",
+                "Ref": "KdsDataStream7B329BF0",
               },
               "",{"stat":"p99"}],["AWS/Kinesis","GetRecords.IteratorAgeMilliseconds","StreamName","",
               {
-                "Ref": "KDSB6F9C0AD",
+                "Ref": "KdsDataStream7B329BF0",
               },
               ""],["AWS/Kinesis","GetRecords.IteratorAgeMilliseconds","StreamName","",
               {
-                "Ref": "KDSB6F9C0AD",
+                "Ref": "KdsDataStream7B329BF0",
               },
               "",{"stat":"Minimum"}]],"yAxis":{"left":{"min":0}},"period":60}},{"type":"text","width":24,"height":2,"x":0,"y":36,"properties":{"markdown":"# Lambda Metrics"}},{"type":"metric","width":12,"height":8,"x":0,"y":38,"properties":{"view":"timeSeries","title":"関数起動数(Sum)","region":"",
               {
@@ -294,6 +270,40 @@ exports[`apiGwKdsLambdaStack 1`] = `
       },
       "Type": "AWS::CloudWatch::Dashboard",
     },
+    "KdsDataStream7B329BF0": {
+      "DeletionPolicy": "Delete",
+      "Properties": {
+        "RetentionPeriodHours": 24,
+        "ShardCount": 1,
+        "StreamEncryption": {
+          "Fn::If": [
+            "AwsCdkKinesisEncryptedStreamsUnsupportedRegions",
+            {
+              "Ref": "AWS::NoValue",
+            },
+            {
+              "EncryptionType": "KMS",
+              "KeyId": "alias/aws/kinesis",
+            },
+          ],
+        },
+        "StreamModeDetails": {
+          "StreamMode": "PROVISIONED",
+        },
+      },
+      "Type": "AWS::Kinesis::Stream",
+      "UpdateReplacePolicy": "Delete",
+    },
+    "KdsDataStreamparameter9E23EE0A": {
+      "Properties": {
+        "Name": "/prod-data-str-sample-apigw-kds-lambda-stack/stream/name",
+        "Type": "String",
+        "Value": {
+          "Ref": "KdsDataStream7B329BF0",
+        },
+      },
+      "Type": "AWS::SSM::Parameter",
+    },
     "KdsLambdaConsumerCustomLayerC00DB53B": {
       "DeletionPolicy": "Delete",
       "Properties": {
@@ -334,7 +344,7 @@ exports[`apiGwKdsLambdaStack 1`] = `
         "Environment": {
           "Variables": {
             "AWS_NODEJS_CONNECTION_REUSE_ENABLED": "1",
-            "FUNCTION_NAME": "data-str-kds-consumer-func",
+            "FUNCTION_NAME": "Stack-kds-consumer-func",
             "METRIC_NAME": "LambdaBatchSize",
             "NAMESPACE": "Custom/LambdaMetrics",
             "TABLE_NAME": {
@@ -342,7 +352,7 @@ exports[`apiGwKdsLambdaStack 1`] = `
             },
           },
         },
-        "FunctionName": "data-str-kds-consumer-func",
+        "FunctionName": "Stack-kds-consumer-func",
         "Handler": "index.handler",
         "Layers": [
           {
@@ -385,7 +395,7 @@ exports[`apiGwKdsLambdaStack 1`] = `
         "Enabled": true,
         "EventSourceArn": {
           "Fn::GetAtt": [
-            "KDSB6F9C0AD",
+            "KdsDataStream7B329BF0",
             "Arn",
           ],
         },
@@ -517,7 +527,7 @@ exports[`apiGwKdsLambdaStack 1`] = `
               "Effect": "Allow",
               "Resource": {
                 "Fn::GetAtt": [
-                  "KDSB6F9C0AD",
+                  "KdsDataStream7B329BF0",
                   "Arn",
                 ],
               },
@@ -688,7 +698,7 @@ exports[`apiGwKdsLambdaStack 1`] = `
       "Type": "AWS::IAM::Role",
       "UpdateReplacePolicy": "Retain",
     },
-    "KdsPrivateApiGwProducerDeploymentDADF549Bd4c6eab1ac7af41b798860fb93e0632c": {
+    "KdsPrivateApiGwProducerDeploymentDADF549Ba0286cfa5cf26de95fe86998eb78c08f": {
       "DependsOn": [
         "KdsPrivateApiGwProducerstreamsrecordPUT350B36BC",
         "KdsPrivateApiGwProducerstreamsrecord4A9F8619",
@@ -710,7 +720,7 @@ exports[`apiGwKdsLambdaStack 1`] = `
       ],
       "Properties": {
         "DeploymentId": {
-          "Ref": "KdsPrivateApiGwProducerDeploymentDADF549Bd4c6eab1ac7af41b798860fb93e0632c",
+          "Ref": "KdsPrivateApiGwProducerDeploymentDADF549Ba0286cfa5cf26de95fe86998eb78c08f",
         },
         "MethodSettings": [
           {
@@ -758,7 +768,7 @@ exports[`apiGwKdsLambdaStack 1`] = `
               "Effect": "Allow",
               "Resource": {
                 "Fn::GetAtt": [
-                  "KDSB6F9C0AD",
+                  "KdsDataStream7B329BF0",
                   "Arn",
                 ],
               },
@@ -867,7 +877,7 @@ exports[`apiGwKdsLambdaStack 1`] = `
 {
 "StreamName": "",
                   {
-                    "Ref": "KDSB6F9C0AD",
+                    "Ref": "KdsDataStream7B329BF0",
                   },
                   "",
 "Data": "$util.base64Encode($input.path('$.data'))",
@@ -987,7 +997,7 @@ exports[`apiGwKdsLambdaStack 1`] = `
 {
 "StreamName": "",
                   {
-                    "Ref": "KDSB6F9C0AD",
+                    "Ref": "KdsDataStream7B329BF0",
                   },
                   "",
 "Records": [
@@ -1519,40 +1529,6 @@ exports[`deliveryS3Stack 1`] = `
     },
   },
   "Resources": {
-    "DataStream80B8B961": {
-      "DeletionPolicy": "Delete",
-      "Properties": {
-        "RetentionPeriodHours": 24,
-        "ShardCount": 1,
-        "StreamEncryption": {
-          "Fn::If": [
-            "AwsCdkKinesisEncryptedStreamsUnsupportedRegions",
-            {
-              "Ref": "AWS::NoValue",
-            },
-            {
-              "EncryptionType": "KMS",
-              "KeyId": "alias/aws/kinesis",
-            },
-          ],
-        },
-        "StreamModeDetails": {
-          "StreamMode": "PROVISIONED",
-        },
-      },
-      "Type": "AWS::Kinesis::Stream",
-      "UpdateReplacePolicy": "Delete",
-    },
-    "DataStreamparameterD94E8D77": {
-      "Properties": {
-        "Name": "/firehoseS3/kds/dataStreamName",
-        "Type": "String",
-        "Value": {
-          "Ref": "DataStream80B8B961",
-        },
-      },
-      "Type": "AWS::SSM::Parameter",
-    },
     "FirehoseWithLambdaCustomLayer9FB598A7": {
       "DeletionPolicy": "Delete",
       "Properties": {
@@ -1841,7 +1817,7 @@ exports[`deliveryS3Stack 1`] = `
         "KinesisStreamSourceConfiguration": {
           "KinesisStreamARN": {
             "Fn::GetAtt": [
-              "DataStream80B8B961",
+              "KdsDataStream7B329BF0",
               "Arn",
             ],
           },
@@ -2037,7 +2013,7 @@ exports[`deliveryS3Stack 1`] = `
               "Effect": "Allow",
               "Resource": {
                 "Fn::GetAtt": [
-                  "DataStream80B8B961",
+                  "KdsDataStream7B329BF0",
                   "Arn",
                 ],
               },
@@ -2066,11 +2042,11 @@ exports[`deliveryS3Stack 1`] = `
               },
               "","metrics":[["AWS/Kinesis","PutRecords.ThrottledRecords","StreamName","",
               {
-                "Ref": "DataStream80B8B961",
+                "Ref": "KdsDataStream7B329BF0",
               },
               "",{"period":60,"stat":"Sum"}],[{"label":"incommingBytes","expression":"e1/60","yAxis":"right"}],["AWS/Kinesis","IncomingBytes","StreamName","",
               {
-                "Ref": "DataStream80B8B961",
+                "Ref": "KdsDataStream7B329BF0",
               },
               "",{"stat":"Sum","visible":false,"id":"e1"}]],"yAxis":{"left":{"min":0},"right":{"min":0}},"period":60,"stat":"Sum"}},{"type":"metric","width":12,"height":8,"x":12,"y":10,"properties":{"view":"timeSeries","title":"読み込み制限エラー数(Sum)","region":"",
               {
@@ -2078,7 +2054,7 @@ exports[`deliveryS3Stack 1`] = `
               },
               "","metrics":[["AWS/Kinesis","PutRecords.ThrottledRecords","StreamName","",
               {
-                "Ref": "DataStream80B8B961",
+                "Ref": "KdsDataStream7B329BF0",
               },
               ""]],"yAxis":{"left":{"min":0}},"period":60,"stat":"Sum"}},{"type":"metric","width":12,"height":8,"x":0,"y":18,"properties":{"view":"timeSeries","title":"書き込み制限エラー数(Sum)と分あたり送信レコード数(Sum)","region":"",
               {
@@ -2086,11 +2062,11 @@ exports[`deliveryS3Stack 1`] = `
               },
               "","metrics":[["AWS/Kinesis","PutRecords.ThrottledRecords","StreamName","",
               {
-                "Ref": "DataStream80B8B961",
+                "Ref": "KdsDataStream7B329BF0",
               },
               "",{"period":60,"stat":"Sum"}],[{"label":"incommingRecords","expression":"e1/60","yAxis":"right"}],["AWS/Kinesis","IncomingRecords","StreamName","",
               {
-                "Ref": "DataStream80B8B961",
+                "Ref": "KdsDataStream7B329BF0",
               },
               "",{"stat":"Sum","visible":false,"id":"e1"}]],"yAxis":{"left":{"min":0},"right":{"min":0}},"period":60,"stat":"Sum"}},{"type":"metric","width":12,"height":8,"x":12,"y":10,"properties":{"view":"timeSeries","title":"読み込み制限エラー数(Sum)","region":"",
               {
@@ -2098,7 +2074,7 @@ exports[`deliveryS3Stack 1`] = `
               },
               "","metrics":[["AWS/Kinesis","PutRecords.ThrottledRecords","StreamName","",
               {
-                "Ref": "DataStream80B8B961",
+                "Ref": "KdsDataStream7B329BF0",
               },
               ""]],"yAxis":{"left":{"min":0}},"period":60,"stat":"Sum"}},{"type":"metric","width":12,"height":8,"x":0,"y":18,"properties":{"view":"timeSeries","title":"書き込み制限エラー数(Sum)と分あたり送信レコード数(Sum)","region":"",
               {
@@ -2106,11 +2082,11 @@ exports[`deliveryS3Stack 1`] = `
               },
               "","metrics":[["AWS/Kinesis","PutRecords.ThrottledRecords","StreamName","",
               {
-                "Ref": "DataStream80B8B961",
+                "Ref": "KdsDataStream7B329BF0",
               },
               "",{"period":60,"stat":"Sum"}],[{"label":"incommingRecords","expression":"e1/60","yAxis":"right"}],["AWS/Kinesis","IncomingRecords","StreamName","",
               {
-                "Ref": "DataStream80B8B961",
+                "Ref": "KdsDataStream7B329BF0",
               },
               "",{"stat":"Sum","visible":false,"id":"e1"}]],"yAxis":{"left":{"min":0},"right":{"min":0}},"period":60,"stat":"Sum"}},{"type":"metric","width":12,"height":8,"x":12,"y":18,"properties":{"view":"timeSeries","title":"データストリーム内での待機時間(Max, p99, Avg, Min)","region":"",
               {
@@ -2118,19 +2094,19 @@ exports[`deliveryS3Stack 1`] = `
               },
               "","metrics":[["AWS/Kinesis","GetRecords.IteratorAgeMilliseconds","StreamName","",
               {
-                "Ref": "DataStream80B8B961",
+                "Ref": "KdsDataStream7B329BF0",
               },
               "",{"stat":"Maximum"}],["AWS/Kinesis","GetRecords.IteratorAgeMilliseconds","StreamName","",
               {
-                "Ref": "DataStream80B8B961",
+                "Ref": "KdsDataStream7B329BF0",
               },
               "",{"stat":"p99"}],["AWS/Kinesis","GetRecords.IteratorAgeMilliseconds","StreamName","",
               {
-                "Ref": "DataStream80B8B961",
+                "Ref": "KdsDataStream7B329BF0",
               },
               ""],["AWS/Kinesis","GetRecords.IteratorAgeMilliseconds","StreamName","",
               {
-                "Ref": "DataStream80B8B961",
+                "Ref": "KdsDataStream7B329BF0",
               },
               "",{"stat":"Minimum"}]],"yAxis":{"left":{"min":0}},"period":60}},{"type":"text","width":24,"height":2,"x":0,"y":26,"properties":{"markdown":"# Lambda Metrics"}},{"type":"metric","width":12,"height":8,"x":0,"y":28,"properties":{"view":"timeSeries","title":"関数起動数(Sum)","region":"",
               {
@@ -2295,6 +2271,40 @@ exports[`deliveryS3Stack 1`] = `
         "DashboardName": "prod-data-str-sample-delivery-s3-stack-dashboard-ap-northeast-1",
       },
       "Type": "AWS::CloudWatch::Dashboard",
+    },
+    "KdsDataStream7B329BF0": {
+      "DeletionPolicy": "Delete",
+      "Properties": {
+        "RetentionPeriodHours": 24,
+        "ShardCount": 1,
+        "StreamEncryption": {
+          "Fn::If": [
+            "AwsCdkKinesisEncryptedStreamsUnsupportedRegions",
+            {
+              "Ref": "AWS::NoValue",
+            },
+            {
+              "EncryptionType": "KMS",
+              "KeyId": "alias/aws/kinesis",
+            },
+          ],
+        },
+        "StreamModeDetails": {
+          "StreamMode": "PROVISIONED",
+        },
+      },
+      "Type": "AWS::Kinesis::Stream",
+      "UpdateReplacePolicy": "Delete",
+    },
+    "KdsDataStreamparameter9E23EE0A": {
+      "Properties": {
+        "Name": "/prod-data-str-sample-delivery-s3-stack/stream/name",
+        "Type": "String",
+        "Value": {
+          "Ref": "KdsDataStream7B329BF0",
+        },
+      },
+      "Type": "AWS::SSM::Parameter",
     },
   },
   "Rules": {

@@ -1,12 +1,13 @@
-import { RemovalPolicy, Stack, type StackProps } from 'aws-cdk-lib'
+import { Stack, type StackProps } from 'aws-cdk-lib'
 import { type Construct } from 'constructs'
-import * as kds from 'aws-cdk-lib/aws-kinesis'
 import * as dynamodb from 'aws-cdk-lib/aws-dynamodb'
 import { type Vpc } from 'aws-cdk-lib/aws-ec2'
 
 import { KdsPrivateApiGwProducer } from '../construct/kdsApiGwProducer'
 import { KdsLambdaConsumer } from '../construct/kdsLambdaConsumer'
 import { KdsCWDashboard } from '../construct/kdsCWDashboard'
+// import { type Alarm } from 'aws-cdk-lib/aws-cloudwatch'
+import { KdsDataStream } from '../construct/kdsDataStream'
 
 interface ApiGwKdsLambdaStackProps extends StackProps {
   prefix: string
@@ -24,17 +25,13 @@ export class ApiGwKdsLambdaStack extends Stack {
     /*
     * Kinesis Data Streams
     -------------------------------------------------------------------------- */
-    const dataStream = new kds.Stream(this, 'KDS', {
-      streamMode: kds.StreamMode.PROVISIONED,
-      shardCount: 1,
-      removalPolicy: RemovalPolicy.DESTROY
-    })
+    const kdsDataStream = new KdsDataStream(this, 'KdsDataStream')
 
     /*
     * Producer側
     -------------------------------------------------------------------------- */
     const producer = new KdsPrivateApiGwProducer(this, 'KdsPrivateApiGwProducer', {
-      dataStream,
+      dataStream: kdsDataStream.dataStream,
       vpc: props.vpc
     })
 
@@ -43,7 +40,7 @@ export class ApiGwKdsLambdaStack extends Stack {
     -------------------------------------------------------------------------- */
     const consumer = new KdsLambdaConsumer(this, 'KdsLambdaConsumer', {
       prefix: props.prefix,
-      dataStream,
+      dataStream: kdsDataStream.dataStream,
       lambdaEntry: './resources/lambda/kinesis/index.ts',
       billing: dynamodb.Billing.onDemand()
     })
@@ -51,9 +48,19 @@ export class ApiGwKdsLambdaStack extends Stack {
     /*
     * Monitoring
     -------------------------------------------------------------------------- */
+    // Alarm
+    // const writePrvAlarm: Alarm = kdsDataStream.createWriteProvisionedAlarm()
+    // const readPrvAlarm: Alarm = kdsDataStream.createReadProvisionedAlarm()
+    // const iteratorAgeAlarm: Alarm = kdsDataStream.createIteratorAgeAlarm()
+    // const apiGwClientErrorAlarm: Alarm = producer.createClientErrorAlarm()
+    // const apiGwServerErrorAlarm: Alarm = producer.createServerErrorAlarm()
+    // const lambdaErrorsAlarm: Alarm = consumer.createLambdaErrorsAlarm()
+    // const dlqMessageSentAlarm: Alarm = consumer.createDLQMessagesSentAlarm()
+
+    // Dashboard
     new KdsCWDashboard(this, 'KdsCWDashborad', {
       prefix: props.prefix,
-      dataStream,
+      dataStream: kdsDataStream.dataStream,
       restApi: producer.restApi,
       lambdaFunction: consumer.kdsConsumerFunction
     })

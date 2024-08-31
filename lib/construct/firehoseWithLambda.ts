@@ -11,6 +11,7 @@ import { type CfnDeliveryStream } from 'aws-cdk-lib/aws-kinesisfirehose'
 import * as logs from 'aws-cdk-lib/aws-logs'
 import * as nodejsLambda from 'aws-cdk-lib/aws-lambda-nodejs'
 import * as iam from 'aws-cdk-lib/aws-iam'
+import * as cw from 'aws-cdk-lib/aws-cloudwatch'
 
 interface FirehoseWithLambdaProps {
   /** KDS Data Stream */
@@ -164,5 +165,101 @@ export class FirehoseWithLambda extends Construct {
         }
       ]
     })
+  }
+
+  /**
+   * FirehoseのMetricを作成
+   * L2で作成できないMetricが多いため
+   * @param metricName
+   * @param statistic
+   * @returns
+   */
+  private createFirehoseMetric(metricName: string, statistic?: string): cw.Metric {
+    return new cw.Metric({
+      namespace: 'AWS/Firehose',
+      metricName,
+      dimensionsMap: {
+        DeliveryStreamName: this.deliveryStream.deliveryStreamName
+      },
+      statistic
+    })
+  }
+
+  /**
+   * パーティション数超過のアラームを作成
+   * @param metricOption メトリクス設定
+   * @param alarmOption  CW Alarm設定
+   * @returns
+   */
+  createPartitionCountExceededAlarm(
+    metricOption?: cw.MetricOptions,
+    alarmOption?: cw.CreateAlarmOptions
+  ): cw.Alarm {
+    metricOption ??= {
+      period: Duration.minutes(1),
+      statistic: cw.Stats.SUM
+    }
+    alarmOption ??= {
+      alarmName: `${Stack.of(this).stackName}-deliveryStream-partition-count-alarm`,
+      evaluationPeriods: 1,
+      datapointsToAlarm: 1,
+      threshold: 0,
+      comparisonOperator: cw.ComparisonOperator.GREATER_THAN_THRESHOLD,
+      treatMissingData: cw.TreatMissingData.NOT_BREACHING
+    }
+    const metric = this.createFirehoseMetric('PartitionCountExceeded')
+    return metric.createAlarm(this, 'partitionCountExceededAlarm', alarmOption)
+  }
+
+  /**
+   * Firehoseレコード経過時間のアラームを作成
+   * @param metricOption メトリクス設定
+   * @param alarmOption  CW Alarm設定
+   * @returns
+   */
+  createDataFreshnessAlarm(
+    metricOption?: cw.MetricOptions,
+    alarmOption?: cw.CreateAlarmOptions
+  ): cw.Alarm {
+    metricOption ??= {
+      period: Duration.minutes(1),
+      statistic: cw.Stats.percentile(99)
+    }
+    alarmOption ??= {
+      alarmName: `${Stack.of(this).stackName}-deliveryStream-data-freshness-alarm`,
+      evaluationPeriods: 5,
+      datapointsToAlarm: 5,
+      threshold: 0,
+      comparisonOperator: cw.ComparisonOperator.GREATER_THAN_THRESHOLD,
+      treatMissingData: cw.TreatMissingData.NOT_BREACHING
+    }
+    const metric = this.createFirehoseMetric('DeliveryToS3.DataFreshness')
+    return metric.createAlarm(this, 'dataFreshnessAlarm', alarmOption)
+  }
+
+  /**
+   * Lambda関数エラーのアラームを作成
+   * @param metricOption メトリクス設定
+   * @param alarmOption  CW Alarm設定
+   * @returns
+   */
+  createLambdaErrorsAlarm(
+    metricOption?: cw.MetricOptions,
+    alarmOption?: cw.CreateAlarmOptions
+  ): cw.Alarm {
+    metricOption ??= {
+      period: Duration.minutes(1),
+      statistic: cw.Stats.SUM
+    }
+    alarmOption ??= {
+      alarmName: `${Stack.of(this).stackName}-deliveryStream-lambda-errors-alarm`,
+      evaluationPeriods: 5,
+      datapointsToAlarm: 3,
+      threshold: 0,
+      comparisonOperator: cw.ComparisonOperator.GREATER_THAN_THRESHOLD,
+      treatMissingData: cw.TreatMissingData.NOT_BREACHING
+    }
+    const metric = this.lambdaFunc.metricErrors(metricOption)
+    return metric.createAlarm(this, 'lambdaErrorsAlarm', alarmOption)
   }
 }

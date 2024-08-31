@@ -1,7 +1,7 @@
 import * as path from 'path'
 
 import { Construct } from 'constructs'
-import { Duration, RemovalPolicy } from 'aws-cdk-lib'
+import { Duration, RemovalPolicy, Stack } from 'aws-cdk-lib'
 import * as logs from 'aws-cdk-lib/aws-logs'
 import * as nodejsLambda from 'aws-cdk-lib/aws-lambda-nodejs'
 import * as lambda_ from 'aws-cdk-lib/aws-lambda'
@@ -10,6 +10,7 @@ import * as sqs from 'aws-cdk-lib/aws-sqs'
 import * as iam from 'aws-cdk-lib/aws-iam'
 import * as dynamodb from 'aws-cdk-lib/aws-dynamodb'
 import { type Stream } from 'aws-cdk-lib/aws-kinesis'
+import * as cw from 'aws-cdk-lib/aws-cloudwatch'
 
 interface KdsLambdaConsumerProps {
   prefix: string
@@ -29,6 +30,7 @@ interface KdsLambdaConsumerProps {
 export class KdsLambdaConsumer extends Construct {
   public readonly kdsConsumerFunction: lambda_.Function
   public readonly logGroup: logs.LogGroup
+  private readonly dlq: sqs.Queue
 
   constructor(scope: Construct, id: string, props: KdsLambdaConsumerProps) {
     super(scope, id)
@@ -58,7 +60,7 @@ export class KdsLambdaConsumer extends Construct {
     * Lambda
     -------------------------------------------------------------------------- */
     // DLQ
-    const kdsDlq = new sqs.Queue(this, 'KinesisDeadLetterQueue')
+    this.dlq = new sqs.Queue(this, 'KinesisDeadLetterQueue')
 
     // Lambda Layer
     const customlayer = new lambda_.LayerVersion(this, 'CustomLayer', {
@@ -68,7 +70,7 @@ export class KdsLambdaConsumer extends Construct {
     })
 
     // Lambda Function
-    const funcName = `${props.prefix}-kds-consumer-func`
+    const funcName = `${Stack.name}-kds-consumer-func`
     this.kdsConsumerFunction = new nodejsLambda.NodejsFunction(this, 'LambdaFunc', {
       functionName: funcName,
       entry: props.lambdaEntry,
@@ -111,7 +113,7 @@ export class KdsLambdaConsumer extends Construct {
       reportBatchItemFailures: true, // エラー処理のレポート
       retryAttempts: 5, // リトライ回数
       startingPosition: lambda_.StartingPosition.TRIM_HORIZON,
-      onFailure: new SqsDlq(kdsDlq),
+      onFailure: new SqsDlq(this.dlq),
       filters: [{ notificationFlag: [true] }]
     }
     const eventSourceMapping = this.kdsConsumerFunction.addEventSourceMapping(
@@ -147,5 +149,57 @@ export class KdsLambdaConsumer extends Construct {
     // Lambda関数からDynamoDBヘのアクセスを許可する
     table.grantReadWriteData(this.kdsConsumerFunction)
     props.dataStream.grantRead(this.kdsConsumerFunction)
+  }
+
+  /**
+   * DLQメッセージ送信のアラームを作成
+   * @param metricOption メトリクス設定
+   * @param alarmOption  CW Alarm設定
+   * @returns
+   */
+  createDLQMessagesSentAlarm(
+    metricOption?: cw.MetricOptions,
+    alarmOption?: cw.CreateAlarmOptions
+  ): cw.Alarm {
+    metricOption ??= {
+      period: Duration.minutes(1),
+      statistic: cw.Stats.SUM
+    }
+    alarmOption ??= {
+      alarmName: `${Stack.of(this).stackName}-dlq-messages-sent-alarm`,
+      evaluationPeriods: 1,
+      datapointsToAlarm: 1,
+      threshold: 0,
+      comparisonOperator: cw.ComparisonOperator.GREATER_THAN_THRESHOLD,
+      treatMissingData: cw.TreatMissingData.NOT_BREACHING
+    }
+    const metric = this.dlq.metricNumberOfMessagesSent(metricOption)
+    return metric.createAlarm(this, 'dlqMessagesSentAlarm', alarmOption)
+  }
+
+  /**
+   * Lambda関数エラーのアラームを作成
+   * @param metricOption メトリクス設定
+   * @param alarmOption  CW Alarm設定
+   * @returns
+   */
+  createLambdaErrorsAlarm(
+    metricOption?: cw.MetricOptions,
+    alarmOption?: cw.CreateAlarmOptions
+  ): cw.Alarm {
+    metricOption ??= {
+      period: Duration.minutes(1),
+      statistic: cw.Stats.SUM
+    }
+    alarmOption ??= {
+      alarmName: `${Stack.of(this).stackName}-lambda-errors-alarm`,
+      evaluationPeriods: 5,
+      datapointsToAlarm: 3,
+      threshold: 0,
+      comparisonOperator: cw.ComparisonOperator.GREATER_THAN_THRESHOLD,
+      treatMissingData: cw.TreatMissingData.NOT_BREACHING
+    }
+    const metric = this.kdsConsumerFunction.metricErrors(metricOption)
+    return metric.createAlarm(this, 'lambdaErrorsAlarm', alarmOption)
   }
 }

@@ -1,4 +1,4 @@
-import { RemovalPolicy, Stack } from 'aws-cdk-lib'
+import { Duration, RemovalPolicy, Stack } from 'aws-cdk-lib'
 import { Construct } from 'constructs'
 import * as iam from 'aws-cdk-lib/aws-iam'
 import * as apigw from 'aws-cdk-lib/aws-apigateway'
@@ -6,6 +6,7 @@ import * as ec2 from 'aws-cdk-lib/aws-ec2'
 import * as logs from 'aws-cdk-lib/aws-logs'
 import { type Stream } from 'aws-cdk-lib/aws-kinesis'
 import * as ssm from 'aws-cdk-lib/aws-ssm'
+import * as cw from 'aws-cdk-lib/aws-cloudwatch'
 
 interface KdsPrivateApiGwProducerProps {
   dataStream: Stream
@@ -342,5 +343,57 @@ export class KdsPrivateApiGwProducer extends Construct {
         }
       ]
     }
+  }
+
+  /**
+   * クライアント4××エラーのアラームを作成
+   * @param metricOption メトリクス設定
+   * @param alarmOption  CW Alarm設定
+   * @returns
+   */
+  createClientErrorAlarm(
+    metricOption?: cw.MetricOptions,
+    alarmOption?: cw.CreateAlarmOptions
+  ): cw.Alarm {
+    metricOption ??= {
+      period: Duration.minutes(1),
+      statistic: cw.Stats.SUM
+    }
+    alarmOption ??= {
+      alarmName: `${Stack.of(this).stackName}-apigw-client-error-alarm`,
+      evaluationPeriods: 5,
+      datapointsToAlarm: 3,
+      threshold: 0,
+      comparisonOperator: cw.ComparisonOperator.GREATER_THAN_THRESHOLD,
+      treatMissingData: cw.TreatMissingData.NOT_BREACHING
+    }
+    const metric = this.restApi.metricClientError(metricOption)
+    return metric.createAlarm(this, 'clientErrorAlarm', alarmOption)
+  }
+
+  /**
+   * サーバー5××エラーのアラームを作成
+   * @param metricOption メトリクス設定
+   * @param alarmOption  CW Alarm設定
+   * @returns
+   */
+  createServerErrorAlarm(
+    metricOption?: cw.MetricOptions,
+    alarmOption?: cw.CreateAlarmOptions
+  ): cw.Alarm {
+    metricOption ??= {
+      period: Duration.minutes(1),
+      statistic: cw.Stats.SUM
+    }
+    alarmOption ??= {
+      alarmName: `${Stack.of(this).stackName}-apigw-server-error-alarm`,
+      evaluationPeriods: 5,
+      datapointsToAlarm: 3,
+      threshold: 0,
+      comparisonOperator: cw.ComparisonOperator.GREATER_THAN_THRESHOLD,
+      treatMissingData: cw.TreatMissingData.NOT_BREACHING
+    }
+    const metric = this.restApi.metricServerError(metricOption)
+    return metric.createAlarm(this, 'serverErrorAlarm', alarmOption)
   }
 }
