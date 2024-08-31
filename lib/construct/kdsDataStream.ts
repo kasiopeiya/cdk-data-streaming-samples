@@ -1,28 +1,26 @@
 import { Construct } from 'constructs'
 import { Stream, type StreamProps, StreamMode } from 'aws-cdk-lib/aws-kinesis'
 import * as ssm from 'aws-cdk-lib/aws-ssm'
-import { RemovalPolicy } from 'aws-cdk-lib'
+import { RemovalPolicy, Stack } from 'aws-cdk-lib'
 
 interface KdsDataStreamProps {
-  parameterKeyName: string
   dataStreamProps?: StreamProps
 }
 
 export class KdsDataStream extends Construct {
   public readonly dataStream: Stream
 
-  constructor(scope: Construct, id: string, props: KdsDataStreamProps) {
+  constructor(scope: Construct, id: string, props?: KdsDataStreamProps) {
     super(scope, id)
 
     /*
     * Kinesis Data Streams
     -------------------------------------------------------------------------- */
     this.dataStream = new Stream(this, 'Resource', {
-      shardCount: props.dataStreamProps?.shardCount ?? 1,
+      shardCount: 1,
       streamMode: StreamMode.PROVISIONED,
       removalPolicy: RemovalPolicy.DESTROY,
-      // streamMode: StreamMode.ON_DEMAND,
-      ...props.dataStreamProps
+      ...props?.dataStreamProps
     })
 
     /*
@@ -31,7 +29,7 @@ export class KdsDataStream extends Construct {
     // dataStream名を登録
     // producer scriptで利用
     new ssm.StringParameter(this, 'parameter', {
-      parameterName: props.parameterKeyName,
+      parameterName: `/${Stack.of(this).stackName}/stream/name`,
       stringValue: this.dataStream.streamName
     })
   }

@@ -43,9 +43,7 @@ export class DeliveryS3Stack extends Stack {
     /*
     * Kinesis Data Streams
     -------------------------------------------------------------------------- */
-    const myDataStream = new KdsDataStream(this, 'DataStream', {
-      parameterKeyName: '/firehoseS3/kds/dataStreamName'
-    })
+    const myDataStream = new KdsDataStream(this, 'DataStream')
 
     /*
     * Data Firehose

@@ -30,7 +30,7 @@ interface Config {
 
 export const config: Config = {
   region: 'ap-northeast-1',
-  dataStreamNameParamKey: '/firehoseS3/kds/dataStreamName',
+  dataStreamNameParamKey: 'dev/data-str-sample-delivery-s3-stack',
   totalSendCount: 30,
   concurrentExecution: 3,
   sendInterval: 5,
