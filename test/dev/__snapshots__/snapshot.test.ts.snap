@@ -45,14 +45,14 @@ exports[`apiGwKdsLambdaStack 1`] = `
         ],
       },
     },
-    "KdsPrivateApiGwProducerEndpointF590D4F1": {
+    "KdsApiGwProducerEndpoint56011AC5": {
       "Value": {
         "Fn::Join": [
           "",
           [
             "https://",
             {
-              "Ref": "KdsPrivateApiGwProducer4C63EDB2",
+              "Ref": "KdsApiGwProducerA4899BB0",
             },
             ".execute-api.ap-northeast-1.",
             {
@@ -60,7 +60,7 @@ exports[`apiGwKdsLambdaStack 1`] = `
             },
             "/",
             {
-              "Ref": "KdsPrivateApiGwProducerDeploymentStagev122026BC6",
+              "Ref": "KdsApiGwProducerDeploymentStagev1E9BA3322",
             },
             "/",
           ],
@@ -76,6 +76,442 @@ exports[`apiGwKdsLambdaStack 1`] = `
     },
   },
   "Resources": {
+    "KdsApiGwProducerA4899BB0": {
+      "Properties": {
+        "EndpointConfiguration": {
+          "Types": [
+            "REGIONAL",
+          ],
+        },
+        "Name": "Default",
+      },
+      "Type": "AWS::ApiGateway::RestApi",
+    },
+    "KdsApiGwProducerAPIGWUrlParameterF380F99B": {
+      "Properties": {
+        "Name": "/apiGwKds/dev-data-str-sample-apigw-kds-lambda-stack/url",
+        "Type": "String",
+        "Value": {
+          "Fn::Join": [
+            "",
+            [
+              "https://",
+              {
+                "Ref": "KdsApiGwProducerA4899BB0",
+              },
+              ".execute-api.ap-northeast-1.",
+              {
+                "Ref": "AWS::URLSuffix",
+              },
+              "/",
+              {
+                "Ref": "KdsApiGwProducerDeploymentStagev1E9BA3322",
+              },
+              "/",
+            ],
+          ],
+        },
+      },
+      "Type": "AWS::SSM::Parameter",
+    },
+    "KdsApiGwProducerAccount3A6F6013": {
+      "DeletionPolicy": "Retain",
+      "DependsOn": [
+        "KdsApiGwProducerA4899BB0",
+      ],
+      "Properties": {
+        "CloudWatchRoleArn": {
+          "Fn::GetAtt": [
+            "KdsApiGwProducerCloudWatchRole5827EB53",
+            "Arn",
+          ],
+        },
+      },
+      "Type": "AWS::ApiGateway::Account",
+      "UpdateReplacePolicy": "Retain",
+    },
+    "KdsApiGwProducerCloudWatchRole5827EB53": {
+      "DeletionPolicy": "Retain",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "apigateway.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":iam::aws:policy/service-role/AmazonAPIGatewayPushToCloudWatchLogs",
+              ],
+            ],
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+      "UpdateReplacePolicy": "Retain",
+    },
+    "KdsApiGwProducerDeploymentE4B8A8B485d40d806f35b57e7900733bb03d773b": {
+      "DependsOn": [
+        "KdsApiGwProducerstreamsrecordPUTF0440163",
+        "KdsApiGwProducerstreamsrecordB638860A",
+        "KdsApiGwProducerstreamsrecordsPUT6E0B114F",
+        "KdsApiGwProducerstreamsrecordsB801BED7",
+        "KdsApiGwProducerstreams52DC4236",
+      ],
+      "Properties": {
+        "Description": "Automatically created by the RestApi construct",
+        "RestApiId": {
+          "Ref": "KdsApiGwProducerA4899BB0",
+        },
+      },
+      "Type": "AWS::ApiGateway::Deployment",
+    },
+    "KdsApiGwProducerDeploymentStagev1E9BA3322": {
+      "DependsOn": [
+        "KdsApiGwProducerAccount3A6F6013",
+      ],
+      "Properties": {
+        "DeploymentId": {
+          "Ref": "KdsApiGwProducerDeploymentE4B8A8B485d40d806f35b57e7900733bb03d773b",
+        },
+        "MethodSettings": [
+          {
+            "DataTraceEnabled": false,
+            "HttpMethod": "*",
+            "MetricsEnabled": false,
+            "ResourcePath": "/*",
+          },
+        ],
+        "RestApiId": {
+          "Ref": "KdsApiGwProducerA4899BB0",
+        },
+        "StageName": "v1",
+        "TracingEnabled": false,
+      },
+      "Type": "AWS::ApiGateway::Stage",
+    },
+    "KdsApiGwProducerRole867BA55B": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "apigateway.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+      },
+      "Type": "AWS::IAM::Role",
+    },
+    "KdsApiGwProducerRoleDefaultPolicy3FD45C37": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "kinesis:ListShards",
+                "kinesis:PutRecord",
+                "kinesis:PutRecords",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::GetAtt": [
+                  "KdsDataStream7B329BF0",
+                  "Arn",
+                ],
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "KdsApiGwProducerRoleDefaultPolicy3FD45C37",
+        "Roles": [
+          {
+            "Ref": "KdsApiGwProducerRole867BA55B",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "KdsApiGwProducerstreams52DC4236": {
+      "Properties": {
+        "ParentId": {
+          "Fn::GetAtt": [
+            "KdsApiGwProducerA4899BB0",
+            "RootResourceId",
+          ],
+        },
+        "PathPart": "streams",
+        "RestApiId": {
+          "Ref": "KdsApiGwProducerA4899BB0",
+        },
+      },
+      "Type": "AWS::ApiGateway::Resource",
+    },
+    "KdsApiGwProducerstreamsrecordB638860A": {
+      "Properties": {
+        "ParentId": {
+          "Ref": "KdsApiGwProducerstreams52DC4236",
+        },
+        "PathPart": "record",
+        "RestApiId": {
+          "Ref": "KdsApiGwProducerA4899BB0",
+        },
+      },
+      "Type": "AWS::ApiGateway::Resource",
+    },
+    "KdsApiGwProducerstreamsrecordPUTF0440163": {
+      "Properties": {
+        "AuthorizationType": "NONE",
+        "HttpMethod": "PUT",
+        "Integration": {
+          "Credentials": {
+            "Fn::GetAtt": [
+              "KdsApiGwProducerRole867BA55B",
+              "Arn",
+            ],
+          },
+          "IntegrationHttpMethod": "POST",
+          "IntegrationResponses": [
+            {
+              "ResponseTemplates": {
+                "application/json": "
+{
+"Code": "200",
+"Message": "OK",
+"SequenceNumber": "$input.path('$.sequnceNumber')",
+"shardId": "$input.path('$.shardId')",
+}",
+              },
+              "SelectionPattern": "200",
+              "StatusCode": "200",
+            },
+            {
+              "ResponseTemplates": {
+                "application/json": "
+{
+"Code": "400",
+"Message": "KinesisClientError"
+}",
+              },
+              "SelectionPattern": "4\\d{2}",
+              "StatusCode": "400",
+            },
+            {
+              "ResponseTemplates": {
+                "application/json": "
+{
+#set($inputRoot = $input.path('$'))
+"Code": "500",
+"Message": "$inputRoot.errorMessage",
+"ErrorType": "$inputRoot.errorType",
+"StackTrace": "$inputRoot.stackTrace"
+}",
+              },
+              "SelectionPattern": "5d{2}",
+              "StatusCode": "500",
+            },
+          ],
+          "PassthroughBehavior": "WHEN_NO_TEMPLATES",
+          "RequestParameters": {
+            "integration.request.header.Content-Type": "'x-amz-json-1.1'",
+          },
+          "RequestTemplates": {
+            "application/json": {
+              "Fn::Join": [
+                "",
+                [
+                  "
+{
+"StreamName": "",
+                  {
+                    "Ref": "KdsDataStream7B329BF0",
+                  },
+                  "",
+"Data": "$util.base64Encode($input.path('$.data'))",
+"PartitionKey": "$input.path('$.PartitionKey')"
+}",
+                ],
+              ],
+            },
+          },
+          "Type": "AWS",
+          "Uri": {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":apigateway:ap-northeast-1:kinesis:action/PutRecord",
+              ],
+            ],
+          },
+        },
+        "MethodResponses": [
+          {
+            "StatusCode": "200",
+          },
+          {
+            "StatusCode": "400",
+          },
+          {
+            "StatusCode": "500",
+          },
+        ],
+        "ResourceId": {
+          "Ref": "KdsApiGwProducerstreamsrecordB638860A",
+        },
+        "RestApiId": {
+          "Ref": "KdsApiGwProducerA4899BB0",
+        },
+      },
+      "Type": "AWS::ApiGateway::Method",
+    },
+    "KdsApiGwProducerstreamsrecordsB801BED7": {
+      "Properties": {
+        "ParentId": {
+          "Ref": "KdsApiGwProducerstreams52DC4236",
+        },
+        "PathPart": "records",
+        "RestApiId": {
+          "Ref": "KdsApiGwProducerA4899BB0",
+        },
+      },
+      "Type": "AWS::ApiGateway::Resource",
+    },
+    "KdsApiGwProducerstreamsrecordsPUT6E0B114F": {
+      "Properties": {
+        "AuthorizationType": "NONE",
+        "HttpMethod": "PUT",
+        "Integration": {
+          "Credentials": {
+            "Fn::GetAtt": [
+              "KdsApiGwProducerRole867BA55B",
+              "Arn",
+            ],
+          },
+          "IntegrationHttpMethod": "POST",
+          "IntegrationResponses": [
+            {
+              "ResponseTemplates": {
+                "application/json": "
+{
+"Code": "200",
+"Message": "OK",
+"FailedRecordCount": "$input.path('$.FailedRecordCount')"
+}
+#if($input.path('$.FailedRecordCount') != '0')
+#set($context.responseOverride.status = 500)
+#end",
+              },
+              "SelectionPattern": "200",
+              "StatusCode": "200",
+            },
+            {
+              "ResponseTemplates": {
+                "application/json": "
+{
+"Code": "400",
+"Message": "KinesisClientError"
+}",
+              },
+              "SelectionPattern": "4\\d{2}",
+              "StatusCode": "400",
+            },
+            {
+              "ResponseTemplates": {
+                "application/json": "
+{
+"Code": "500",
+"Message": "KinesisServerError"
+}",
+              },
+              "SelectionPattern": "5\\d{2}",
+              "StatusCode": "500",
+            },
+          ],
+          "PassthroughBehavior": "WHEN_NO_TEMPLATES",
+          "RequestParameters": {
+            "integration.request.header.Content-Type": "'x-amz-json-1.1'",
+          },
+          "RequestTemplates": {
+            "application/json": {
+              "Fn::Join": [
+                "",
+                [
+                  "
+{
+"StreamName": "",
+                  {
+                    "Ref": "KdsDataStream7B329BF0",
+                  },
+                  "",
+"Records": [
+#foreach($elem in $input.path('$.records'))
+  {
+    "Data": "$util.base64Encode($elem.data)",
+    "PartitionKey": "$elem.PartitionKey"
+  }#if($foreach.hasNext),#end
+  #end
+]
+}",
+                ],
+              ],
+            },
+          },
+          "Type": "AWS",
+          "Uri": {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":apigateway:ap-northeast-1:kinesis:action/PutRecords",
+              ],
+            ],
+          },
+        },
+        "MethodResponses": [
+          {
+            "StatusCode": "200",
+          },
+          {
+            "StatusCode": "400",
+          },
+          {
+            "StatusCode": "500",
+          },
+        ],
+        "ResourceId": {
+          "Ref": "KdsApiGwProducerstreamsrecordsB801BED7",
+        },
+        "RestApiId": {
+          "Ref": "KdsApiGwProducerA4899BB0",
+        },
+      },
+      "Type": "AWS::ApiGateway::Method",
+    },
     "KdsCWDashboradDashboard45FE56EE": {
       "Properties": {
         "DashboardBody": {
@@ -610,442 +1046,6 @@ exports[`apiGwKdsLambdaStack 1`] = `
       },
       "Type": "AWS::DynamoDB::GlobalTable",
       "UpdateReplacePolicy": "Delete",
-    },
-    "KdsPrivateApiGwProducer4C63EDB2": {
-      "Properties": {
-        "EndpointConfiguration": {
-          "Types": [
-            "REGIONAL",
-          ],
-        },
-        "Name": "Default",
-      },
-      "Type": "AWS::ApiGateway::RestApi",
-    },
-    "KdsPrivateApiGwProducerAPIGWUrlParameterC7447613": {
-      "Properties": {
-        "Name": "/apiGwKds/dev-data-str-sample-apigw-kds-lambda-stack/url",
-        "Type": "String",
-        "Value": {
-          "Fn::Join": [
-            "",
-            [
-              "https://",
-              {
-                "Ref": "KdsPrivateApiGwProducer4C63EDB2",
-              },
-              ".execute-api.ap-northeast-1.",
-              {
-                "Ref": "AWS::URLSuffix",
-              },
-              "/",
-              {
-                "Ref": "KdsPrivateApiGwProducerDeploymentStagev122026BC6",
-              },
-              "/",
-            ],
-          ],
-        },
-      },
-      "Type": "AWS::SSM::Parameter",
-    },
-    "KdsPrivateApiGwProducerAccount943D0C51": {
-      "DeletionPolicy": "Retain",
-      "DependsOn": [
-        "KdsPrivateApiGwProducer4C63EDB2",
-      ],
-      "Properties": {
-        "CloudWatchRoleArn": {
-          "Fn::GetAtt": [
-            "KdsPrivateApiGwProducerCloudWatchRoleF0E0428F",
-            "Arn",
-          ],
-        },
-      },
-      "Type": "AWS::ApiGateway::Account",
-      "UpdateReplacePolicy": "Retain",
-    },
-    "KdsPrivateApiGwProducerCloudWatchRoleF0E0428F": {
-      "DeletionPolicy": "Retain",
-      "Properties": {
-        "AssumeRolePolicyDocument": {
-          "Statement": [
-            {
-              "Action": "sts:AssumeRole",
-              "Effect": "Allow",
-              "Principal": {
-                "Service": "apigateway.amazonaws.com",
-              },
-            },
-          ],
-          "Version": "2012-10-17",
-        },
-        "ManagedPolicyArns": [
-          {
-            "Fn::Join": [
-              "",
-              [
-                "arn:",
-                {
-                  "Ref": "AWS::Partition",
-                },
-                ":iam::aws:policy/service-role/AmazonAPIGatewayPushToCloudWatchLogs",
-              ],
-            ],
-          },
-        ],
-      },
-      "Type": "AWS::IAM::Role",
-      "UpdateReplacePolicy": "Retain",
-    },
-    "KdsPrivateApiGwProducerDeploymentDADF549Ba0286cfa5cf26de95fe86998eb78c08f": {
-      "DependsOn": [
-        "KdsPrivateApiGwProducerstreamsrecordPUT350B36BC",
-        "KdsPrivateApiGwProducerstreamsrecord4A9F8619",
-        "KdsPrivateApiGwProducerstreamsrecordsPUTBD654217",
-        "KdsPrivateApiGwProducerstreamsrecords9CA38AEC",
-        "KdsPrivateApiGwProducerstreams92372065",
-      ],
-      "Properties": {
-        "Description": "Automatically created by the RestApi construct",
-        "RestApiId": {
-          "Ref": "KdsPrivateApiGwProducer4C63EDB2",
-        },
-      },
-      "Type": "AWS::ApiGateway::Deployment",
-    },
-    "KdsPrivateApiGwProducerDeploymentStagev122026BC6": {
-      "DependsOn": [
-        "KdsPrivateApiGwProducerAccount943D0C51",
-      ],
-      "Properties": {
-        "DeploymentId": {
-          "Ref": "KdsPrivateApiGwProducerDeploymentDADF549Ba0286cfa5cf26de95fe86998eb78c08f",
-        },
-        "MethodSettings": [
-          {
-            "DataTraceEnabled": false,
-            "HttpMethod": "*",
-            "MetricsEnabled": false,
-            "ResourcePath": "/*",
-          },
-        ],
-        "RestApiId": {
-          "Ref": "KdsPrivateApiGwProducer4C63EDB2",
-        },
-        "StageName": "v1",
-        "TracingEnabled": false,
-      },
-      "Type": "AWS::ApiGateway::Stage",
-    },
-    "KdsPrivateApiGwProducerRole37490E0D": {
-      "Properties": {
-        "AssumeRolePolicyDocument": {
-          "Statement": [
-            {
-              "Action": "sts:AssumeRole",
-              "Effect": "Allow",
-              "Principal": {
-                "Service": "apigateway.amazonaws.com",
-              },
-            },
-          ],
-          "Version": "2012-10-17",
-        },
-      },
-      "Type": "AWS::IAM::Role",
-    },
-    "KdsPrivateApiGwProducerRoleDefaultPolicy28BBC1B5": {
-      "Properties": {
-        "PolicyDocument": {
-          "Statement": [
-            {
-              "Action": [
-                "kinesis:ListShards",
-                "kinesis:PutRecord",
-                "kinesis:PutRecords",
-              ],
-              "Effect": "Allow",
-              "Resource": {
-                "Fn::GetAtt": [
-                  "KdsDataStream7B329BF0",
-                  "Arn",
-                ],
-              },
-            },
-          ],
-          "Version": "2012-10-17",
-        },
-        "PolicyName": "KdsPrivateApiGwProducerRoleDefaultPolicy28BBC1B5",
-        "Roles": [
-          {
-            "Ref": "KdsPrivateApiGwProducerRole37490E0D",
-          },
-        ],
-      },
-      "Type": "AWS::IAM::Policy",
-    },
-    "KdsPrivateApiGwProducerstreams92372065": {
-      "Properties": {
-        "ParentId": {
-          "Fn::GetAtt": [
-            "KdsPrivateApiGwProducer4C63EDB2",
-            "RootResourceId",
-          ],
-        },
-        "PathPart": "streams",
-        "RestApiId": {
-          "Ref": "KdsPrivateApiGwProducer4C63EDB2",
-        },
-      },
-      "Type": "AWS::ApiGateway::Resource",
-    },
-    "KdsPrivateApiGwProducerstreamsrecord4A9F8619": {
-      "Properties": {
-        "ParentId": {
-          "Ref": "KdsPrivateApiGwProducerstreams92372065",
-        },
-        "PathPart": "record",
-        "RestApiId": {
-          "Ref": "KdsPrivateApiGwProducer4C63EDB2",
-        },
-      },
-      "Type": "AWS::ApiGateway::Resource",
-    },
-    "KdsPrivateApiGwProducerstreamsrecordPUT350B36BC": {
-      "Properties": {
-        "AuthorizationType": "NONE",
-        "HttpMethod": "PUT",
-        "Integration": {
-          "Credentials": {
-            "Fn::GetAtt": [
-              "KdsPrivateApiGwProducerRole37490E0D",
-              "Arn",
-            ],
-          },
-          "IntegrationHttpMethod": "POST",
-          "IntegrationResponses": [
-            {
-              "ResponseTemplates": {
-                "application/json": "
-{
-"Code": "200",
-"Message": "OK",
-"SequenceNumber": "$input.path('$.sequnceNumber')",
-"shardId": "$input.path('$.shardId')",
-}",
-              },
-              "SelectionPattern": "200",
-              "StatusCode": "200",
-            },
-            {
-              "ResponseTemplates": {
-                "application/json": "
-{
-"Code": "400",
-"Message": "KinesisClientError"
-}",
-              },
-              "SelectionPattern": "4\\d{2}",
-              "StatusCode": "400",
-            },
-            {
-              "ResponseTemplates": {
-                "application/json": "
-{
-#set($inputRoot = $input.path('$'))
-"Code": "500",
-"Message": "$inputRoot.errorMessage",
-"ErrorType": "$inputRoot.errorType",
-"StackTrace": "$inputRoot.stackTrace"
-}",
-              },
-              "SelectionPattern": "5d{2}",
-              "StatusCode": "500",
-            },
-          ],
-          "PassthroughBehavior": "WHEN_NO_TEMPLATES",
-          "RequestParameters": {
-            "integration.request.header.Content-Type": "'x-amz-json-1.1'",
-          },
-          "RequestTemplates": {
-            "application/json": {
-              "Fn::Join": [
-                "",
-                [
-                  "
-{
-"StreamName": "",
-                  {
-                    "Ref": "KdsDataStream7B329BF0",
-                  },
-                  "",
-"Data": "$util.base64Encode($input.path('$.data'))",
-"PartitionKey": "$input.path('$.PartitionKey')"
-}",
-                ],
-              ],
-            },
-          },
-          "Type": "AWS",
-          "Uri": {
-            "Fn::Join": [
-              "",
-              [
-                "arn:",
-                {
-                  "Ref": "AWS::Partition",
-                },
-                ":apigateway:ap-northeast-1:kinesis:action/PutRecord",
-              ],
-            ],
-          },
-        },
-        "MethodResponses": [
-          {
-            "StatusCode": "200",
-          },
-          {
-            "StatusCode": "400",
-          },
-          {
-            "StatusCode": "500",
-          },
-        ],
-        "ResourceId": {
-          "Ref": "KdsPrivateApiGwProducerstreamsrecord4A9F8619",
-        },
-        "RestApiId": {
-          "Ref": "KdsPrivateApiGwProducer4C63EDB2",
-        },
-      },
-      "Type": "AWS::ApiGateway::Method",
-    },
-    "KdsPrivateApiGwProducerstreamsrecords9CA38AEC": {
-      "Properties": {
-        "ParentId": {
-          "Ref": "KdsPrivateApiGwProducerstreams92372065",
-        },
-        "PathPart": "records",
-        "RestApiId": {
-          "Ref": "KdsPrivateApiGwProducer4C63EDB2",
-        },
-      },
-      "Type": "AWS::ApiGateway::Resource",
-    },
-    "KdsPrivateApiGwProducerstreamsrecordsPUTBD654217": {
-      "Properties": {
-        "AuthorizationType": "NONE",
-        "HttpMethod": "PUT",
-        "Integration": {
-          "Credentials": {
-            "Fn::GetAtt": [
-              "KdsPrivateApiGwProducerRole37490E0D",
-              "Arn",
-            ],
-          },
-          "IntegrationHttpMethod": "POST",
-          "IntegrationResponses": [
-            {
-              "ResponseTemplates": {
-                "application/json": "
-{
-"Code": "200",
-"Message": "OK",
-"FailedRecordCount": "$input.path('$.FailedRecordCount')"
-}
-#if($input.path('$.FailedRecordCount') != '0')
-#set($context.responseOverride.status = 500)
-#end",
-              },
-              "SelectionPattern": "200",
-              "StatusCode": "200",
-            },
-            {
-              "ResponseTemplates": {
-                "application/json": "
-{
-"Code": "400",
-"Message": "KinesisClientError"
-}",
-              },
-              "SelectionPattern": "4\\d{2}",
-              "StatusCode": "400",
-            },
-            {
-              "ResponseTemplates": {
-                "application/json": "
-{
-"Code": "500",
-"Message": "KinesisServerError"
-}",
-              },
-              "SelectionPattern": "5\\d{2}",
-              "StatusCode": "500",
-            },
-          ],
-          "PassthroughBehavior": "WHEN_NO_TEMPLATES",
-          "RequestParameters": {
-            "integration.request.header.Content-Type": "'x-amz-json-1.1'",
-          },
-          "RequestTemplates": {
-            "application/json": {
-              "Fn::Join": [
-                "",
-                [
-                  "
-{
-"StreamName": "",
-                  {
-                    "Ref": "KdsDataStream7B329BF0",
-                  },
-                  "",
-"Records": [
-#foreach($elem in $input.path('$.records'))
-  {
-    "Data": "$util.base64Encode($elem.data)",
-    "PartitionKey": "$elem.PartitionKey"
-  }#if($foreach.hasNext),#end
-  #end
-]
-}",
-                ],
-              ],
-            },
-          },
-          "Type": "AWS",
-          "Uri": {
-            "Fn::Join": [
-              "",
-              [
-                "arn:",
-                {
-                  "Ref": "AWS::Partition",
-                },
-                ":apigateway:ap-northeast-1:kinesis:action/PutRecords",
-              ],
-            ],
-          },
-        },
-        "MethodResponses": [
-          {
-            "StatusCode": "200",
-          },
-          {
-            "StatusCode": "400",
-          },
-          {
-            "StatusCode": "500",
-          },
-        ],
-        "ResourceId": {
-          "Ref": "KdsPrivateApiGwProducerstreamsrecords9CA38AEC",
-        },
-        "RestApiId": {
-          "Ref": "KdsPrivateApiGwProducer4C63EDB2",
-        },
-      },
-      "Type": "AWS::ApiGateway::Method",
     },
   },
   "Rules": {

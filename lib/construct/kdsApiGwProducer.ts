@@ -8,7 +8,7 @@ import { type Stream } from 'aws-cdk-lib/aws-kinesis'
 import * as ssm from 'aws-cdk-lib/aws-ssm'
 import * as cw from 'aws-cdk-lib/aws-cloudwatch'
 
-interface KdsPrivateApiGwProducerProps {
+interface KdsApiGwProducerProps {
   dataStream: Stream
   /* APIGWのタイプ, Privateの場合はVPCの指定が必須 */
   type?: apigw.EndpointType.PRIVATE | apigw.EndpointType.REGIONAL
@@ -23,13 +23,13 @@ interface KdsPrivateApiGwProducerProps {
  * Private APIにも対応
  * PutRcord, PutRecords APIに対応
  */
-export class KdsPrivateApiGwProducer extends Construct {
+export class KdsApiGwProducer extends Construct {
   private readonly role: iam.Role
   private readonly stageOption: apigw.StageOptions
   private readonly vpcEndpoint: ec2.InterfaceVpcEndpoint
   public readonly restApi: apigw.RestApi
 
-  constructor(scope: Construct, id: string, props: KdsPrivateApiGwProducerProps) {
+  constructor(scope: Construct, id: string, props: KdsApiGwProducerProps) {
     super(scope, id)
 
     props.type ??= apigw.EndpointType.REGIONAL

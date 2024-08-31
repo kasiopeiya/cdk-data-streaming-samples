@@ -3,7 +3,7 @@ import { type Construct } from 'constructs'
 import * as dynamodb from 'aws-cdk-lib/aws-dynamodb'
 import { type Vpc } from 'aws-cdk-lib/aws-ec2'
 
-import { KdsPrivateApiGwProducer } from '../construct/kdsApiGwProducer'
+import { KdsApiGwProducer } from '../construct/kdsApiGwProducer'
 import { KdsLambdaConsumer } from '../construct/kdsLambdaConsumer'
 import { KdsCWDashboard } from '../construct/kdsCWDashboard'
 // import { type Alarm } from 'aws-cdk-lib/aws-cloudwatch'
@@ -30,7 +30,7 @@ export class ApiGwKdsLambdaStack extends Stack {
     /*
     * Producer側
     -------------------------------------------------------------------------- */
-    const producer = new KdsPrivateApiGwProducer(this, 'KdsPrivateApiGwProducer', {
+    const producer = new KdsApiGwProducer(this, 'KdsApiGwProducer', {
       dataStream: kdsDataStream.dataStream,
       vpc: props.vpc
     })
