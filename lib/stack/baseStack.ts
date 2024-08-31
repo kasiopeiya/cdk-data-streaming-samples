@@ -3,6 +3,7 @@ import { type Construct } from 'constructs'
 import { Bucket, BucketEncryption } from 'aws-cdk-lib/aws-s3'
 import * as iam from 'aws-cdk-lib/aws-iam'
 import * as apigw from 'aws-cdk-lib/aws-apigateway'
+import * as sns from 'aws-cdk-lib/aws-sns'
 
 /**
  * ステートフルなリソースを構築する
@@ -46,6 +47,13 @@ export class BaseStack extends Stack {
       ]
     })
     new apigw.CfnAccount(this, 'CfnAccount', { cloudWatchRoleArn: role.roleArn })
+
+    /*
+    * SNS
+    -------------------------------------------------------------------------- */
+    // Alarm通知用
+    const alarmTopic = new sns.Topic(this, 'AlarmNotificationTopic')
+    alarmTopic.applyRemovalPolicy(RemovalPolicy.DESTROY)
 
     /*
     * 出力設定

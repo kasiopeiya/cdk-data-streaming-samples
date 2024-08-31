@@ -1112,6 +1112,11 @@ exports[`baseStack 1`] = `
     },
   },
   "Resources": {
+    "AlarmNotificationTopic58BFACC9": {
+      "DeletionPolicy": "Delete",
+      "Type": "AWS::SNS::Topic",
+      "UpdateReplacePolicy": "Delete",
+    },
     "ApiGWAccountRoleBB7B8DFB": {
       "Properties": {
         "AssumeRolePolicyDocument": {
