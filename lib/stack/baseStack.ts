@@ -61,6 +61,28 @@ export class BaseStack extends Stack {
     })
 
     /*
+    * CloudWatch Logs
+    -------------------------------------------------------------------------- */
+    // テストスクリプト用LogGroup: apiGwPutRecord
+    new logs.LogGroup(this, 'apiGwPutRecordLog', {
+      logGroupName: '/test/script/apiGwPutRecord',
+      removalPolicy: RemovalPolicy.DESTROY,
+      retention: logs.RetentionDays.ONE_DAY
+    })
+    // テストスクリプト用LogGroup: apiGwPutRecords
+    new logs.LogGroup(this, 'apiGwPutRecordsLog', {
+      logGroupName: '/test/script/apiGwPutRecords',
+      removalPolicy: RemovalPolicy.DESTROY,
+      retention: logs.RetentionDays.ONE_DAY
+    })
+    // テストスクリプト用LogGroup: sdkPutRecords
+    new logs.LogGroup(this, 'sdkPutRecordsLog', {
+      logGroupName: '/test/script/sdkPutRecords',
+      removalPolicy: RemovalPolicy.DESTROY,
+      retention: logs.RetentionDays.ONE_DAY
+    })
+
+    /*
     * APIGW
     -------------------------------------------------------------------------- */
     // アカウント設定, CloudWatch Logsへの出力権限

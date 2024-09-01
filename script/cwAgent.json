@@ -1,0 +1,26 @@
+{
+  "logs": {
+    "force_flush_interval": 100,
+    "logs_collected": {
+      "files": {
+        "collect_list": [
+          {
+            "file_path": "~/script/apiGwPutRecord.log",
+            "log_group_name": "/test/script/apiGwPutRecord",
+            "log_stream_name": "{ip_address}"
+          },
+          {
+            "file_path": "~/script/apiGwPutRecords.log",
+            "log_group_name": "/test/script/apiGwPutRecorsd",
+            "log_stream_name": "{ip_address}"
+          },
+          {
+            "file_path": "~/script/sdkPutRecords.log",
+            "log_group_name": "/test/script/sdkPutRecords",
+            "log_stream_name": "{ip_address}"
+          }
+        ]
+      }
+    }
+  }
+}
