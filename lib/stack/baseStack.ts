@@ -5,6 +5,8 @@ import * as iam from 'aws-cdk-lib/aws-iam'
 import * as apigw from 'aws-cdk-lib/aws-apigateway'
 import * as sns from 'aws-cdk-lib/aws-sns'
 
+import { AlarmNotificationHandler } from '../construct/alarmNotificationHandler'
+
 /**
  * ステートフルなリソースを構築する
  */
@@ -49,11 +51,17 @@ export class BaseStack extends Stack {
     new apigw.CfnAccount(this, 'CfnAccount', { cloudWatchRoleArn: role.roleArn })
 
     /*
-    * SNS
+    * 通知
     -------------------------------------------------------------------------- */
-    // Alarm通知用
+    // Alarm通知用SNS Topic
     const alarmTopic = new sns.Topic(this, 'AlarmNotificationTopic')
     alarmTopic.applyRemovalPolicy(RemovalPolicy.DESTROY)
+
+    // CloudWatch Alarmのステータス変更を検知し、件名本文を加工してメール通知
+    // Envent Bridge - Input Transformer - StepFunctions - SNS
+    new AlarmNotificationHandler(this, 'AlarmNotificationHandler', {
+      topic: alarmTopic
+    })
 
     /*
     * 出力設定

@@ -1112,6 +1112,166 @@ exports[`baseStack 1`] = `
     },
   },
   "Resources": {
+    "AlarmNotificationHandler3668E638": {
+      "DeletionPolicy": "Delete",
+      "DependsOn": [
+        "AlarmNotificationHandlerRoleDefaultPolicyFFB2F848",
+        "AlarmNotificationHandlerRoleA1B91015",
+      ],
+      "Properties": {
+        "DefinitionString": {
+          "Fn::Join": [
+            "",
+            [
+              "{"StartAt":"snsPublishTask","States":{"snsPublishTask":{"End":true,"Type":"Task","Resource":"arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":states:::aws-sdk:sns:publish","Parameters":{"TopicArn":"",
+              {
+                "Ref": "AlarmNotificationTopic58BFACC9",
+              },
+              "","Message.$":"$.message","Subject.$":"$.subject"}}}}",
+            ],
+          ],
+        },
+        "RoleArn": {
+          "Fn::GetAtt": [
+            "AlarmNotificationHandlerRoleA1B91015",
+            "Arn",
+          ],
+        },
+      },
+      "Type": "AWS::StepFunctions::StateMachine",
+      "UpdateReplacePolicy": "Delete",
+    },
+    "AlarmNotificationHandlerEventsRole13840AD0": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "events.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+      },
+      "Type": "AWS::IAM::Role",
+    },
+    "AlarmNotificationHandlerEventsRoleDefaultPolicyFAA93D6E": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "states:StartExecution",
+              "Effect": "Allow",
+              "Resource": {
+                "Ref": "AlarmNotificationHandler3668E638",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "AlarmNotificationHandlerEventsRoleDefaultPolicyFAA93D6E",
+        "Roles": [
+          {
+            "Ref": "AlarmNotificationHandlerEventsRole13840AD0",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "AlarmNotificationHandlerRoleA1B91015": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "states.ap-northeast-1.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+      },
+      "Type": "AWS::IAM::Role",
+    },
+    "AlarmNotificationHandlerRoleDefaultPolicyFFB2F848": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sns:publish",
+              "Effect": "Allow",
+              "Resource": {
+                "Ref": "AlarmNotificationTopic58BFACC9",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "AlarmNotificationHandlerRoleDefaultPolicyFFB2F848",
+        "Roles": [
+          {
+            "Ref": "AlarmNotificationHandlerRoleA1B91015",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "AlarmNotificationHandlerRule4D0A5C08": {
+      "Properties": {
+        "EventPattern": {
+          "detail": {
+            "alarmName": [
+              {
+                "suffix": "info",
+              },
+            ],
+            "state": {
+              "value": [
+                "ALARM",
+              ],
+            },
+          },
+          "detail-type": [
+            "CloudWatch Alarm State Change",
+          ],
+          "source": [
+            "aws.cloudwatch",
+          ],
+        },
+        "State": "ENABLED",
+        "Targets": [
+          {
+            "Arn": {
+              "Ref": "AlarmNotificationHandler3668E638",
+            },
+            "Id": "Target0",
+            "InputTransformer": {
+              "InputPathsMap": {
+                "detail": "$.detail",
+                "detail-alarmName": "$.detail.alarmName",
+              },
+              "InputTemplate": "{"subject":"【CDK Streamingサンプルアラーム通知】 <detail-alarmName>","message":<detail>}",
+            },
+            "RoleArn": {
+              "Fn::GetAtt": [
+                "AlarmNotificationHandlerEventsRole13840AD0",
+                "Arn",
+              ],
+            },
+          },
+        ],
+      },
+      "Type": "AWS::Events::Rule",
+    },
     "AlarmNotificationTopic58BFACC9": {
       "DeletionPolicy": "Delete",
       "Type": "AWS::SNS::Topic",
