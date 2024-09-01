@@ -7,9 +7,17 @@ import { type RestApi } from 'aws-cdk-lib/aws-apigateway'
 import { KdsShardCountMetrics } from './kdsShardCountMetrics'
 import { type DeliveryStream } from '@aws-cdk/aws-kinesisfirehose-alpha'
 
+import { alarmDescriptionTable } from '../../resources/dashboard/markdown'
+
 /** Dashboardの各セクション共通Widget */
 interface CommonWidgets {
   titleWid: cw.TextWidget
+}
+
+/** Alarmセクションで利用可能なWidget */
+interface AlarmWidgets extends CommonWidgets {
+  alarmStatusWid: cw.AlarmStatusWidget
+  tableWid: cw.TextWidget
 }
 
 /** API Gatewayセクションで利用可能なWidget */
@@ -80,15 +88,19 @@ interface KdsCWDashboardProps {
   lambdaFunction?: LambdaFunction
   /** Data Firehose */
   deliveryStream?: DeliveryStream
+  /** CloudWatch Alarms */
+  alarms: cw.Alarm[]
 }
 
 export class KdsCWDashboard extends Construct {
   private readonly defaultHeight: number = 8
   private readonly defaultWidth: number = 12
+  private readonly alarms: cw.Alarm[]
   private readonly restApi: RestApi
   private readonly dataStream: Stream
   private readonly lambdaFunction: LambdaFunction
   private readonly deliveryStream: DeliveryStream
+  private readonly alarmWidgets: AlarmWidgets
   private readonly apiGwWidgets: ApiGwSectionWidgets
   private readonly kdsWidgets: KdsSectionWidgets
   private readonly lambdaWidgets: LambdaSectionWidgets
@@ -116,6 +128,15 @@ export class KdsCWDashboard extends Construct {
       defaultInterval: Duration.hours(1),
       dashboardName: `${Stack.of(this).stackName}-dashboard-${Stack.of(this).region}`
     })
+
+    // Alarms
+    if (props.alarms !== undefined) {
+      this.alarms = props.alarms
+      this.alarmWidgets = this.createAlarmWidgets()
+      dashboard.addWidgets(this.alarmWidgets.titleWid)
+      dashboard.addWidgets(this.alarmWidgets.alarmStatusWid)
+      dashboard.addWidgets(this.alarmWidgets.tableWid)
+    }
 
     // API Gateway
     if (props.restApi !== undefined) {
@@ -213,6 +234,32 @@ export class KdsCWDashboard extends Construct {
         dashboard.addWidgets(this.firehoseWidgets.partitionCount)
       }
     }
+  }
+
+  /**
+   * CW AlarmのWidgetsを作成する
+   * @returns
+   */
+  createAlarmWidgets(): AlarmWidgets {
+    // Title
+    const titleWid = new cw.TextWidget({
+      markdown: '# CloudWatch Alarm',
+      height: 2,
+      width: 24
+    })
+
+    const alarmStatusWid = new cw.AlarmStatusWidget({
+      alarms: this.alarms,
+      width: 24
+    })
+
+    const tableWid = new cw.TextWidget({
+      markdown: alarmDescriptionTable,
+      height: 15,
+      width: 24
+    })
+
+    return { titleWid, alarmStatusWid, tableWid }
   }
 
   /**

@@ -54,11 +54,20 @@ export class ApiGwKdsLambdaStack extends Stack {
     // Alarm
     const writePrvAlarm: Alarm = kdsDataStream.createWriteProvisionedAlarm()
     const readPrvAlarm: Alarm = kdsDataStream.createReadProvisionedAlarm()
-    // const iteratorAgeAlarm: Alarm = kdsDataStream.createIteratorAgeAlarm()
-    // const apiGwClientErrorAlarm: Alarm = producer.createClientErrorAlarm()
-    // const apiGwServerErrorAlarm: Alarm = producer.createServerErrorAlarm()
-    // const lambdaErrorsAlarm: Alarm = consumer.createLambdaErrorsAlarm()
-    // const dlqMessageSentAlarm: Alarm = consumer.createDLQMessagesSentAlarm()
+    const iteratorAgeAlarm: Alarm = kdsDataStream.createIteratorAgeAlarm()
+    const apiGwClientErrorAlarm: Alarm = producer.createClientErrorAlarm()
+    const apiGwServerErrorAlarm: Alarm = producer.createServerErrorAlarm()
+    const lambdaErrorsAlarm: Alarm = consumer.createLambdaErrorsAlarm()
+    const dlqMessageSentAlarm: Alarm = consumer.createDLQMessagesSentAlarm()
+    const cwAlarms: Alarm[] = [
+      writePrvAlarm,
+      readPrvAlarm,
+      iteratorAgeAlarm,
+      apiGwClientErrorAlarm,
+      apiGwServerErrorAlarm,
+      lambdaErrorsAlarm,
+      dlqMessageSentAlarm
+    ]
 
     // Alarm Action
     const cfnStream = kdsDataStream.dataStream.node.defaultChild as CfnStream
@@ -79,6 +88,7 @@ export class ApiGwKdsLambdaStack extends Stack {
     // Dashboard
     new KdsCWDashboard(this, 'KdsCWDashborad', {
       prefix: props.prefix,
+      alarms: cwAlarms,
       dataStream: kdsDataStream.dataStream,
       restApi: producer.restApi,
       lambdaFunction: consumer.kdsConsumerFunction

@@ -250,6 +250,48 @@ exports[`apiGwKdsLambdaStack 1`] = `
       },
       "Type": "AWS::IAM::Policy",
     },
+    "KdsApiGwProducerclientErrorAlarmC0B26A54": {
+      "Properties": {
+        "AlarmName": "apigw-client-error-alarm-prod-data-str-sample-apigw-kds-lambda-stack",
+        "ComparisonOperator": "GreaterThanThreshold",
+        "DatapointsToAlarm": 3,
+        "Dimensions": [
+          {
+            "Name": "ApiName",
+            "Value": "Default",
+          },
+        ],
+        "EvaluationPeriods": 5,
+        "MetricName": "4XXError",
+        "Namespace": "AWS/ApiGateway",
+        "Period": 60,
+        "Statistic": "Sum",
+        "Threshold": 0,
+        "TreatMissingData": "notBreaching",
+      },
+      "Type": "AWS::CloudWatch::Alarm",
+    },
+    "KdsApiGwProducerserverErrorAlarmD72EF5DF": {
+      "Properties": {
+        "AlarmName": "apigw-server-error-alarm-prod-data-str-sample-apigw-kds-lambda-stack",
+        "ComparisonOperator": "GreaterThanThreshold",
+        "DatapointsToAlarm": 3,
+        "Dimensions": [
+          {
+            "Name": "ApiName",
+            "Value": "Default",
+          },
+        ],
+        "EvaluationPeriods": 5,
+        "MetricName": "5XXError",
+        "Namespace": "AWS/ApiGateway",
+        "Period": 60,
+        "Statistic": "Sum",
+        "Threshold": 0,
+        "TreatMissingData": "notBreaching",
+      },
+      "Type": "AWS::CloudWatch::Alarm",
+    },
     "KdsApiGwProducerstreams52DC4236": {
       "Properties": {
         "ParentId": {
@@ -518,15 +560,64 @@ exports[`apiGwKdsLambdaStack 1`] = `
           "Fn::Join": [
             "",
             [
-              "{"start":"-PT1H","widgets":[{"type":"text","width":24,"height":2,"x":0,"y":0,"properties":{"markdown":"# API Gateway Metrics\\n## 5××エラーの例\\n- 504 INTEGRATIONN_FAILURE, INTEGRATION_TIMEOUT\\n  - バックエンドとの統合失敗\\n\\n## 4××エラーの例\\n- 400 Kinesis WriteProvisionedThroughputExceeded\\n  - kinesisの書き込みスループット超過エラー\\n- 403 EXPIRED_TOKEN, INVALID_API_KEY, INVALID_SIGNATUREなど\\n  - API KeyやAWS署名などの認証関連エラー\\n"}},{"type":"metric","width":12,"height":8,"x":0,"y":2,"properties":{"view":"timeSeries","title":"エラー発生数 4×× 5××(Sum)","region":"",
+              "{"start":"-PT1H","widgets":[{"type":"text","width":24,"height":2,"x":0,"y":0,"properties":{"markdown":"# CloudWatch Alarm"}},{"type":"alarm","width":24,"height":3,"x":0,"y":2,"properties":{"title":"Alarm Status","alarms":["",
+              {
+                "Fn::GetAtt": [
+                  "KdsDataStreamwriteProvisionedAlarmD89876F3",
+                  "Arn",
+                ],
+              },
+              "","",
+              {
+                "Fn::GetAtt": [
+                  "KdsDataStreamreadProvisionedAlarm3EE73403",
+                  "Arn",
+                ],
+              },
+              "","",
+              {
+                "Fn::GetAtt": [
+                  "KdsDataStreamiteratorAgeAlarm04D03A9D",
+                  "Arn",
+                ],
+              },
+              "","",
+              {
+                "Fn::GetAtt": [
+                  "KdsApiGwProducerclientErrorAlarmC0B26A54",
+                  "Arn",
+                ],
+              },
+              "","",
+              {
+                "Fn::GetAtt": [
+                  "KdsApiGwProducerserverErrorAlarmD72EF5DF",
+                  "Arn",
+                ],
+              },
+              "","",
+              {
+                "Fn::GetAtt": [
+                  "KdsLambdaConsumerlambdaErrorsAlarm6629D4EF",
+                  "Arn",
+                ],
+              },
+              "","",
+              {
+                "Fn::GetAtt": [
+                  "KdsLambdaConsumerdlqMessagesSentAlarm140B9E7D",
+                  "Arn",
+                ],
+              },
+              ""]}},{"type":"text","width":24,"height":15,"x":0,"y":5,"properties":{"markdown":"\\n| サービス       | アラーム名             | 検知される状況                                             | 対応                                                                    |\\n|------------|-------------------|-----------------------------------------------------|-----------------------------------------------------------------------|\\n| KDS        | write-provisioned | Producerの送信量がシャード規定を上回る                             | オンデマンドモードの場合: 自動でスケールアウトのため対応不要<br/>プロビジョンドモードの場合: 自動スケールアウトLambdaが起動 |\\n| KDS        | read-provisioned  | Consumerの読み取り量がシャード規定を上回る<br/>主に複数Consumer構成のケースで発生 | write-provisionedと同じ                                                  |\\n| KDS        | iterator-age      | Producerの送信量 > Consumerの処理量で処理遅延発生                  | Consumerの処理能力を上げるなど<br/>対応手順のリンクを貼る                                   |\\n| APIGW      | client-error      | APIGWで4××エラーが一定数を超える<br/>不正なアクセスによる403エラーなど         | 対応手順のリンクを貼る                                                           |\\n| APIGW      | server-error      | APIGWで5××エラーが一定数を超える<br/>APIGWとKDSの統合エラーやネットワーク遮断など | 基本的にこちらでの対応は不可<br/>未処理レコードが発生していないか確認するなど                             |\\n| Lambda     | errors            | Lambda関数でのエラーが一定数を超える<br/>業務処理の失敗、メモリ不足など           | 対応手順のリンクを貼る                                                           |\\n| Lambda-SQS | dlq-messages-sent | Lambdaでの最大リトライを超える処理失敗により、<br/>未処理レコード発生            | Messageを確認して手動で処理を再実行するなど<br/>対応手順のリンクを貼る                             |\\n| Firehose   | partition-count   | 動的パーティショニング使用時にパーティション数が上限値を超える                     | パーティション作成の実装見直しなど                                                     |\\n| Firehose   | s3-data-freshness | S3配信時に一定以上の配信処理遅延が発生                                | 対応手順のリンクを貼る                                                           |\\n| Firehose   | lambda-errors     | Firehose連携のLambda関数で一定以上のエラー発生                      | 関数の実装見直しなど                                                            |\\n"}},{"type":"text","width":24,"height":2,"x":0,"y":20,"properties":{"markdown":"# API Gateway Metrics\\n## 5××エラーの例\\n- 504 INTEGRATIONN_FAILURE, INTEGRATION_TIMEOUT\\n  - バックエンドとの統合失敗\\n\\n## 4××エラーの例\\n- 400 Kinesis WriteProvisionedThroughputExceeded\\n  - kinesisの書き込みスループット超過エラー\\n- 403 EXPIRED_TOKEN, INVALID_API_KEY, INVALID_SIGNATUREなど\\n  - API KeyやAWS署名などの認証関連エラー\\n"}},{"type":"metric","width":12,"height":8,"x":0,"y":22,"properties":{"view":"timeSeries","title":"エラー発生数 4×× 5××(Sum)","region":"",
               {
                 "Ref": "AWS::Region",
               },
-              "","metrics":[["AWS/ApiGateway","4XXError","ApiName","Default",{"stat":"Sum"}],["AWS/ApiGateway","5XXError","ApiName","Default",{"stat":"Sum","yAxis":"right"}]],"yAxis":{"left":{"min":0}},"period":60,"stat":"Sum"}},{"type":"metric","width":12,"height":8,"x":12,"y":2,"properties":{"view":"timeSeries","title":"レイテンシー(Max, p99, Avg, Min)","region":"",
+              "","metrics":[["AWS/ApiGateway","4XXError","ApiName","Default",{"stat":"Sum"}],["AWS/ApiGateway","5XXError","ApiName","Default",{"stat":"Sum","yAxis":"right"}]],"yAxis":{"left":{"min":0}},"period":60,"stat":"Sum"}},{"type":"metric","width":12,"height":8,"x":12,"y":22,"properties":{"view":"timeSeries","title":"レイテンシー(Max, p99, Avg, Min)","region":"",
               {
                 "Ref": "AWS::Region",
               },
-              "","metrics":[["AWS/ApiGateway","Latency","ApiName","Default",{"stat":"Maximum"}],["AWS/ApiGateway","Latency","ApiName","Default",{"stat":"p99"}],["AWS/ApiGateway","Latency","ApiName","Default"],["AWS/ApiGateway","Latency","ApiName","Default",{"stat":"Minimum"}]],"yAxis":{"left":{"min":0}},"period":60}},{"type":"text","width":24,"height":2,"x":0,"y":10,"properties":{"markdown":"# Kinesis Metrics"}},{"type":"metric","width":12,"height":8,"x":0,"y":12,"properties":{"view":"timeSeries","title":"書き込み制限エラー数(Sum)と分あたり送信レコードByte(Sum)","region":"",
+              "","metrics":[["AWS/ApiGateway","Latency","ApiName","Default",{"stat":"Maximum"}],["AWS/ApiGateway","Latency","ApiName","Default",{"stat":"p99"}],["AWS/ApiGateway","Latency","ApiName","Default"],["AWS/ApiGateway","Latency","ApiName","Default",{"stat":"Minimum"}]],"yAxis":{"left":{"min":0}},"period":60}},{"type":"text","width":24,"height":2,"x":0,"y":30,"properties":{"markdown":"# Kinesis Metrics"}},{"type":"metric","width":12,"height":8,"x":0,"y":32,"properties":{"view":"timeSeries","title":"書き込み制限エラー数(Sum)と分あたり送信レコードByte(Sum)","region":"",
               {
                 "Ref": "AWS::Region",
               },
@@ -538,7 +629,7 @@ exports[`apiGwKdsLambdaStack 1`] = `
               {
                 "Ref": "KdsDataStream7B329BF0",
               },
-              "",{"stat":"Sum","visible":false,"id":"e1"}]],"yAxis":{"left":{"min":0},"right":{"min":0}},"period":60,"stat":"Sum"}},{"type":"metric","width":12,"height":8,"x":12,"y":20,"properties":{"view":"timeSeries","title":"読み込み制限エラー数(Sum)","region":"",
+              "",{"stat":"Sum","visible":false,"id":"e1"}]],"yAxis":{"left":{"min":0},"right":{"min":0}},"period":60,"stat":"Sum"}},{"type":"metric","width":12,"height":8,"x":12,"y":40,"properties":{"view":"timeSeries","title":"読み込み制限エラー数(Sum)","region":"",
               {
                 "Ref": "AWS::Region",
               },
@@ -546,27 +637,7 @@ exports[`apiGwKdsLambdaStack 1`] = `
               {
                 "Ref": "KdsDataStream7B329BF0",
               },
-              ""]],"yAxis":{"left":{"min":0}},"period":60,"stat":"Sum"}},{"type":"metric","width":12,"height":8,"x":0,"y":28,"properties":{"view":"timeSeries","title":"書き込み制限エラー数(Sum)と分あたり送信レコード数(Sum)","region":"",
-              {
-                "Ref": "AWS::Region",
-              },
-              "","metrics":[["AWS/Kinesis","PutRecords.ThrottledRecords","StreamName","",
-              {
-                "Ref": "KdsDataStream7B329BF0",
-              },
-              "",{"period":60,"stat":"Sum"}],[{"label":"incommingRecords","expression":"e1/60","yAxis":"right"}],["AWS/Kinesis","IncomingRecords","StreamName","",
-              {
-                "Ref": "KdsDataStream7B329BF0",
-              },
-              "",{"stat":"Sum","visible":false,"id":"e1"}]],"yAxis":{"left":{"min":0},"right":{"min":0}},"period":60,"stat":"Sum"}},{"type":"metric","width":12,"height":8,"x":12,"y":20,"properties":{"view":"timeSeries","title":"読み込み制限エラー数(Sum)","region":"",
-              {
-                "Ref": "AWS::Region",
-              },
-              "","metrics":[["AWS/Kinesis","PutRecords.ThrottledRecords","StreamName","",
-              {
-                "Ref": "KdsDataStream7B329BF0",
-              },
-              ""]],"yAxis":{"left":{"min":0}},"period":60,"stat":"Sum"}},{"type":"metric","width":12,"height":8,"x":0,"y":28,"properties":{"view":"timeSeries","title":"書き込み制限エラー数(Sum)と分あたり送信レコード数(Sum)","region":"",
+              ""]],"yAxis":{"left":{"min":0}},"period":60,"stat":"Sum"}},{"type":"metric","width":12,"height":8,"x":0,"y":48,"properties":{"view":"timeSeries","title":"書き込み制限エラー数(Sum)と分あたり送信レコード数(Sum)","region":"",
               {
                 "Ref": "AWS::Region",
               },
@@ -578,7 +649,27 @@ exports[`apiGwKdsLambdaStack 1`] = `
               {
                 "Ref": "KdsDataStream7B329BF0",
               },
-              "",{"stat":"Sum","visible":false,"id":"e1"}]],"yAxis":{"left":{"min":0},"right":{"min":0}},"period":60,"stat":"Sum"}},{"type":"metric","width":12,"height":8,"x":12,"y":28,"properties":{"view":"timeSeries","title":"データストリーム内での待機時間(Max, p99, Avg, Min)","region":"",
+              "",{"stat":"Sum","visible":false,"id":"e1"}]],"yAxis":{"left":{"min":0},"right":{"min":0}},"period":60,"stat":"Sum"}},{"type":"metric","width":12,"height":8,"x":12,"y":40,"properties":{"view":"timeSeries","title":"読み込み制限エラー数(Sum)","region":"",
+              {
+                "Ref": "AWS::Region",
+              },
+              "","metrics":[["AWS/Kinesis","PutRecords.ThrottledRecords","StreamName","",
+              {
+                "Ref": "KdsDataStream7B329BF0",
+              },
+              ""]],"yAxis":{"left":{"min":0}},"period":60,"stat":"Sum"}},{"type":"metric","width":12,"height":8,"x":0,"y":48,"properties":{"view":"timeSeries","title":"書き込み制限エラー数(Sum)と分あたり送信レコード数(Sum)","region":"",
+              {
+                "Ref": "AWS::Region",
+              },
+              "","metrics":[["AWS/Kinesis","PutRecords.ThrottledRecords","StreamName","",
+              {
+                "Ref": "KdsDataStream7B329BF0",
+              },
+              "",{"period":60,"stat":"Sum"}],[{"label":"incommingRecords","expression":"e1/60","yAxis":"right"}],["AWS/Kinesis","IncomingRecords","StreamName","",
+              {
+                "Ref": "KdsDataStream7B329BF0",
+              },
+              "",{"stat":"Sum","visible":false,"id":"e1"}]],"yAxis":{"left":{"min":0},"right":{"min":0}},"period":60,"stat":"Sum"}},{"type":"metric","width":12,"height":8,"x":12,"y":48,"properties":{"view":"timeSeries","title":"データストリーム内での待機時間(Max, p99, Avg, Min)","region":"",
               {
                 "Ref": "AWS::Region",
               },
@@ -598,7 +689,7 @@ exports[`apiGwKdsLambdaStack 1`] = `
               {
                 "Ref": "KdsDataStream7B329BF0",
               },
-              "",{"stat":"Minimum"}]],"yAxis":{"left":{"min":0}},"period":60}},{"type":"text","width":24,"height":2,"x":0,"y":36,"properties":{"markdown":"# Lambda Metrics"}},{"type":"metric","width":12,"height":8,"x":0,"y":38,"properties":{"view":"timeSeries","title":"関数起動数(Sum)","region":"",
+              "",{"stat":"Minimum"}]],"yAxis":{"left":{"min":0}},"period":60}},{"type":"text","width":24,"height":2,"x":0,"y":56,"properties":{"markdown":"# Lambda Metrics"}},{"type":"metric","width":12,"height":8,"x":0,"y":58,"properties":{"view":"timeSeries","title":"関数起動数(Sum)","region":"",
               {
                 "Ref": "AWS::Region",
               },
@@ -606,7 +697,7 @@ exports[`apiGwKdsLambdaStack 1`] = `
               {
                 "Ref": "KdsLambdaConsumerLambdaFunc571FC7AA",
               },
-              "",{"stat":"Sum"}]],"yAxis":{"left":{"min":0}},"period":60,"stat":"Sum"}},{"type":"metric","width":12,"height":8,"x":12,"y":38,"properties":{"view":"timeSeries","title":"関数実行時間(Max, p99, Avg, Min)","region":"",
+              "",{"stat":"Sum"}]],"yAxis":{"left":{"min":0}},"period":60,"stat":"Sum"}},{"type":"metric","width":12,"height":8,"x":12,"y":58,"properties":{"view":"timeSeries","title":"関数実行時間(Max, p99, Avg, Min)","region":"",
               {
                 "Ref": "AWS::Region",
               },
@@ -626,7 +717,7 @@ exports[`apiGwKdsLambdaStack 1`] = `
               {
                 "Ref": "KdsLambdaConsumerLambdaFunc571FC7AA",
               },
-              "",{"stat":"Minimum"}]],"yAxis":{"left":{"min":0}},"period":60}},{"type":"metric","width":12,"height":8,"x":0,"y":46,"properties":{"view":"timeSeries","title":"関数同時実行数(Max)","region":"",
+              "",{"stat":"Minimum"}]],"yAxis":{"left":{"min":0}},"period":60}},{"type":"metric","width":12,"height":8,"x":0,"y":66,"properties":{"view":"timeSeries","title":"関数同時実行数(Max)","region":"",
               {
                 "Ref": "AWS::Region",
               },
@@ -634,7 +725,7 @@ exports[`apiGwKdsLambdaStack 1`] = `
               {
                 "Ref": "KdsLambdaConsumerLambdaFunc571FC7AA",
               },
-              ""]],"yAxis":{"left":{"min":0}},"period":60,"stat":"Maximum"}},{"type":"metric","width":12,"height":8,"x":12,"y":46,"properties":{"view":"timeSeries","title":"メモリ使用率(Max)","region":"",
+              ""]],"yAxis":{"left":{"min":0}},"period":60,"stat":"Maximum"}},{"type":"metric","width":12,"height":8,"x":12,"y":66,"properties":{"view":"timeSeries","title":"メモリ使用率(Max)","region":"",
               {
                 "Ref": "AWS::Region",
               },
@@ -642,7 +733,7 @@ exports[`apiGwKdsLambdaStack 1`] = `
               {
                 "Ref": "KdsLambdaConsumerLambdaFunc571FC7AA",
               },
-              "",{"stat":"Maximum"}]],"yAxis":{"left":{"min":0}},"period":60}},{"type":"metric","width":12,"height":8,"x":0,"y":54,"properties":{"view":"timeSeries","title":"スロットリング発生数(Sum)","region":"",
+              "",{"stat":"Maximum"}]],"yAxis":{"left":{"min":0}},"period":60}},{"type":"metric","width":12,"height":8,"x":0,"y":74,"properties":{"view":"timeSeries","title":"スロットリング発生数(Sum)","region":"",
               {
                 "Ref": "AWS::Region",
               },
@@ -650,7 +741,7 @@ exports[`apiGwKdsLambdaStack 1`] = `
               {
                 "Ref": "KdsLambdaConsumerLambdaFunc571FC7AA",
               },
-              "",{"stat":"Sum"}]],"yAxis":{"left":{"min":0}},"period":60,"stat":"Sum"}},{"type":"metric","width":12,"height":8,"x":12,"y":54,"properties":{"view":"timeSeries","title":"エラー数(Sum)","region":"",
+              "",{"stat":"Sum"}]],"yAxis":{"left":{"min":0}},"period":60,"stat":"Sum"}},{"type":"metric","width":12,"height":8,"x":12,"y":74,"properties":{"view":"timeSeries","title":"エラー数(Sum)","region":"",
               {
                 "Ref": "AWS::Region",
               },
@@ -658,7 +749,7 @@ exports[`apiGwKdsLambdaStack 1`] = `
               {
                 "Ref": "KdsLambdaConsumerLambdaFunc571FC7AA",
               },
-              "",{"stat":"Sum"}]],"yAxis":{"left":{"min":0}},"period":60,"stat":"Sum"}},{"type":"metric","width":12,"height":8,"x":0,"y":62,"properties":{"view":"timeSeries","title":"バッチサイズ：関数あたりの処理レコード数(Max, Avg, Min)","region":"",
+              "",{"stat":"Sum"}]],"yAxis":{"left":{"min":0}},"period":60,"stat":"Sum"}},{"type":"metric","width":12,"height":8,"x":0,"y":82,"properties":{"view":"timeSeries","title":"バッチサイズ：関数あたりの処理レコード数(Max, Avg, Min)","region":"",
               {
                 "Ref": "AWS::Region",
               },
@@ -674,11 +765,11 @@ exports[`apiGwKdsLambdaStack 1`] = `
               {
                 "Ref": "KdsLambdaConsumerLambdaFunc571FC7AA",
               },
-              "",{"stat":"Minimum"}]],"yAxis":{"left":{"min":0},"right":{"min":0}}}},{"type":"text","width":24,"height":1,"x":0,"y":70,"properties":{"markdown":"# Logs"}},{"type":"text","width":12,"height":4,"x":0,"y":71,"properties":{"markdown":"# Producer\\nAPI GWに対してリクエストを送信するクライアントスクリプトのログ情報\\n- Success_Requests: 送信成功したリクエスト数, 「Success_Requests * レコード数(/request) = Success_Records」なら欠損レコードなし\\n- Retried_Requests: リトライしたリクエスト数\\n- Failed_Requests: 送信できなかったリクエスト数, １つでもあれば欠損あり\\n        "}},{"type":"text","width":12,"height":4,"x":12,"y":71,"properties":{"markdown":"# Consumer\\nLambda関数から出力されるログ情報\\n- Success_Records: 処理が正常に完了したレコード数\\n- Retried_Records: DynamoDBのPK重複エラー数\\n- Failed_Records: レコード重複以外のエラー数(DynamoDBのスロットリングなど), リトライ対象\\n        "}},{"type":"log","width":12,"height":3,"x":0,"y":75,"properties":{"view":"table","title":"Producer側スクリプトログサマリ(Sum)","region":"",
+              "",{"stat":"Minimum"}]],"yAxis":{"left":{"min":0},"right":{"min":0}}}},{"type":"text","width":24,"height":1,"x":0,"y":90,"properties":{"markdown":"# Logs"}},{"type":"text","width":12,"height":4,"x":0,"y":91,"properties":{"markdown":"# Producer\\nAPI GWに対してリクエストを送信するクライアントスクリプトのログ情報\\n- Success_Requests: 送信成功したリクエスト数, 「Success_Requests * レコード数(/request) = Success_Records」なら欠損レコードなし\\n- Retried_Requests: リトライしたリクエスト数\\n- Failed_Requests: 送信できなかったリクエスト数, １つでもあれば欠損あり\\n        "}},{"type":"text","width":12,"height":4,"x":12,"y":91,"properties":{"markdown":"# Consumer\\nLambda関数から出力されるログ情報\\n- Success_Records: 処理が正常に完了したレコード数\\n- Retried_Records: DynamoDBのPK重複エラー数\\n- Failed_Records: レコード重複以外のエラー数(DynamoDBのスロットリングなど), リトライ対象\\n        "}},{"type":"log","width":12,"height":3,"x":0,"y":95,"properties":{"view":"table","title":"Producer側スクリプトログサマリ(Sum)","region":"",
               {
                 "Ref": "AWS::Region",
               },
-              "","query":"SOURCE '/apigw/client/putRecords' | fields @message\\n| parse @message \\"SUCCESS\\" as @Success\\n| parse @message \\"RETRY\\" as @Retry\\n| parse @message \\"FAILED\\" as @Failed\\n| stats count(@Success) as Success_Requests, count(@Retry) as Retried_Requests, count(@Failed) as Failed_Requests"}},{"type":"log","width":12,"height":3,"x":12,"y":75,"properties":{"view":"table","title":"Consmer側Lambda関数ログサマリ(Sum)","region":"",
+              "","query":"SOURCE '/apigw/client/putRecords' | fields @message\\n| parse @message \\"SUCCESS\\" as @Success\\n| parse @message \\"RETRY\\" as @Retry\\n| parse @message \\"FAILED\\" as @Failed\\n| stats count(@Success) as Success_Requests, count(@Retry) as Retried_Requests, count(@Failed) as Failed_Requests"}},{"type":"log","width":12,"height":3,"x":12,"y":95,"properties":{"view":"table","title":"Consmer側Lambda関数ログサマリ(Sum)","region":"",
               {
                 "Ref": "AWS::Region",
               },
@@ -686,11 +777,11 @@ exports[`apiGwKdsLambdaStack 1`] = `
               {
                 "Ref": "KdsLambdaConsumerLambdaFunc571FC7AA",
               },
-              "' | fields @message\\n| parse @message \\"SUCCESS\\" as @Success\\n| parse @message \\"RETRY\\" as @Retry\\n| parse @message \\"FAILED\\" as @Failed\\n| stats count(@Success) as Success_Records, count(@Retry) as Retried_Records, count(@Failed) as Failed_Records"}},{"type":"log","width":12,"height":15,"x":0,"y":78,"properties":{"view":"table","title":"Producer側スクリプトエラーログ詳細: スロットリングエラーを除く","region":"",
+              "' | fields @message\\n| parse @message \\"SUCCESS\\" as @Success\\n| parse @message \\"RETRY\\" as @Retry\\n| parse @message \\"FAILED\\" as @Failed\\n| stats count(@Success) as Success_Records, count(@Retry) as Retried_Records, count(@Failed) as Failed_Records"}},{"type":"log","width":12,"height":15,"x":0,"y":98,"properties":{"view":"table","title":"Producer側スクリプトエラーログ詳細: スロットリングエラーを除く","region":"",
               {
                 "Ref": "AWS::Region",
               },
-              "","query":"SOURCE '/apigw/client/putRecords' | fields @message\\n| parse @message like \\"Request failed with status code\\"\\n| parse @message not like \\"Request failed with status code 400\\""}},{"type":"log","width":12,"height":15,"x":12,"y":78,"properties":{"view":"table","title":"Consumer側スクリプトエラーログ詳細","region":"",
+              "","query":"SOURCE '/apigw/client/putRecords' | fields @message\\n| parse @message like \\"Request failed with status code\\"\\n| parse @message not like \\"Request failed with status code 400\\""}},{"type":"log","width":12,"height":15,"x":12,"y":98,"properties":{"view":"table","title":"Consumer側スクリプトエラーログ詳細","region":"",
               {
                 "Ref": "AWS::Region",
               },
@@ -730,6 +821,29 @@ exports[`apiGwKdsLambdaStack 1`] = `
       "Type": "AWS::Kinesis::Stream",
       "UpdateReplacePolicy": "Delete",
     },
+    "KdsDataStreamiteratorAgeAlarm04D03A9D": {
+      "Properties": {
+        "AlarmName": "kds-iterator-age-alarm-prod-data-str-sample-apigw-kds-lambda-stack",
+        "ComparisonOperator": "GreaterThanThreshold",
+        "DatapointsToAlarm": 5,
+        "Dimensions": [
+          {
+            "Name": "StreamName",
+            "Value": {
+              "Ref": "KdsDataStream7B329BF0",
+            },
+          },
+        ],
+        "EvaluationPeriods": 5,
+        "MetricName": "GetRecords.IteratorAgeMilliseconds",
+        "Namespace": "AWS/Kinesis",
+        "Period": 60,
+        "Statistic": "Sum",
+        "Threshold": 0,
+        "TreatMissingData": "notBreaching",
+      },
+      "Type": "AWS::CloudWatch::Alarm",
+    },
     "KdsDataStreamparameter9E23EE0A": {
       "Properties": {
         "Name": "/prod-data-str-sample-apigw-kds-lambda-stack/stream/name",
@@ -750,7 +864,7 @@ exports[`apiGwKdsLambdaStack 1`] = `
             ],
           },
         ],
-        "AlarmName": "prod-data-str-sample-apigw-kds-lambda-stack-kds-read-provisioned-alarm",
+        "AlarmName": "kds-read-provisioned-alarm-prod-data-str-sample-apigw-kds-lambda-stack",
         "ComparisonOperator": "GreaterThanOrEqualToThreshold",
         "DatapointsToAlarm": 5,
         "Dimensions": [
@@ -781,7 +895,7 @@ exports[`apiGwKdsLambdaStack 1`] = `
             ],
           },
         ],
-        "AlarmName": "prod-data-str-sample-apigw-kds-lambda-stack-kds-write-provisioned-alarm",
+        "AlarmName": "kds-write-provisioned-alarm-prod-data-str-sample-apigw-kds-lambda-stack",
         "ComparisonOperator": "GreaterThanOrEqualToThreshold",
         "DatapointsToAlarm": 5,
         "Dimensions": [
@@ -1108,6 +1222,55 @@ exports[`apiGwKdsLambdaStack 1`] = `
       },
       "Type": "AWS::DynamoDB::GlobalTable",
       "UpdateReplacePolicy": "Delete",
+    },
+    "KdsLambdaConsumerdlqMessagesSentAlarm140B9E7D": {
+      "Properties": {
+        "AlarmName": "sqs-dlq-messages-sent-alarm-prod-data-str-sample-apigw-kds-lambda-stack",
+        "ComparisonOperator": "GreaterThanThreshold",
+        "DatapointsToAlarm": 1,
+        "Dimensions": [
+          {
+            "Name": "QueueName",
+            "Value": {
+              "Fn::GetAtt": [
+                "KdsLambdaConsumerKinesisDeadLetterQueue4D912974",
+                "QueueName",
+              ],
+            },
+          },
+        ],
+        "EvaluationPeriods": 1,
+        "MetricName": "NumberOfMessagesSent",
+        "Namespace": "AWS/SQS",
+        "Period": 60,
+        "Statistic": "Sum",
+        "Threshold": 0,
+        "TreatMissingData": "notBreaching",
+      },
+      "Type": "AWS::CloudWatch::Alarm",
+    },
+    "KdsLambdaConsumerlambdaErrorsAlarm6629D4EF": {
+      "Properties": {
+        "AlarmName": "lambda-errors-alarm-prod-data-str-sample-apigw-kds-lambda-stack",
+        "ComparisonOperator": "GreaterThanThreshold",
+        "DatapointsToAlarm": 3,
+        "Dimensions": [
+          {
+            "Name": "FunctionName",
+            "Value": {
+              "Ref": "KdsLambdaConsumerLambdaFunc571FC7AA",
+            },
+          },
+        ],
+        "EvaluationPeriods": 5,
+        "MetricName": "Errors",
+        "Namespace": "AWS/Lambda",
+        "Period": 60,
+        "Statistic": "Sum",
+        "Threshold": 0,
+        "TreatMissingData": "notBreaching",
+      },
+      "Type": "AWS::CloudWatch::Alarm",
     },
     "KdsScaleOutLambda1CustomLayer6BC07A9F": {
       "DeletionPolicy": "Delete",
@@ -2581,13 +2744,124 @@ exports[`deliveryS3Stack 1`] = `
       },
       "Type": "AWS::IAM::Policy",
     },
+    "FirehoseWithLambdadataFreshnessAlarmAA68B709": {
+      "Properties": {
+        "AlarmName": "firehose-s3-data-freshness-alarm-prod-data-str-sample-delivery-s3-stack",
+        "ComparisonOperator": "GreaterThanThreshold",
+        "DatapointsToAlarm": 5,
+        "Dimensions": [
+          {
+            "Name": "DeliveryStreamName",
+            "Value": {
+              "Ref": "FirehoseWithLambdaSampleDeliveryStream2C0299A1",
+            },
+          },
+        ],
+        "EvaluationPeriods": 5,
+        "MetricName": "DeliveryToS3.DataFreshness",
+        "Namespace": "AWS/Firehose",
+        "Period": 300,
+        "Statistic": "Average",
+        "Threshold": 0,
+        "TreatMissingData": "notBreaching",
+      },
+      "Type": "AWS::CloudWatch::Alarm",
+    },
+    "FirehoseWithLambdalambdaErrorsAlarm91F54D75": {
+      "Properties": {
+        "AlarmName": "firehose-lambda-errors-alarm-prod-data-str-sample-delivery-s3-stack",
+        "ComparisonOperator": "GreaterThanThreshold",
+        "DatapointsToAlarm": 3,
+        "Dimensions": [
+          {
+            "Name": "FunctionName",
+            "Value": {
+              "Ref": "FirehoseWithLambdaLambdaFunc46ED7116",
+            },
+          },
+        ],
+        "EvaluationPeriods": 5,
+        "MetricName": "Errors",
+        "Namespace": "AWS/Lambda",
+        "Period": 60,
+        "Statistic": "Sum",
+        "Threshold": 0,
+        "TreatMissingData": "notBreaching",
+      },
+      "Type": "AWS::CloudWatch::Alarm",
+    },
+    "FirehoseWithLambdapartitionCountExceededAlarmC19CA446": {
+      "Properties": {
+        "AlarmName": "firehose-partition-count-alarm-prod-data-str-sample-delivery-s3-stack",
+        "ComparisonOperator": "GreaterThanThreshold",
+        "DatapointsToAlarm": 1,
+        "Dimensions": [
+          {
+            "Name": "DeliveryStreamName",
+            "Value": {
+              "Ref": "FirehoseWithLambdaSampleDeliveryStream2C0299A1",
+            },
+          },
+        ],
+        "EvaluationPeriods": 1,
+        "MetricName": "PartitionCountExceeded",
+        "Namespace": "AWS/Firehose",
+        "Period": 300,
+        "Statistic": "Average",
+        "Threshold": 0,
+        "TreatMissingData": "notBreaching",
+      },
+      "Type": "AWS::CloudWatch::Alarm",
+    },
     "KdsCWDashboradDashboard45FE56EE": {
       "Properties": {
         "DashboardBody": {
           "Fn::Join": [
             "",
             [
-              "{"start":"-PT1H","widgets":[{"type":"text","width":24,"height":2,"x":0,"y":0,"properties":{"markdown":"# Kinesis Metrics"}},{"type":"metric","width":12,"height":8,"x":0,"y":2,"properties":{"view":"timeSeries","title":"書き込み制限エラー数(Sum)と分あたり送信レコードByte(Sum)","region":"",
+              "{"start":"-PT1H","widgets":[{"type":"text","width":24,"height":2,"x":0,"y":0,"properties":{"markdown":"# CloudWatch Alarm"}},{"type":"alarm","width":24,"height":3,"x":0,"y":2,"properties":{"title":"Alarm Status","alarms":["",
+              {
+                "Fn::GetAtt": [
+                  "KdsDataStreamwriteProvisionedAlarmD89876F3",
+                  "Arn",
+                ],
+              },
+              "","",
+              {
+                "Fn::GetAtt": [
+                  "KdsDataStreamreadProvisionedAlarm3EE73403",
+                  "Arn",
+                ],
+              },
+              "","",
+              {
+                "Fn::GetAtt": [
+                  "KdsDataStreamiteratorAgeAlarm04D03A9D",
+                  "Arn",
+                ],
+              },
+              "","",
+              {
+                "Fn::GetAtt": [
+                  "FirehoseWithLambdapartitionCountExceededAlarmC19CA446",
+                  "Arn",
+                ],
+              },
+              "","",
+              {
+                "Fn::GetAtt": [
+                  "FirehoseWithLambdadataFreshnessAlarmAA68B709",
+                  "Arn",
+                ],
+              },
+              "","",
+              {
+                "Fn::GetAtt": [
+                  "FirehoseWithLambdalambdaErrorsAlarm91F54D75",
+                  "Arn",
+                ],
+              },
+              ""]}},{"type":"text","width":24,"height":15,"x":0,"y":5,"properties":{"markdown":"\\n| サービス       | アラーム名             | 検知される状況                                             | 対応                                                                    |\\n|------------|-------------------|-----------------------------------------------------|-----------------------------------------------------------------------|\\n| KDS        | write-provisioned | Producerの送信量がシャード規定を上回る                             | オンデマンドモードの場合: 自動でスケールアウトのため対応不要<br/>プロビジョンドモードの場合: 自動スケールアウトLambdaが起動 |\\n| KDS        | read-provisioned  | Consumerの読み取り量がシャード規定を上回る<br/>主に複数Consumer構成のケースで発生 | write-provisionedと同じ                                                  |\\n| KDS        | iterator-age      | Producerの送信量 > Consumerの処理量で処理遅延発生                  | Consumerの処理能力を上げるなど<br/>対応手順のリンクを貼る                                   |\\n| APIGW      | client-error      | APIGWで4××エラーが一定数を超える<br/>不正なアクセスによる403エラーなど         | 対応手順のリンクを貼る                                                           |\\n| APIGW      | server-error      | APIGWで5××エラーが一定数を超える<br/>APIGWとKDSの統合エラーやネットワーク遮断など | 基本的にこちらでの対応は不可<br/>未処理レコードが発生していないか確認するなど                             |\\n| Lambda     | errors            | Lambda関数でのエラーが一定数を超える<br/>業務処理の失敗、メモリ不足など           | 対応手順のリンクを貼る                                                           |\\n| Lambda-SQS | dlq-messages-sent | Lambdaでの最大リトライを超える処理失敗により、<br/>未処理レコード発生            | Messageを確認して手動で処理を再実行するなど<br/>対応手順のリンクを貼る                             |\\n| Firehose   | partition-count   | 動的パーティショニング使用時にパーティション数が上限値を超える                     | パーティション作成の実装見直しなど                                                     |\\n| Firehose   | s3-data-freshness | S3配信時に一定以上の配信処理遅延が発生                                | 対応手順のリンクを貼る                                                           |\\n| Firehose   | lambda-errors     | Firehose連携のLambda関数で一定以上のエラー発生                      | 関数の実装見直しなど                                                            |\\n"}},{"type":"text","width":24,"height":2,"x":0,"y":20,"properties":{"markdown":"# Kinesis Metrics"}},{"type":"metric","width":12,"height":8,"x":0,"y":22,"properties":{"view":"timeSeries","title":"書き込み制限エラー数(Sum)と分あたり送信レコードByte(Sum)","region":"",
               {
                 "Ref": "AWS::Region",
               },
@@ -2599,7 +2873,7 @@ exports[`deliveryS3Stack 1`] = `
               {
                 "Ref": "KdsDataStream7B329BF0",
               },
-              "",{"stat":"Sum","visible":false,"id":"e1"}]],"yAxis":{"left":{"min":0},"right":{"min":0}},"period":60,"stat":"Sum"}},{"type":"metric","width":12,"height":8,"x":12,"y":10,"properties":{"view":"timeSeries","title":"読み込み制限エラー数(Sum)","region":"",
+              "",{"stat":"Sum","visible":false,"id":"e1"}]],"yAxis":{"left":{"min":0},"right":{"min":0}},"period":60,"stat":"Sum"}},{"type":"metric","width":12,"height":8,"x":12,"y":30,"properties":{"view":"timeSeries","title":"読み込み制限エラー数(Sum)","region":"",
               {
                 "Ref": "AWS::Region",
               },
@@ -2607,27 +2881,7 @@ exports[`deliveryS3Stack 1`] = `
               {
                 "Ref": "KdsDataStream7B329BF0",
               },
-              ""]],"yAxis":{"left":{"min":0}},"period":60,"stat":"Sum"}},{"type":"metric","width":12,"height":8,"x":0,"y":18,"properties":{"view":"timeSeries","title":"書き込み制限エラー数(Sum)と分あたり送信レコード数(Sum)","region":"",
-              {
-                "Ref": "AWS::Region",
-              },
-              "","metrics":[["AWS/Kinesis","PutRecords.ThrottledRecords","StreamName","",
-              {
-                "Ref": "KdsDataStream7B329BF0",
-              },
-              "",{"period":60,"stat":"Sum"}],[{"label":"incommingRecords","expression":"e1/60","yAxis":"right"}],["AWS/Kinesis","IncomingRecords","StreamName","",
-              {
-                "Ref": "KdsDataStream7B329BF0",
-              },
-              "",{"stat":"Sum","visible":false,"id":"e1"}]],"yAxis":{"left":{"min":0},"right":{"min":0}},"period":60,"stat":"Sum"}},{"type":"metric","width":12,"height":8,"x":12,"y":10,"properties":{"view":"timeSeries","title":"読み込み制限エラー数(Sum)","region":"",
-              {
-                "Ref": "AWS::Region",
-              },
-              "","metrics":[["AWS/Kinesis","PutRecords.ThrottledRecords","StreamName","",
-              {
-                "Ref": "KdsDataStream7B329BF0",
-              },
-              ""]],"yAxis":{"left":{"min":0}},"period":60,"stat":"Sum"}},{"type":"metric","width":12,"height":8,"x":0,"y":18,"properties":{"view":"timeSeries","title":"書き込み制限エラー数(Sum)と分あたり送信レコード数(Sum)","region":"",
+              ""]],"yAxis":{"left":{"min":0}},"period":60,"stat":"Sum"}},{"type":"metric","width":12,"height":8,"x":0,"y":38,"properties":{"view":"timeSeries","title":"書き込み制限エラー数(Sum)と分あたり送信レコード数(Sum)","region":"",
               {
                 "Ref": "AWS::Region",
               },
@@ -2639,7 +2893,27 @@ exports[`deliveryS3Stack 1`] = `
               {
                 "Ref": "KdsDataStream7B329BF0",
               },
-              "",{"stat":"Sum","visible":false,"id":"e1"}]],"yAxis":{"left":{"min":0},"right":{"min":0}},"period":60,"stat":"Sum"}},{"type":"metric","width":12,"height":8,"x":12,"y":18,"properties":{"view":"timeSeries","title":"データストリーム内での待機時間(Max, p99, Avg, Min)","region":"",
+              "",{"stat":"Sum","visible":false,"id":"e1"}]],"yAxis":{"left":{"min":0},"right":{"min":0}},"period":60,"stat":"Sum"}},{"type":"metric","width":12,"height":8,"x":12,"y":30,"properties":{"view":"timeSeries","title":"読み込み制限エラー数(Sum)","region":"",
+              {
+                "Ref": "AWS::Region",
+              },
+              "","metrics":[["AWS/Kinesis","PutRecords.ThrottledRecords","StreamName","",
+              {
+                "Ref": "KdsDataStream7B329BF0",
+              },
+              ""]],"yAxis":{"left":{"min":0}},"period":60,"stat":"Sum"}},{"type":"metric","width":12,"height":8,"x":0,"y":38,"properties":{"view":"timeSeries","title":"書き込み制限エラー数(Sum)と分あたり送信レコード数(Sum)","region":"",
+              {
+                "Ref": "AWS::Region",
+              },
+              "","metrics":[["AWS/Kinesis","PutRecords.ThrottledRecords","StreamName","",
+              {
+                "Ref": "KdsDataStream7B329BF0",
+              },
+              "",{"period":60,"stat":"Sum"}],[{"label":"incommingRecords","expression":"e1/60","yAxis":"right"}],["AWS/Kinesis","IncomingRecords","StreamName","",
+              {
+                "Ref": "KdsDataStream7B329BF0",
+              },
+              "",{"stat":"Sum","visible":false,"id":"e1"}]],"yAxis":{"left":{"min":0},"right":{"min":0}},"period":60,"stat":"Sum"}},{"type":"metric","width":12,"height":8,"x":12,"y":38,"properties":{"view":"timeSeries","title":"データストリーム内での待機時間(Max, p99, Avg, Min)","region":"",
               {
                 "Ref": "AWS::Region",
               },
@@ -2659,7 +2933,7 @@ exports[`deliveryS3Stack 1`] = `
               {
                 "Ref": "KdsDataStream7B329BF0",
               },
-              "",{"stat":"Minimum"}]],"yAxis":{"left":{"min":0}},"period":60}},{"type":"text","width":24,"height":2,"x":0,"y":26,"properties":{"markdown":"# Lambda Metrics"}},{"type":"metric","width":12,"height":8,"x":0,"y":28,"properties":{"view":"timeSeries","title":"関数起動数(Sum)","region":"",
+              "",{"stat":"Minimum"}]],"yAxis":{"left":{"min":0}},"period":60}},{"type":"text","width":24,"height":2,"x":0,"y":46,"properties":{"markdown":"# Lambda Metrics"}},{"type":"metric","width":12,"height":8,"x":0,"y":48,"properties":{"view":"timeSeries","title":"関数起動数(Sum)","region":"",
               {
                 "Ref": "AWS::Region",
               },
@@ -2667,7 +2941,7 @@ exports[`deliveryS3Stack 1`] = `
               {
                 "Ref": "FirehoseWithLambdaLambdaFunc46ED7116",
               },
-              "",{"stat":"Sum"}]],"yAxis":{"left":{"min":0}},"period":60,"stat":"Sum"}},{"type":"metric","width":12,"height":8,"x":12,"y":28,"properties":{"view":"timeSeries","title":"関数実行時間(Max, p99, Avg, Min)","region":"",
+              "",{"stat":"Sum"}]],"yAxis":{"left":{"min":0}},"period":60,"stat":"Sum"}},{"type":"metric","width":12,"height":8,"x":12,"y":48,"properties":{"view":"timeSeries","title":"関数実行時間(Max, p99, Avg, Min)","region":"",
               {
                 "Ref": "AWS::Region",
               },
@@ -2687,7 +2961,7 @@ exports[`deliveryS3Stack 1`] = `
               {
                 "Ref": "FirehoseWithLambdaLambdaFunc46ED7116",
               },
-              "",{"stat":"Minimum"}]],"yAxis":{"left":{"min":0}},"period":60}},{"type":"metric","width":12,"height":8,"x":0,"y":36,"properties":{"view":"timeSeries","title":"関数同時実行数(Max)","region":"",
+              "",{"stat":"Minimum"}]],"yAxis":{"left":{"min":0}},"period":60}},{"type":"metric","width":12,"height":8,"x":0,"y":56,"properties":{"view":"timeSeries","title":"関数同時実行数(Max)","region":"",
               {
                 "Ref": "AWS::Region",
               },
@@ -2695,7 +2969,7 @@ exports[`deliveryS3Stack 1`] = `
               {
                 "Ref": "FirehoseWithLambdaLambdaFunc46ED7116",
               },
-              ""]],"yAxis":{"left":{"min":0}},"period":60,"stat":"Maximum"}},{"type":"metric","width":12,"height":8,"x":12,"y":36,"properties":{"view":"timeSeries","title":"メモリ使用率(Max)","region":"",
+              ""]],"yAxis":{"left":{"min":0}},"period":60,"stat":"Maximum"}},{"type":"metric","width":12,"height":8,"x":12,"y":56,"properties":{"view":"timeSeries","title":"メモリ使用率(Max)","region":"",
               {
                 "Ref": "AWS::Region",
               },
@@ -2703,7 +2977,7 @@ exports[`deliveryS3Stack 1`] = `
               {
                 "Ref": "FirehoseWithLambdaLambdaFunc46ED7116",
               },
-              "",{"stat":"Maximum"}]],"yAxis":{"left":{"min":0}},"period":60}},{"type":"metric","width":12,"height":8,"x":0,"y":44,"properties":{"view":"timeSeries","title":"スロットリング発生数(Sum)","region":"",
+              "",{"stat":"Maximum"}]],"yAxis":{"left":{"min":0}},"period":60}},{"type":"metric","width":12,"height":8,"x":0,"y":64,"properties":{"view":"timeSeries","title":"スロットリング発生数(Sum)","region":"",
               {
                 "Ref": "AWS::Region",
               },
@@ -2711,7 +2985,7 @@ exports[`deliveryS3Stack 1`] = `
               {
                 "Ref": "FirehoseWithLambdaLambdaFunc46ED7116",
               },
-              "",{"stat":"Sum"}]],"yAxis":{"left":{"min":0}},"period":60,"stat":"Sum"}},{"type":"metric","width":12,"height":8,"x":12,"y":44,"properties":{"view":"timeSeries","title":"エラー数(Sum)","region":"",
+              "",{"stat":"Sum"}]],"yAxis":{"left":{"min":0}},"period":60,"stat":"Sum"}},{"type":"metric","width":12,"height":8,"x":12,"y":64,"properties":{"view":"timeSeries","title":"エラー数(Sum)","region":"",
               {
                 "Ref": "AWS::Region",
               },
@@ -2719,7 +2993,7 @@ exports[`deliveryS3Stack 1`] = `
               {
                 "Ref": "FirehoseWithLambdaLambdaFunc46ED7116",
               },
-              "",{"stat":"Sum"}]],"yAxis":{"left":{"min":0}},"period":60,"stat":"Sum"}},{"type":"metric","width":12,"height":8,"x":0,"y":52,"properties":{"view":"timeSeries","title":"バッチサイズ：関数あたりの処理レコード数(Max, Avg, Min)","region":"",
+              "",{"stat":"Sum"}]],"yAxis":{"left":{"min":0}},"period":60,"stat":"Sum"}},{"type":"metric","width":12,"height":8,"x":0,"y":72,"properties":{"view":"timeSeries","title":"バッチサイズ：関数あたりの処理レコード数(Max, Avg, Min)","region":"",
               {
                 "Ref": "AWS::Region",
               },
@@ -2735,7 +3009,7 @@ exports[`deliveryS3Stack 1`] = `
               {
                 "Ref": "FirehoseWithLambdaLambdaFunc46ED7116",
               },
-              "",{"stat":"Minimum"}]],"yAxis":{"left":{"min":0},"right":{"min":0}}}},{"type":"text","width":24,"height":2,"x":0,"y":60,"properties":{"markdown":"# Data Firehose Metrics"}},{"type":"metric","width":12,"height":8,"x":0,"y":62,"properties":{"view":"timeSeries","title":"KDSからの読み込みレコード数(Sum)","region":"",
+              "",{"stat":"Minimum"}]],"yAxis":{"left":{"min":0},"right":{"min":0}}}},{"type":"text","width":24,"height":2,"x":0,"y":80,"properties":{"markdown":"# Data Firehose Metrics"}},{"type":"metric","width":12,"height":8,"x":0,"y":82,"properties":{"view":"timeSeries","title":"KDSからの読み込みレコード数(Sum)","region":"",
               {
                 "Ref": "AWS::Region",
               },
@@ -2743,7 +3017,7 @@ exports[`deliveryS3Stack 1`] = `
               {
                 "Ref": "FirehoseWithLambdaSampleDeliveryStream2C0299A1",
               },
-              ""]],"yAxis":{"left":{"min":0}},"period":60,"stat":"Sum"}},{"type":"metric","width":12,"height":8,"x":12,"y":62,"properties":{"view":"timeSeries","title":"KDSからの読み込みバイト数(Sum)","region":"",
+              ""]],"yAxis":{"left":{"min":0}},"period":60,"stat":"Sum"}},{"type":"metric","width":12,"height":8,"x":12,"y":82,"properties":{"view":"timeSeries","title":"KDSからの読み込みバイト数(Sum)","region":"",
               {
                 "Ref": "AWS::Region",
               },
@@ -2751,7 +3025,7 @@ exports[`deliveryS3Stack 1`] = `
               {
                 "Ref": "FirehoseWithLambdaSampleDeliveryStream2C0299A1",
               },
-              ""]],"yAxis":{"left":{"min":0}},"period":60,"stat":"Sum"}},{"type":"metric","width":12,"height":8,"x":0,"y":70,"properties":{"view":"timeSeries","title":"S3への配信レコード数(Sum)","region":"",
+              ""]],"yAxis":{"left":{"min":0}},"period":60,"stat":"Sum"}},{"type":"metric","width":12,"height":8,"x":0,"y":90,"properties":{"view":"timeSeries","title":"S3への配信レコード数(Sum)","region":"",
               {
                 "Ref": "AWS::Region",
               },
@@ -2759,7 +3033,7 @@ exports[`deliveryS3Stack 1`] = `
               {
                 "Ref": "FirehoseWithLambdaSampleDeliveryStream2C0299A1",
               },
-              ""]],"yAxis":{"left":{"min":0}},"period":60,"stat":"Sum"}},{"type":"metric","width":12,"height":8,"x":12,"y":70,"properties":{"view":"timeSeries","title":"正常に終了したS3 putコマンド合計(Sum)","region":"",
+              ""]],"yAxis":{"left":{"min":0}},"period":60,"stat":"Sum"}},{"type":"metric","width":12,"height":8,"x":12,"y":90,"properties":{"view":"timeSeries","title":"正常に終了したS3 putコマンド合計(Sum)","region":"",
               {
                 "Ref": "AWS::Region",
               },
@@ -2767,7 +3041,7 @@ exports[`deliveryS3Stack 1`] = `
               {
                 "Ref": "FirehoseWithLambdaSampleDeliveryStream2C0299A1",
               },
-              ""]],"yAxis":{"left":{"min":0}},"period":60,"stat":"Sum"}},{"type":"metric","width":12,"height":8,"x":0,"y":78,"properties":{"view":"timeSeries","title":"Firehose内の最も古いレコードの経過時間(Max, p99, Avg, Min)","region":"",
+              ""]],"yAxis":{"left":{"min":0}},"period":60,"stat":"Sum"}},{"type":"metric","width":12,"height":8,"x":0,"y":98,"properties":{"view":"timeSeries","title":"Firehose内の最も古いレコードの経過時間(Max, p99, Avg, Min)","region":"",
               {
                 "Ref": "AWS::Region",
               },
@@ -2787,7 +3061,7 @@ exports[`deliveryS3Stack 1`] = `
               {
                 "Ref": "FirehoseWithLambdaSampleDeliveryStream2C0299A1",
               },
-              "",{"stat":"Minimum"}]],"yAxis":{"left":{"min":0}},"period":60}},{"type":"text","width":24,"height":1,"x":0,"y":86,"properties":{"markdown":"## 動的パーティショニング"}},{"type":"metric","width":12,"height":8,"x":0,"y":87,"properties":{"view":"timeSeries","title":"Lambdaによる加工処理が正常に完了したレコード数(Sum)","region":"",
+              "",{"stat":"Minimum"}]],"yAxis":{"left":{"min":0}},"period":60}},{"type":"text","width":24,"height":1,"x":0,"y":106,"properties":{"markdown":"## 動的パーティショニング"}},{"type":"metric","width":12,"height":8,"x":0,"y":107,"properties":{"view":"timeSeries","title":"Lambdaによる加工処理が正常に完了したレコード数(Sum)","region":"",
               {
                 "Ref": "AWS::Region",
               },
@@ -2795,7 +3069,7 @@ exports[`deliveryS3Stack 1`] = `
               {
                 "Ref": "FirehoseWithLambdaSampleDeliveryStream2C0299A1",
               },
-              ""]],"yAxis":{"left":{"min":0}},"period":60,"stat":"Sum"}},{"type":"metric","width":12,"height":8,"x":12,"y":87,"properties":{"view":"timeSeries","title":"正常に完了したLambdaによる加工処理数(Sum)","region":"",
+              ""]],"yAxis":{"left":{"min":0}},"period":60,"stat":"Sum"}},{"type":"metric","width":12,"height":8,"x":12,"y":107,"properties":{"view":"timeSeries","title":"正常に完了したLambdaによる加工処理数(Sum)","region":"",
               {
                 "Ref": "AWS::Region",
               },
@@ -2803,7 +3077,7 @@ exports[`deliveryS3Stack 1`] = `
               {
                 "Ref": "FirehoseWithLambdaSampleDeliveryStream2C0299A1",
               },
-              ""]],"yAxis":{"left":{"min":0}},"period":60,"stat":"Sum"}},{"type":"metric","width":12,"height":8,"x":0,"y":95,"properties":{"view":"timeSeries","title":"動的パーティショニングによるパーティション数と上限超過数(Max)","region":"",
+              ""]],"yAxis":{"left":{"min":0}},"period":60,"stat":"Sum"}},{"type":"metric","width":12,"height":8,"x":0,"y":115,"properties":{"view":"timeSeries","title":"動的パーティショニングによるパーティション数と上限超過数(Max)","region":"",
               {
                 "Ref": "AWS::Region",
               },
@@ -2847,6 +3121,29 @@ exports[`deliveryS3Stack 1`] = `
       "Type": "AWS::Kinesis::Stream",
       "UpdateReplacePolicy": "Delete",
     },
+    "KdsDataStreamiteratorAgeAlarm04D03A9D": {
+      "Properties": {
+        "AlarmName": "kds-iterator-age-alarm-prod-data-str-sample-delivery-s3-stack",
+        "ComparisonOperator": "GreaterThanThreshold",
+        "DatapointsToAlarm": 5,
+        "Dimensions": [
+          {
+            "Name": "StreamName",
+            "Value": {
+              "Ref": "KdsDataStream7B329BF0",
+            },
+          },
+        ],
+        "EvaluationPeriods": 5,
+        "MetricName": "GetRecords.IteratorAgeMilliseconds",
+        "Namespace": "AWS/Kinesis",
+        "Period": 60,
+        "Statistic": "Sum",
+        "Threshold": 0,
+        "TreatMissingData": "notBreaching",
+      },
+      "Type": "AWS::CloudWatch::Alarm",
+    },
     "KdsDataStreamparameter9E23EE0A": {
       "Properties": {
         "Name": "/prod-data-str-sample-delivery-s3-stack/stream/name",
@@ -2867,7 +3164,7 @@ exports[`deliveryS3Stack 1`] = `
             ],
           },
         ],
-        "AlarmName": "prod-data-str-sample-delivery-s3-stack-kds-read-provisioned-alarm",
+        "AlarmName": "kds-read-provisioned-alarm-prod-data-str-sample-delivery-s3-stack",
         "ComparisonOperator": "GreaterThanOrEqualToThreshold",
         "DatapointsToAlarm": 5,
         "Dimensions": [
@@ -2898,7 +3195,7 @@ exports[`deliveryS3Stack 1`] = `
             ],
           },
         ],
-        "AlarmName": "prod-data-str-sample-delivery-s3-stack-kds-write-provisioned-alarm",
+        "AlarmName": "kds-write-provisioned-alarm-prod-data-str-sample-delivery-s3-stack",
         "ComparisonOperator": "GreaterThanOrEqualToThreshold",
         "DatapointsToAlarm": 5,
         "Dimensions": [

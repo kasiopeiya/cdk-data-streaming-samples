@@ -99,11 +99,19 @@ export class DeliveryS3Stack extends Stack {
     // Alarm
     const writePrvAlarm: Alarm = kdsDataStream.createWriteProvisionedAlarm()
     const readPrvAlarm: Alarm = kdsDataStream.createReadProvisionedAlarm()
-    // const iteratorAgeAlarm: Alarm = kdsDataStream.createIteratorAgeAlarm()
-    // const apiGwClientErrorAlarm: Alarm = producer.createClientErrorAlarm()
-    // const apiGwServerErrorAlarm: Alarm = producer.createServerErrorAlarm()
-    // const lambdaErrorsAlarm: Alarm = consumer.createLambdaErrorsAlarm()
-    // const dlqMessageSentAlarm: Alarm = consumer.createDLQMessagesSentAlarm()
+    const iteratorAgeAlarm: Alarm = kdsDataStream.createIteratorAgeAlarm()
+    const partitionCountExceededAlarm: Alarm | undefined =
+      firehoseWithLambda?.createPartitionCountExceededAlarm()
+    const dataFreshnessAlarm: Alarm | undefined = firehoseWithLambda?.createDataFreshnessAlarm()
+    const lambdaErrorsAlarm: Alarm | undefined = firehoseWithLambda?.createLambdaErrorsAlarm()
+    const cwAlarms: Alarm[] = [
+      writePrvAlarm,
+      readPrvAlarm,
+      iteratorAgeAlarm,
+      partitionCountExceededAlarm,
+      dataFreshnessAlarm,
+      lambdaErrorsAlarm
+    ].filter((value, _) => value !== undefined)
 
     // Alarm Action
     const cfnStream = kdsDataStream.dataStream.node.defaultChild as CfnStream
@@ -124,6 +132,7 @@ export class DeliveryS3Stack extends Stack {
     // Dashboard
     new KdsCWDashboard(this, 'KdsCWDashborad', {
       prefix: props.prefix,
+      alarms: cwAlarms,
       dataStream: kdsDataStream.dataStream,
       deliveryStream,
       lambdaFunction: lambdaFunc
