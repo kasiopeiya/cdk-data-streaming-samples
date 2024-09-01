@@ -1,9 +1,11 @@
 import { Stack, type StackProps, RemovalPolicy } from 'aws-cdk-lib'
 import { type Construct } from 'constructs'
 import { Bucket, BucketEncryption } from 'aws-cdk-lib/aws-s3'
+import * as s3Deploy from 'aws-cdk-lib/aws-s3-deployment'
 import * as iam from 'aws-cdk-lib/aws-iam'
 import * as apigw from 'aws-cdk-lib/aws-apigateway'
 import * as sns from 'aws-cdk-lib/aws-sns'
+import * as logs from 'aws-cdk-lib/aws-logs'
 
 import { AlarmNotificationHandler } from '../construct/alarmNotificationHandler'
 
@@ -33,6 +35,29 @@ export class BaseStack extends Stack {
       removalPolicy: RemovalPolicy.DESTROY,
       encryption: BucketEncryption.S3_MANAGED,
       enforceSSL: true
+    })
+
+    // テスト資材配置用
+    const testResourceBucket = new Bucket(this, 'TestResourceBucket', {
+      bucketName: 'cdk-samples-test-resource-bucket',
+      autoDeleteObjects: true,
+      removalPolicy: RemovalPolicy.DESTROY,
+      encryption: BucketEncryption.S3_MANAGED,
+      enforceSSL: true
+    })
+    // ローカルリソースをS3に配置
+    const scriptSource: s3Deploy.ISource = s3Deploy.Source.asset('./script', {
+      exclude: ['**/node_modules/**/*', '**/node_modules/.*', '*.log']
+    })
+    new s3Deploy.BucketDeployment(this, 'TestResourceDeployment', {
+      sources: [scriptSource],
+      destinationBucket: testResourceBucket,
+      prune: true,
+      retainOnDelete: false,
+      logGroup: new logs.LogGroup(this, 'TestResourceDeploymentLogGroup', {
+        removalPolicy: RemovalPolicy.DESTROY,
+        retention: logs.RetentionDays.ONE_DAY
+      })
     })
 
     /*
