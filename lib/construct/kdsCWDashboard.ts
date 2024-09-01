@@ -270,17 +270,12 @@ export class KdsCWDashboard extends Construct {
     // Title
     const titleWid = new cw.TextWidget({
       markdown: `# API Gateway Metrics
-## 5××エラーの例
-- 504 INTEGRATIONN_FAILURE, INTEGRATION_TIMEOUT
-  - バックエンドとの統合失敗
-
-## 4××エラーの例
-- 400 Kinesis WriteProvisionedThroughputExceeded
-  - kinesisの書き込みスループット超過エラー
-- 403 EXPIRED_TOKEN, INVALID_API_KEY, INVALID_SIGNATUREなど
-  - API KeyやAWS署名などの認証関連エラー
+## エラー情報ドキュメント
+- [API Gateway default error responses](https://docs.aws.amazon.com/ja_jp/apigateway/latest/developerguide/supported-gateway-response-types.html)
+- [KDS PutRecords API Errors](https://docs.aws.amazon.com/kinesis/latest/APIReference/API_PutRecords.html#API_PutRecords_Errors)
+- [KDS PutRecord API Errors](https://docs.aws.amazon.com/kinesis/latest/APIReference/API_PutRecord.html#API_PutRecord_Errors)
 `,
-      height: 2,
+      height: 4,
       width: 24
     })
 
