@@ -7,11 +7,14 @@ import * as kinesisfirehose_alpha from '@aws-cdk/aws-kinesisfirehose-alpha'
 import * as kinesisfirehose_destination_alpha from '@aws-cdk/aws-kinesisfirehose-destinations-alpha'
 import { type Function as LambdaFunction } from 'aws-cdk-lib/aws-lambda'
 import * as logs from 'aws-cdk-lib/aws-logs'
-// import { type Alarm } from 'aws-cdk-lib/aws-cloudwatch'
+import { type Alarm } from 'aws-cdk-lib/aws-cloudwatch'
+import * as cwAction from 'aws-cdk-lib/aws-cloudwatch-actions'
+import { StreamMode, type CfnStream } from 'aws-cdk-lib/aws-kinesis'
 
 import { KdsDataStream } from '../construct/kdsDataStream'
 import { KdsCWDashboard } from '../construct/kdsCWDashboard'
 import { FirehoseWithLambda } from '../construct/firehoseWithLambda'
+import { KdsScaleOutLambda } from '../construct/kdsScaleOutLambda'
 
 interface DeliveryS3StackProps extends StackProps {
   /** プレフィックス */
@@ -94,12 +97,29 @@ export class DeliveryS3Stack extends Stack {
     * Monitoring
     -------------------------------------------------------------------------- */
     // Alarm
-    // const writePrvAlarm: Alarm = kdsDataStream.createWriteProvisionedAlarm()
-    // const readPrvAlarm: Alarm = kdsDataStream.createReadProvisionedAlarm()
+    const writePrvAlarm: Alarm = kdsDataStream.createWriteProvisionedAlarm()
+    const readPrvAlarm: Alarm = kdsDataStream.createReadProvisionedAlarm()
     // const iteratorAgeAlarm: Alarm = kdsDataStream.createIteratorAgeAlarm()
-    // const partitionCountAlarm: Alarm | undefined = firehoseWithLambda?.createPartitionCountExceededAlarm()
-    // const dataFreshnessAlarm: Alarm | undefined = firehoseWithLambda?.createDataFreshnessAlarm()
-    // const lambdaErrorsAlarm: Alarm | undefined = firehoseWithLambda?.createLambdaErrorsAlarm()
+    // const apiGwClientErrorAlarm: Alarm = producer.createClientErrorAlarm()
+    // const apiGwServerErrorAlarm: Alarm = producer.createServerErrorAlarm()
+    // const lambdaErrorsAlarm: Alarm = consumer.createLambdaErrorsAlarm()
+    // const dlqMessageSentAlarm: Alarm = consumer.createDLQMessagesSentAlarm()
+
+    // Alarm Action
+    const cfnStream = kdsDataStream.dataStream.node.defaultChild as CfnStream
+    const capacityMode = (cfnStream.streamModeDetails as CfnStream.StreamModeDetailsProperty)
+      .streamMode
+    if (capacityMode === StreamMode.PROVISIONED) {
+      // BUG: cdkのバグで同じLambda関数を複数のAlarm Actionに設定するとエラーになるため、複数のLambdaを用意
+      const kdsScaleOutLambda1 = new KdsScaleOutLambda(this, 'KdsScaleOutLambda1', {
+        dataStream: kdsDataStream.dataStream
+      })
+      const kdsScaleOutLambda2 = new KdsScaleOutLambda(this, 'KdsScaleOutLambda2', {
+        dataStream: kdsDataStream.dataStream
+      })
+      writePrvAlarm.addAlarmAction(new cwAction.LambdaAction(kdsScaleOutLambda1.func))
+      readPrvAlarm.addAlarmAction(new cwAction.LambdaAction(kdsScaleOutLambda2.func))
+    }
 
     // Dashboard
     new KdsCWDashboard(this, 'KdsCWDashborad', {

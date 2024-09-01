@@ -2,12 +2,15 @@ import { Stack, type StackProps } from 'aws-cdk-lib'
 import { type Construct } from 'constructs'
 import * as dynamodb from 'aws-cdk-lib/aws-dynamodb'
 import { type Vpc } from 'aws-cdk-lib/aws-ec2'
+import { StreamMode, type CfnStream } from 'aws-cdk-lib/aws-kinesis'
+import { type Alarm } from 'aws-cdk-lib/aws-cloudwatch'
+import * as cwAction from 'aws-cdk-lib/aws-cloudwatch-actions'
 
 import { KdsApiGwProducer } from '../construct/kdsApiGwProducer'
 import { KdsLambdaConsumer } from '../construct/kdsLambdaConsumer'
 import { KdsCWDashboard } from '../construct/kdsCWDashboard'
-// import { type Alarm } from 'aws-cdk-lib/aws-cloudwatch'
 import { KdsDataStream } from '../construct/kdsDataStream'
+import { KdsScaleOutLambda } from '../construct/kdsScaleOutLambda'
 
 interface ApiGwKdsLambdaStackProps extends StackProps {
   prefix: string
@@ -49,13 +52,29 @@ export class ApiGwKdsLambdaStack extends Stack {
     * Monitoring
     -------------------------------------------------------------------------- */
     // Alarm
-    // const writePrvAlarm: Alarm = kdsDataStream.createWriteProvisionedAlarm()
-    // const readPrvAlarm: Alarm = kdsDataStream.createReadProvisionedAlarm()
+    const writePrvAlarm: Alarm = kdsDataStream.createWriteProvisionedAlarm()
+    const readPrvAlarm: Alarm = kdsDataStream.createReadProvisionedAlarm()
     // const iteratorAgeAlarm: Alarm = kdsDataStream.createIteratorAgeAlarm()
     // const apiGwClientErrorAlarm: Alarm = producer.createClientErrorAlarm()
     // const apiGwServerErrorAlarm: Alarm = producer.createServerErrorAlarm()
     // const lambdaErrorsAlarm: Alarm = consumer.createLambdaErrorsAlarm()
     // const dlqMessageSentAlarm: Alarm = consumer.createDLQMessagesSentAlarm()
+
+    // Alarm Action
+    const cfnStream = kdsDataStream.dataStream.node.defaultChild as CfnStream
+    const capacityMode = (cfnStream.streamModeDetails as CfnStream.StreamModeDetailsProperty)
+      .streamMode
+    if (capacityMode === StreamMode.PROVISIONED) {
+      // BUG: cdkのバグで同じLambda関数を複数のAlarm Actionに設定するとエラーになるため、複数のLambdaを用意
+      const kdsScaleOutLambda1 = new KdsScaleOutLambda(this, 'KdsScaleOutLambda1', {
+        dataStream: kdsDataStream.dataStream
+      })
+      const kdsScaleOutLambda2 = new KdsScaleOutLambda(this, 'KdsScaleOutLambda2', {
+        dataStream: kdsDataStream.dataStream
+      })
+      writePrvAlarm.addAlarmAction(new cwAction.LambdaAction(kdsScaleOutLambda1.func))
+      readPrvAlarm.addAlarmAction(new cwAction.LambdaAction(kdsScaleOutLambda2.func))
+    }
 
     // Dashboard
     new KdsCWDashboard(this, 'KdsCWDashborad', {
