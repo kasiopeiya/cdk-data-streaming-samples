@@ -200,7 +200,7 @@ export class FirehoseWithLambda extends Construct {
       statistic: cw.Stats.SUM
     }
     alarmOption ??= {
-      alarmName: `${Stack.of(this).stackName}-deliveryStream-partition-count-alarm`,
+      alarmName: `firehose-partition-count-alarm-${Stack.of(this).stackName}`,
       evaluationPeriods: 1,
       datapointsToAlarm: 1,
       threshold: 0,
@@ -226,7 +226,7 @@ export class FirehoseWithLambda extends Construct {
       statistic: cw.Stats.percentile(99)
     }
     alarmOption ??= {
-      alarmName: `${Stack.of(this).stackName}-deliveryStream-data-freshness-alarm`,
+      alarmName: `firehose-s3-data-freshness-alarm-${Stack.of(this).stackName}`,
       evaluationPeriods: 5,
       datapointsToAlarm: 5,
       threshold: 0,
@@ -252,7 +252,7 @@ export class FirehoseWithLambda extends Construct {
       statistic: cw.Stats.SUM
     }
     alarmOption ??= {
-      alarmName: `${Stack.of(this).stackName}-deliveryStream-lambda-errors-alarm`,
+      alarmName: `firehose-lambda-errors-alarm-${Stack.of(this).stackName}`,
       evaluationPeriods: 5,
       datapointsToAlarm: 3,
       threshold: 0,

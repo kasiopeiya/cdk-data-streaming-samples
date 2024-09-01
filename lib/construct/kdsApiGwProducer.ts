@@ -360,7 +360,7 @@ export class KdsApiGwProducer extends Construct {
       statistic: cw.Stats.SUM
     }
     alarmOption ??= {
-      alarmName: `${Stack.of(this).stackName}-apigw-client-error-alarm`,
+      alarmName: `apigw-client-error-alarm-${Stack.of(this).stackName}`,
       evaluationPeriods: 5,
       datapointsToAlarm: 3,
       threshold: 0,
@@ -386,7 +386,7 @@ export class KdsApiGwProducer extends Construct {
       statistic: cw.Stats.SUM
     }
     alarmOption ??= {
-      alarmName: `${Stack.of(this).stackName}-apigw-server-error-alarm`,
+      alarmName: `apigw-server-error-alarm-${Stack.of(this).stackName}`,
       evaluationPeriods: 5,
       datapointsToAlarm: 3,
       threshold: 0,

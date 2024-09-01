@@ -50,7 +50,7 @@ export class KdsDataStream extends Construct {
       statistic: cw.Stats.SUM
     }
     alarmOption ??= {
-      alarmName: `${Stack.of(this).stackName}-kds-write-provisioned-alarm`,
+      alarmName: `kds-write-provisioned-alarm-${Stack.of(this).stackName}`,
       evaluationPeriods: 5,
       datapointsToAlarm: 5,
       threshold: 500,
@@ -75,7 +75,7 @@ export class KdsDataStream extends Construct {
       statistic: cw.Stats.SUM
     }
     alarmOption ??= {
-      alarmName: `${Stack.of(this).stackName}-kds-read-provisioned-alarm`,
+      alarmName: `kds-read-provisioned-alarm-${Stack.of(this).stackName}`,
       evaluationPeriods: 5,
       datapointsToAlarm: 5,
       threshold: 500,
@@ -100,7 +100,7 @@ export class KdsDataStream extends Construct {
       statistic: cw.Stats.SUM
     }
     alarmOption ??= {
-      alarmName: `${Stack.of(this).stackName}-kds-iterator-age-alarm`,
+      alarmName: `kds-iterator-age-alarm-${Stack.of(this).stackName}`,
       evaluationPeriods: 5,
       datapointsToAlarm: 5,
       threshold: 0,

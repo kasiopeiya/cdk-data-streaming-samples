@@ -166,7 +166,7 @@ export class KdsLambdaConsumer extends Construct {
       statistic: cw.Stats.SUM
     }
     alarmOption ??= {
-      alarmName: `${Stack.of(this).stackName}-dlq-messages-sent-alarm`,
+      alarmName: `sqs-dlq-messages-sent-alarm-${Stack.of(this).stackName}`,
       evaluationPeriods: 1,
       datapointsToAlarm: 1,
       threshold: 0,
@@ -192,7 +192,7 @@ export class KdsLambdaConsumer extends Construct {
       statistic: cw.Stats.SUM
     }
     alarmOption ??= {
-      alarmName: `${Stack.of(this).stackName}-lambda-errors-alarm`,
+      alarmName: `lambda-errors-alarm-${Stack.of(this).stackName}`,
       evaluationPeriods: 5,
       datapointsToAlarm: 3,
       threshold: 0,
