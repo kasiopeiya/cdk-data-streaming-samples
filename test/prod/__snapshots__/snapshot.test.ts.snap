@@ -955,7 +955,7 @@ exports[`apiGwKdsLambdaStack 1`] = `
         },
         "Environment": {
           "Variables": {
-            "FUNCTION_NAME": "data-str-kds-consumer-func",
+            "FUNCTION_NAME": "Stack-kds-consumer-func",
             "METRIC_NAME": "LambdaBatchSize",
             "NAMESPACE": "Custom/LambdaMetrics",
             "TABLE_NAME": {
@@ -1327,7 +1327,6 @@ exports[`apiGwKdsLambdaStack 1`] = `
         },
         "Environment": {
           "Variables": {
-            "AWS_NODEJS_CONNECTION_REUSE_ENABLED": "1",
             "DATA_STREAM_NAME": {
               "Ref": "KdsDataStream7B329BF0",
             },
@@ -1489,7 +1488,6 @@ exports[`apiGwKdsLambdaStack 1`] = `
         },
         "Environment": {
           "Variables": {
-            "AWS_NODEJS_CONNECTION_REUSE_ENABLED": "1",
             "DATA_STREAM_NAME": {
               "Ref": "KdsDataStream7B329BF0",
             },
@@ -1741,7 +1739,7 @@ exports[`baseStack 1`] = `
               "Action": "sts:AssumeRole",
               "Effect": "Allow",
               "Principal": {
-                "Service": "states.ap-northeast-1.amazonaws.com",
+                "Service": "states.amazonaws.com",
               },
             },
           ],
@@ -2611,40 +2609,6 @@ exports[`deliveryS3Stack 1`] = `
     },
   },
   "Resources": {
-    "DataStream80B8B961": {
-      "DeletionPolicy": "Delete",
-      "Properties": {
-        "RetentionPeriodHours": 24,
-        "ShardCount": 1,
-        "StreamEncryption": {
-          "Fn::If": [
-            "AwsCdkKinesisEncryptedStreamsUnsupportedRegions",
-            {
-              "Ref": "AWS::NoValue",
-            },
-            {
-              "EncryptionType": "KMS",
-              "KeyId": "alias/aws/kinesis",
-            },
-          ],
-        },
-        "StreamModeDetails": {
-          "StreamMode": "PROVISIONED",
-        },
-      },
-      "Type": "AWS::Kinesis::Stream",
-      "UpdateReplacePolicy": "Delete",
-    },
-    "DataStreamparameterD94E8D77": {
-      "Properties": {
-        "Name": "/prod-data-str-sample-delivery-s3-stack/stream/name",
-        "Type": "String",
-        "Value": {
-          "Ref": "DataStream80B8B961",
-        },
-      },
-      "Type": "AWS::SSM::Parameter",
-    },
     "FirehoseWithLambdaCustomLayer9FB598A7": {
       "DeletionPolicy": "Delete",
       "Properties": {
@@ -3669,7 +3633,6 @@ exports[`deliveryS3Stack 1`] = `
         },
         "Environment": {
           "Variables": {
-            "AWS_NODEJS_CONNECTION_REUSE_ENABLED": "1",
             "DATA_STREAM_NAME": {
               "Ref": "KdsDataStream7B329BF0",
             },
@@ -3831,7 +3794,6 @@ exports[`deliveryS3Stack 1`] = `
         },
         "Environment": {
           "Variables": {
-            "AWS_NODEJS_CONNECTION_REUSE_ENABLED": "1",
             "DATA_STREAM_NAME": {
               "Ref": "KdsDataStream7B329BF0",
             },
