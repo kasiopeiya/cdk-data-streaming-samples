@@ -7,10 +7,14 @@ import * as kinesisfirehose_alpha from '@aws-cdk/aws-kinesisfirehose-alpha'
 import * as kinesisfirehose_destination_alpha from '@aws-cdk/aws-kinesisfirehose-destinations-alpha'
 import { type Function as LambdaFunction } from 'aws-cdk-lib/aws-lambda'
 import * as logs from 'aws-cdk-lib/aws-logs'
+import { type Alarm } from 'aws-cdk-lib/aws-cloudwatch'
+import * as cwAction from 'aws-cdk-lib/aws-cloudwatch-actions'
+import { StreamMode, type CfnStream } from 'aws-cdk-lib/aws-kinesis'
 
 import { KdsDataStream } from '../construct/kdsDataStream'
 import { KdsCWDashboard } from '../construct/kdsCWDashboard'
 import { FirehoseWithLambda } from '../construct/firehoseWithLambda'
+import { KdsScaleOutLambda } from '../construct/kdsScaleOutLambda'
 
 interface DeliveryS3StackProps extends StackProps {
   /** プレフィックス */
@@ -43,18 +47,19 @@ export class DeliveryS3Stack extends Stack {
     /*
     * Kinesis Data Streams
     -------------------------------------------------------------------------- */
-    const myDataStream = new KdsDataStream(this, 'DataStream')
+    const kdsDataStream = new KdsDataStream(this, 'KdsDataStream')
 
     /*
     * Data Firehose
     -------------------------------------------------------------------------- */
     let deliveryStream: kinesisfirehose_alpha.DeliveryStream
     let lambdaFunc: LambdaFunction | undefined
+    let firehoseWithLambda: FirehoseWithLambda | undefined
 
     if (props.enableLambdaProcessor) {
       // Lambda加工処理を実施する場合
-      const firehoseWithLambda = new FirehoseWithLambda(this, 'FirehoseWithLambda', {
-        sourceStream: myDataStream.dataStream,
+      firehoseWithLambda = new FirehoseWithLambda(this, 'FirehoseWithLambda', {
+        sourceStream: kdsDataStream.dataStream,
         destinationBucket: props.bucket,
         lambdaEntry: path.join(
           'resources',
@@ -84,16 +89,51 @@ export class DeliveryS3Stack extends Stack {
       })
       deliveryStream = new kinesisfirehose_alpha.DeliveryStream(this, 'SampleDeliveryStream', {
         destinations: [s3Destination],
-        sourceStream: myDataStream.dataStream
+        sourceStream: kdsDataStream.dataStream
       })
     }
 
     /*
     * Monitoring
     -------------------------------------------------------------------------- */
+    // Alarm
+    const writePrvAlarm: Alarm = kdsDataStream.createWriteProvisionedAlarm()
+    const readPrvAlarm: Alarm = kdsDataStream.createReadProvisionedAlarm()
+    const iteratorAgeAlarm: Alarm = kdsDataStream.createIteratorAgeAlarm()
+    const partitionCountExceededAlarm: Alarm | undefined =
+      firehoseWithLambda?.createPartitionCountExceededAlarm()
+    const dataFreshnessAlarm: Alarm | undefined = firehoseWithLambda?.createDataFreshnessAlarm()
+    const lambdaErrorsAlarm: Alarm | undefined = firehoseWithLambda?.createLambdaErrorsAlarm()
+    const cwAlarms: Alarm[] = [
+      writePrvAlarm,
+      readPrvAlarm,
+      iteratorAgeAlarm,
+      partitionCountExceededAlarm,
+      dataFreshnessAlarm,
+      lambdaErrorsAlarm
+    ].filter((value, _) => value !== undefined)
+
+    // Alarm Action
+    const cfnStream = kdsDataStream.dataStream.node.defaultChild as CfnStream
+    const capacityMode = (cfnStream.streamModeDetails as CfnStream.StreamModeDetailsProperty)
+      .streamMode
+    if (capacityMode === StreamMode.PROVISIONED) {
+      // BUG: cdkのバグで同じLambda関数を複数のAlarm Actionに設定するとエラーになるため、複数のLambdaを用意
+      const kdsScaleOutLambda1 = new KdsScaleOutLambda(this, 'KdsScaleOutLambda1', {
+        dataStream: kdsDataStream.dataStream
+      })
+      const kdsScaleOutLambda2 = new KdsScaleOutLambda(this, 'KdsScaleOutLambda2', {
+        dataStream: kdsDataStream.dataStream
+      })
+      writePrvAlarm.addAlarmAction(new cwAction.LambdaAction(kdsScaleOutLambda1.func))
+      readPrvAlarm.addAlarmAction(new cwAction.LambdaAction(kdsScaleOutLambda2.func))
+    }
+
+    // Dashboard
     new KdsCWDashboard(this, 'KdsCWDashborad', {
       prefix: props.prefix,
-      dataStream: myDataStream.dataStream,
+      alarms: cwAlarms,
+      dataStream: kdsDataStream.dataStream,
       deliveryStream,
       lambdaFunction: lambdaFunc
     })

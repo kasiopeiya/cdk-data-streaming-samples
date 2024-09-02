@@ -1,0 +1,29 @@
+{
+  "agent": {
+    "region": "ap-northeast-1"
+  },
+  "logs": {
+    "force_flush_interval": 100,
+    "logs_collected": {
+      "files": {
+        "collect_list": [
+          {
+            "file_path": "/workspace/script/apiGwPutRecord.log",
+            "log_group_name": "/test/script/apiGwPutRecord",
+            "log_stream_name": "{ip_address}"
+          },
+          {
+            "file_path": "/workspace/script/apiGwPutRecords.log",
+            "log_group_name": "/test/script/apiGwPutRecords",
+            "log_stream_name": "{ip_address}"
+          },
+          {
+            "file_path": "/workspace/script/sdkPutRecords.log",
+            "log_group_name": "/test/script/sdkPutRecords",
+            "log_stream_name": "{ip_address}"
+          }
+        ]
+      }
+    }
+  }
+}
