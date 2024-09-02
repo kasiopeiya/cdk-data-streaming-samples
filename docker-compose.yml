@@ -7,5 +7,5 @@ services:
     volumes:
       - ${HOME}/.aws/credentials:/root/.aws/credentials:ro
       - ${HOME}/.aws/config:/root/.aws/config:ro
-      - ./.devcontainer/.vimrc:/root/.vimrc:ro
+      - ./script/.vimrc:/root/.vimrc:ro
       - ./:/workspace:cached
