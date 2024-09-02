@@ -1545,7 +1545,7 @@ exports[`deliveryS3Stack 1`] = `
     },
     "DataStreamparameterD94E8D77": {
       "Properties": {
-        "Name": "/firehoseS3/kds/dataStreamName",
+        "Name": "/dev-data-str-sample-delivery-s3-stack/stream/name",
         "Type": "String",
         "Value": {
           "Ref": "DataStream80B8B961",

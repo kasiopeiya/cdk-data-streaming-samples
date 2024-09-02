@@ -77,7 +77,7 @@ export class FirehoseWithLambda extends Construct {
         })
       ],
       layers: [customlayer],
-      logFormat: lambda_.LogFormat.JSON,
+      logFormat: lambda_.LoggingFormat.JSON,
       systemLogLevel: lambda_.SystemLogLevel.WARN
     })
 
