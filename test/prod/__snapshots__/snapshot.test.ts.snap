@@ -2522,6 +2522,33 @@ exports[`baseStack 1`] = `
       "Type": "AWS::Logs::LogGroup",
       "UpdateReplacePolicy": "Delete",
     },
+    "apiGwPutRecordLog1FED03EE": {
+      "DeletionPolicy": "Delete",
+      "Properties": {
+        "LogGroupName": "/test/script/apiGwPutRecord",
+        "RetentionInDays": 1,
+      },
+      "Type": "AWS::Logs::LogGroup",
+      "UpdateReplacePolicy": "Delete",
+    },
+    "apiGwPutRecordsLog349C966D": {
+      "DeletionPolicy": "Delete",
+      "Properties": {
+        "LogGroupName": "/test/script/apiGwPutRecords",
+        "RetentionInDays": 1,
+      },
+      "Type": "AWS::Logs::LogGroup",
+      "UpdateReplacePolicy": "Delete",
+    },
+    "sdkPutRecordsLog47997B07": {
+      "DeletionPolicy": "Delete",
+      "Properties": {
+        "LogGroupName": "/test/script/sdkPutRecords",
+        "RetentionInDays": 1,
+      },
+      "Type": "AWS::Logs::LogGroup",
+      "UpdateReplacePolicy": "Delete",
+    },
   },
   "Rules": {
     "CheckBootstrapVersion": {
