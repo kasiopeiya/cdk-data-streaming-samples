@@ -1,4 +1,4 @@
-import { RemovalPolicy, Stack } from 'aws-cdk-lib'
+import { Duration, RemovalPolicy, Stack } from 'aws-cdk-lib'
 import { Construct } from 'constructs'
 import * as iam from 'aws-cdk-lib/aws-iam'
 import * as apigw from 'aws-cdk-lib/aws-apigateway'
@@ -6,8 +6,9 @@ import * as ec2 from 'aws-cdk-lib/aws-ec2'
 import * as logs from 'aws-cdk-lib/aws-logs'
 import { type Stream } from 'aws-cdk-lib/aws-kinesis'
 import * as ssm from 'aws-cdk-lib/aws-ssm'
+import * as cw from 'aws-cdk-lib/aws-cloudwatch'
 
-interface KdsPrivateApiGwProducerProps {
+interface KdsApiGwProducerProps {
   dataStream: Stream
   /* APIGWのタイプ, Privateの場合はVPCの指定が必須 */
   type?: apigw.EndpointType.PRIVATE | apigw.EndpointType.REGIONAL
@@ -22,13 +23,13 @@ interface KdsPrivateApiGwProducerProps {
  * Private APIにも対応
  * PutRcord, PutRecords APIに対応
  */
-export class KdsPrivateApiGwProducer extends Construct {
+export class KdsApiGwProducer extends Construct {
   private readonly role: iam.Role
   private readonly stageOption: apigw.StageOptions
   private readonly vpcEndpoint: ec2.InterfaceVpcEndpoint
   public readonly restApi: apigw.RestApi
 
-  constructor(scope: Construct, id: string, props: KdsPrivateApiGwProducerProps) {
+  constructor(scope: Construct, id: string, props: KdsApiGwProducerProps) {
     super(scope, id)
 
     props.type ??= apigw.EndpointType.REGIONAL
@@ -342,5 +343,57 @@ export class KdsPrivateApiGwProducer extends Construct {
         }
       ]
     }
+  }
+
+  /**
+   * クライアント4××エラーのアラームを作成
+   * @param metricOption メトリクス設定
+   * @param alarmOption  CW Alarm設定
+   * @returns
+   */
+  createClientErrorAlarm(
+    metricOption?: cw.MetricOptions,
+    alarmOption?: cw.CreateAlarmOptions
+  ): cw.Alarm {
+    metricOption ??= {
+      period: Duration.minutes(1),
+      statistic: cw.Stats.SUM
+    }
+    alarmOption ??= {
+      alarmName: `apigw-client-error-alarm-${Stack.of(this).stackName}`,
+      evaluationPeriods: 5,
+      datapointsToAlarm: 3,
+      threshold: 0,
+      comparisonOperator: cw.ComparisonOperator.GREATER_THAN_THRESHOLD,
+      treatMissingData: cw.TreatMissingData.NOT_BREACHING
+    }
+    const metric = this.restApi.metricClientError(metricOption)
+    return metric.createAlarm(this, 'clientErrorAlarm', alarmOption)
+  }
+
+  /**
+   * サーバー5××エラーのアラームを作成
+   * @param metricOption メトリクス設定
+   * @param alarmOption  CW Alarm設定
+   * @returns
+   */
+  createServerErrorAlarm(
+    metricOption?: cw.MetricOptions,
+    alarmOption?: cw.CreateAlarmOptions
+  ): cw.Alarm {
+    metricOption ??= {
+      period: Duration.minutes(1),
+      statistic: cw.Stats.SUM
+    }
+    alarmOption ??= {
+      alarmName: `apigw-server-error-alarm-${Stack.of(this).stackName}`,
+      evaluationPeriods: 5,
+      datapointsToAlarm: 3,
+      threshold: 0,
+      comparisonOperator: cw.ComparisonOperator.GREATER_THAN_THRESHOLD,
+      treatMissingData: cw.TreatMissingData.NOT_BREACHING
+    }
+    const metric = this.restApi.metricServerError(metricOption)
+    return metric.createAlarm(this, 'serverErrorAlarm', alarmOption)
   }
 }
