@@ -2353,7 +2353,17 @@ exports[`baseStack 1`] = `
             },
           ],
         },
-        "BucketName": "cdk-samples-test-resource-bucket",
+        "BucketName": {
+          "Fn::Join": [
+            "",
+            [
+              "cdk-samples-test-resource-bucket-",
+              {
+                "Ref": "AWS::AccountId",
+              },
+            ],
+          ],
+        },
         "Tags": [
           {
             "Key": "aws-cdk:auto-delete-objects",

@@ -97,7 +97,7 @@ export class KdsLambdaConsumer extends Construct {
       },
       layers: [customlayer],
       tracing: lambda_.Tracing.ACTIVE,
-      logFormat: lambda_.LoggingFormat.JSON,
+      loggingFormat: lambda_.LoggingFormat.JSON,
       systemLogLevel: lambda_.SystemLogLevel.WARN
     })
 

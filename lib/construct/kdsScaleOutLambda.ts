@@ -49,7 +49,7 @@ export class KdsScaleOutLambda extends Construct {
         DATA_STREAM_NAME: props.dataStream.streamName
       },
       layers: [customlayer],
-      logFormat: lambda_.LogFormat.JSON,
+      loggingFormat: lambda_.LoggingFormat.JSON,
       systemLogLevel: lambda_.SystemLogLevel.WARN
     })
 
