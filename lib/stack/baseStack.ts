@@ -39,7 +39,7 @@ export class BaseStack extends Stack {
 
     // テスト資材配置用
     const testResourceBucket = new Bucket(this, 'TestResourceBucket', {
-      bucketName: 'cdk-samples-test-resource-bucket',
+      bucketName: `cdk-samples-test-resource-bucket-${this.account}`,
       autoDeleteObjects: true,
       removalPolicy: RemovalPolicy.DESTROY,
       encryption: BucketEncryption.S3_MANAGED,
