@@ -333,7 +333,6 @@ exports[`apiGwKdsLambdaStack 1`] = `
         },
         "Environment": {
           "Variables": {
-            "AWS_NODEJS_CONNECTION_REUSE_ENABLED": "1",
             "FUNCTION_NAME": "data-str-kds-consumer-func",
             "METRIC_NAME": "LambdaBatchSize",
             "NAMESPACE": "Custom/LambdaMetrics",
@@ -1175,7 +1174,7 @@ exports[`baseStack 1`] = `
             "Arn",
           ],
         },
-        "Runtime": "nodejs18.x",
+        "Runtime": "nodejs20.x",
         "Timeout": 900,
       },
       "Type": "AWS::Lambda::Function",
@@ -1584,11 +1583,6 @@ exports[`deliveryS3Stack 1`] = `
             "Fn::Sub": "cdk-hnb659fds-assets-\${AWS::AccountId}-ap-northeast-1",
           },
           "S3Key": "HASH-REPLACED.zip",
-        },
-        "Environment": {
-          "Variables": {
-            "AWS_NODEJS_CONNECTION_REUSE_ENABLED": "1",
-          },
         },
         "FunctionName": "dev-data-str-sample-delivery-s3-stack-func",
         "Handler": "index.handler",
