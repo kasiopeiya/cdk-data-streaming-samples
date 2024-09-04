@@ -1,22 +1,23 @@
-FROM node:18.18.2
+FROM node:18.18.2-slim
 
 # AWS CLIのインストール
-RUN curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
-RUN unzip awscliv2.zip && ./aws/install && export PATH="$PATH:/aws/dist"
+RUN apt-get update && apt-get install -y unzip curl vim dpkg wget && \
+    curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip" && \
+    unzip awscliv2.zip && \
+    ./aws/install && \
+    export PATH="$PATH:/aws/dist" && \
+    rm awscliv2.zip
 
-# vimのインストール(gitのeditorとして必要)
-RUN apt-get update && apt-get install -y vim
+# vimの設定
 COPY .vimrc /root/.vimrc:ro
 
 # CloudWatch Agent
 RUN wget https://s3.amazonaws.com/amazoncloudwatch-agent/ubuntu/amd64/latest/amazon-cloudwatch-agent.deb && \
     dpkg -i -E amazon-cloudwatch-agent.deb && \
-    rm -rf /tmp/* && \
-    rm -rf amazon-cloudwatch-agent.deb && \
-    rm -rf /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-config-wizard && \
-    rm -rf /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl && \
-    rm -rf /opt/aws/amazon-cloudwatch-agent/bin/config-downloader
+    rm -rf amazon-cloudwatch-agent.deb /tmp/* /var/lib/apt/lists/* /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-config-wizard /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl /opt/aws/amazon-cloudwatch-agent/bin/config-downloader
 COPY cwAgent.json /opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json:ro
 RUN nohup /opt/aws/amazon-cloudwatch-agent/bin/start-amazon-cloudwatch-agent > /dev/null 2> /dev/null &
+
+RUN apt-get clean && rm -rf /var/lib/apt/lists/*
 
 CMD ["bash"]

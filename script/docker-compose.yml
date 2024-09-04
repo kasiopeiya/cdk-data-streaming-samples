@@ -1,10 +1,10 @@
 services:
-  cdk:
-    container_name: cdk-streaming-samples-dev
+  script:
+    container_name: cdk-streaming-script
     build: ./
     tty: true
     volumes:
       - ${HOME}/.aws/credentials:/root/.aws/credentials:ro
       - ${HOME}/.aws/config:/root/.aws/config:ro
-      - ./script/.vimrc:/root/.vimrc:ro
+      - .vimrc:/root/.vimrc:ro
       - ./:/workspace:cached
