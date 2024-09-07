@@ -98,7 +98,7 @@ export class KdsLambdaConsumer extends Construct {
       layers: [customlayer],
       tracing: lambda_.Tracing.ACTIVE,
       loggingFormat: lambda_.LoggingFormat.JSON,
-      systemLogLevel: lambda_.SystemLogLevel.WARN
+      systemLogLevelV2: lambda_.SystemLogLevel.WARN
     })
 
     // Event Source Mapping

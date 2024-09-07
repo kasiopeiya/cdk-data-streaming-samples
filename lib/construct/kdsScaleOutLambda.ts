@@ -50,7 +50,7 @@ export class KdsScaleOutLambda extends Construct {
       },
       layers: [customlayer],
       loggingFormat: lambda_.LoggingFormat.JSON,
-      systemLogLevel: lambda_.SystemLogLevel.WARN
+      systemLogLevelV2: lambda_.SystemLogLevel.WARN
     })
 
     // Log
