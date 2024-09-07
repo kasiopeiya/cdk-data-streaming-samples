@@ -91,7 +91,8 @@ export class ApiGwKdsLambdaStack extends Stack {
       alarms: cwAlarms,
       dataStream: kdsDataStream.dataStream,
       restApi: producer.restApi,
-      lambdaFunction: consumer.kdsConsumerFunction
+      lambdaFunction: consumer.kdsConsumerFunction,
+      lambdaDlq: consumer.dlq
     })
 
     /*

@@ -6,6 +6,7 @@ import { type Function as LambdaFunction } from 'aws-cdk-lib/aws-lambda'
 import { type RestApi } from 'aws-cdk-lib/aws-apigateway'
 import { KdsShardCountMetrics } from './kdsShardCountMetrics'
 import { type DeliveryStream } from '@aws-cdk/aws-kinesisfirehose-alpha'
+import { type Queue } from 'aws-cdk-lib/aws-sqs'
 
 import { alarmDescriptionTable } from '../../resources/dashboard/markdown'
 
@@ -48,6 +49,7 @@ interface LambdaSectionWidgets extends CommonWidgets {
   errorsWid: cw.GraphWidget
   throttlesWid: cw.GraphWidget
   batchSizeWid: cw.GraphWidget
+  dlqWid?: cw.GraphWidget
 }
 
 /** ログセクションで利用可能なWidget */
@@ -86,6 +88,8 @@ interface KdsCWDashboardProps {
   dataStream?: Stream
   /** Lambda Function */
   lambdaFunction?: LambdaFunction
+  /** Lambda DLQ */
+  lambdaDlq?: Queue
   /** Data Firehose */
   deliveryStream?: DeliveryStream
   /** CloudWatch Alarms */
@@ -99,6 +103,7 @@ export class KdsCWDashboard extends Construct {
   private readonly restApi: RestApi
   private readonly dataStream: Stream
   private readonly lambdaFunction: LambdaFunction
+  private readonly lambdaDlq: Queue
   private readonly deliveryStream: DeliveryStream
   private readonly alarmWidgets: AlarmWidgets
   private readonly apiGwWidgets: ApiGwSectionWidgets
@@ -178,6 +183,7 @@ export class KdsCWDashboard extends Construct {
 
     // Lambda
     if (props.lambdaFunction !== undefined) {
+      if (props.lambdaDlq !== undefined) this.lambdaDlq = props.lambdaDlq
       this.lambdaFunction = props.lambdaFunction
       this.lambdaWidgets = this.createLambdaWidgets()
       dashboard.addWidgets(this.lambdaWidgets.titleWid)
@@ -188,6 +194,7 @@ export class KdsCWDashboard extends Construct {
       )
       dashboard.addWidgets(this.lambdaWidgets.throttlesWid, this.lambdaWidgets.errorsWid)
       dashboard.addWidgets(this.lambdaWidgets.batchSizeWid)
+      if (this.lambdaWidgets.dlqWid !== undefined) dashboard.addWidgets(this.lambdaWidgets.dlqWid)
     }
 
     // Logs
@@ -602,6 +609,20 @@ export class KdsCWDashboard extends Construct {
       rightYAxis: { min: 0 }
     })
 
+    // DLQ
+    let dlqWid: cw.GraphWidget | undefined
+    if (this.lambdaDlq !== undefined) {
+      dlqWid = new cw.GraphWidget({
+        title: 'DLQ送信メッセージ数(Sum)',
+        left: [this.lambdaDlq.metricNumberOfMessagesSent()],
+        width: this.defaultWidth,
+        height: this.defaultHeight,
+        statistic: cw.Stats.SUM,
+        leftYAxis: { min: 0 },
+        period: Duration.minutes(1)
+      })
+    }
+
     return {
       titleWid,
       invocationsWid,
@@ -610,7 +631,8 @@ export class KdsCWDashboard extends Construct {
       memoryUtilizationWid,
       errorsWid,
       throttlesWid,
-      batchSizeWid
+      batchSizeWid,
+      dlqWid
     }
   }
 

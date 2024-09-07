@@ -30,7 +30,7 @@ interface KdsLambdaConsumerProps {
 export class KdsLambdaConsumer extends Construct {
   public readonly kdsConsumerFunction: lambda_.Function
   public readonly logGroup: logs.LogGroup
-  private readonly dlq: sqs.Queue
+  public readonly dlq: sqs.Queue
 
   constructor(scope: Construct, id: string, props: KdsLambdaConsumerProps) {
     super(scope, id)

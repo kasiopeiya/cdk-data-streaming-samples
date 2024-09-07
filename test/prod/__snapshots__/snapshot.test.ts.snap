@@ -765,11 +765,22 @@ exports[`apiGwKdsLambdaStack 1`] = `
               {
                 "Ref": "KdsLambdaConsumerLambdaFunc571FC7AA",
               },
-              "",{"stat":"Minimum"}]],"yAxis":{"left":{"min":0},"right":{"min":0}}}},{"type":"text","width":24,"height":1,"x":0,"y":92,"properties":{"markdown":"# Logs"}},{"type":"text","width":12,"height":4,"x":0,"y":93,"properties":{"markdown":"# Producer\\nAPI GWに対してリクエストを送信するクライアントスクリプトのログ情報\\n- Success_Requests: 送信成功したリクエスト数, 「Success_Requests * レコード数(/request) = Success_Records」なら欠損レコードなし\\n- Retried_Requests: リトライしたリクエスト数\\n- Failed_Requests: 送信できなかったリクエスト数, １つでもあれば欠損あり\\n        "}},{"type":"text","width":12,"height":4,"x":12,"y":93,"properties":{"markdown":"# Consumer\\nLambda関数から出力されるログ情報\\n- Success_Records: 処理が正常に完了したレコード数\\n- Retried_Records: DynamoDBのPK重複エラー数\\n- Failed_Records: レコード重複以外のエラー数(DynamoDBのスロットリングなど), リトライ対象\\n        "}},{"type":"log","width":12,"height":3,"x":0,"y":97,"properties":{"view":"table","title":"Producer側スクリプトログサマリ(Sum)","region":"",
+              "",{"stat":"Minimum"}]],"yAxis":{"left":{"min":0},"right":{"min":0}}}},{"type":"metric","width":12,"height":8,"x":0,"y":92,"properties":{"view":"timeSeries","title":"DLQ送信メッセージ数(Sum)","region":"",
               {
                 "Ref": "AWS::Region",
               },
-              "","query":"SOURCE '/apigw/client/putRecords' | fields @message\\n| parse @message \\"SUCCESS\\" as @Success\\n| parse @message \\"RETRY\\" as @Retry\\n| parse @message \\"FAILED\\" as @Failed\\n| stats count(@Success) as Success_Requests, count(@Retry) as Retried_Requests, count(@Failed) as Failed_Requests"}},{"type":"log","width":12,"height":3,"x":12,"y":97,"properties":{"view":"table","title":"Consmer側Lambda関数ログサマリ(Sum)","region":"",
+              "","metrics":[["AWS/SQS","NumberOfMessagesSent","QueueName","",
+              {
+                "Fn::GetAtt": [
+                  "KdsLambdaConsumerKinesisDeadLetterQueue4D912974",
+                  "QueueName",
+                ],
+              },
+              "",{"stat":"Sum"}]],"yAxis":{"left":{"min":0}},"period":60,"stat":"Sum"}},{"type":"text","width":24,"height":1,"x":0,"y":100,"properties":{"markdown":"# Logs"}},{"type":"text","width":12,"height":4,"x":0,"y":101,"properties":{"markdown":"# Producer\\nAPI GWに対してリクエストを送信するクライアントスクリプトのログ情報\\n- Success_Requests: 送信成功したリクエスト数, 「Success_Requests * レコード数(/request) = Success_Records」なら欠損レコードなし\\n- Retried_Requests: リトライしたリクエスト数\\n- Failed_Requests: 送信できなかったリクエスト数, １つでもあれば欠損あり\\n        "}},{"type":"text","width":12,"height":4,"x":12,"y":101,"properties":{"markdown":"# Consumer\\nLambda関数から出力されるログ情報\\n- Success_Records: 処理が正常に完了したレコード数\\n- Retried_Records: DynamoDBのPK重複エラー数\\n- Failed_Records: レコード重複以外のエラー数(DynamoDBのスロットリングなど), リトライ対象\\n        "}},{"type":"log","width":12,"height":3,"x":0,"y":105,"properties":{"view":"table","title":"Producer側スクリプトログサマリ(Sum)","region":"",
+              {
+                "Ref": "AWS::Region",
+              },
+              "","query":"SOURCE '/apigw/client/putRecords' | fields @message\\n| parse @message \\"SUCCESS\\" as @Success\\n| parse @message \\"RETRY\\" as @Retry\\n| parse @message \\"FAILED\\" as @Failed\\n| stats count(@Success) as Success_Requests, count(@Retry) as Retried_Requests, count(@Failed) as Failed_Requests"}},{"type":"log","width":12,"height":3,"x":12,"y":105,"properties":{"view":"table","title":"Consmer側Lambda関数ログサマリ(Sum)","region":"",
               {
                 "Ref": "AWS::Region",
               },
@@ -777,11 +788,11 @@ exports[`apiGwKdsLambdaStack 1`] = `
               {
                 "Ref": "KdsLambdaConsumerLambdaFunc571FC7AA",
               },
-              "' | fields @message\\n| parse @message \\"SUCCESS\\" as @Success\\n| parse @message \\"RETRY\\" as @Retry\\n| parse @message \\"FAILED\\" as @Failed\\n| stats count(@Success) as Success_Records, count(@Retry) as Retried_Records, count(@Failed) as Failed_Records"}},{"type":"log","width":12,"height":15,"x":0,"y":100,"properties":{"view":"table","title":"Producer側スクリプトエラーログ詳細: スロットリングエラーを除く","region":"",
+              "' | fields @message\\n| parse @message \\"SUCCESS\\" as @Success\\n| parse @message \\"RETRY\\" as @Retry\\n| parse @message \\"FAILED\\" as @Failed\\n| stats count(@Success) as Success_Records, count(@Retry) as Retried_Records, count(@Failed) as Failed_Records"}},{"type":"log","width":12,"height":15,"x":0,"y":108,"properties":{"view":"table","title":"Producer側スクリプトエラーログ詳細: スロットリングエラーを除く","region":"",
               {
                 "Ref": "AWS::Region",
               },
-              "","query":"SOURCE '/apigw/client/putRecords' | fields @message\\n| parse @message like \\"Request failed with status code\\"\\n| parse @message not like \\"Request failed with status code 400\\""}},{"type":"log","width":12,"height":15,"x":12,"y":100,"properties":{"view":"table","title":"Consumer側スクリプトエラーログ詳細","region":"",
+              "","query":"SOURCE '/apigw/client/putRecords' | fields @message\\n| parse @message like \\"Request failed with status code\\"\\n| parse @message not like \\"Request failed with status code 400\\""}},{"type":"log","width":12,"height":15,"x":12,"y":108,"properties":{"view":"table","title":"Consumer側スクリプトエラーログ詳細","region":"",
               {
                 "Ref": "AWS::Region",
               },
