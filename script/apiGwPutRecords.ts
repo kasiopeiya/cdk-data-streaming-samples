@@ -129,7 +129,7 @@ const main = async (): Promise<void> => {
     }
 
     // リクエスト送信
-    await Promise.all(tasks)
+    await Promise.allSettled(tasks)
 
     // インターバル
     await wait(sendInterval)

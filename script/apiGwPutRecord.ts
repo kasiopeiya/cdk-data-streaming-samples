@@ -109,7 +109,7 @@ const main = async (): Promise<void> => {
       )
     }
     // タスクを非同期に同時実行、リクエストは１分内でランダム分散
-    await Promise.all(tasks)
+    await Promise.allSettled(tasks)
   }
 }
 
