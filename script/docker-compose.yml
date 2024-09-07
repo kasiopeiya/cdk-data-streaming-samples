@@ -7,4 +7,4 @@ services:
       - ${HOME}/.aws/credentials:/root/.aws/credentials:ro
       - ${HOME}/.aws/config:/root/.aws/config:ro
       - .vimrc:/root/.vimrc:ro
-      - ./:/workspace:cached
+      - ./:/workspace/script:cached
