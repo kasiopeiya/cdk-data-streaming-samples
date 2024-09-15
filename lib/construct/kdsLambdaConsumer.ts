@@ -13,7 +13,6 @@ import { type Stream } from 'aws-cdk-lib/aws-kinesis'
 import * as cw from 'aws-cdk-lib/aws-cloudwatch'
 
 interface KdsLambdaConsumerProps {
-  prefix: string
   dataStream: Stream
   /** Lambda関数のhandlerモジュールファイルパス */
   lambdaEntry: string
@@ -53,7 +52,9 @@ export class KdsLambdaConsumer extends Construct {
       contributorInsights: true,
       timeToLiveAttribute: 'expired',
       dynamoStream: dynamodb.StreamViewType.NEW_IMAGE,
-      tags: [{ key: 'Name', value: `${props.prefix}-lambda-consumer-deduplication-table` }]
+      tags: [
+        { key: 'Name', value: `${Stack.of(this).stackName}-lambda-consumer-deduplication-table` }
+      ]
     })
 
     /*

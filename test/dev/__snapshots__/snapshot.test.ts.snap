@@ -1219,7 +1219,7 @@ exports[`apiGwKdsLambdaStack 1`] = `
             "Tags": [
               {
                 "Key": "Name",
-                "Value": "data-str-lambda-consumer-deduplication-table",
+                "Value": "dev-data-str-sample-apigw-kds-lambda-stack-lambda-consumer-deduplication-table",
               },
             ],
           },
@@ -1721,30 +1721,6 @@ exports[`apiGwKdsLambdaStack 1`] = `
 
 exports[`baseStack 1`] = `
 {
-  "Outputs": {
-    "ExportsOutputFnGetAttFirehoseBkBucketD182A5B2Arn8DA37ED1": {
-      "Export": {
-        "Name": "dev-data-str-base-stack:ExportsOutputFnGetAttFirehoseBkBucketD182A5B2Arn8DA37ED1",
-      },
-      "Value": {
-        "Fn::GetAtt": [
-          "FirehoseBkBucketD182A5B2",
-          "Arn",
-        ],
-      },
-    },
-    "ExportsOutputFnGetAttFirehoseBucket407758F1Arn8ACCD3F6": {
-      "Export": {
-        "Name": "dev-data-str-base-stack:ExportsOutputFnGetAttFirehoseBucket407758F1Arn8ACCD3F6",
-      },
-      "Value": {
-        "Fn::GetAtt": [
-          "FirehoseBucket407758F1",
-          "Arn",
-        ],
-      },
-    },
-  },
   "Parameters": {
     "BootstrapVersion": {
       "Default": "/cdk-bootstrap/hnb659fds/version",
@@ -2141,7 +2117,7 @@ exports[`baseStack 1`] = `
             [
               "Lambda function for auto-deleting objects in ",
               {
-                "Ref": "FirehoseBucket407758F1",
+                "Ref": "TestResourceBucket13D16153",
               },
               " S3 bucket.",
             ],
@@ -2181,260 +2157,6 @@ exports[`baseStack 1`] = `
         ],
       },
       "Type": "AWS::IAM::Role",
-    },
-    "FirehoseBkBucketAutoDeleteObjectsCustomResource34499E1B": {
-      "DeletionPolicy": "Delete",
-      "DependsOn": [
-        "FirehoseBkBucketPolicy5F3C33F8",
-      ],
-      "Properties": {
-        "BucketName": {
-          "Ref": "FirehoseBkBucketD182A5B2",
-        },
-        "ServiceToken": {
-          "Fn::GetAtt": [
-            "CustomS3AutoDeleteObjectsCustomResourceProviderHandler9D90184F",
-            "Arn",
-          ],
-        },
-      },
-      "Type": "Custom::S3AutoDeleteObjects",
-      "UpdateReplacePolicy": "Delete",
-    },
-    "FirehoseBkBucketD182A5B2": {
-      "DeletionPolicy": "Delete",
-      "Properties": {
-        "BucketEncryption": {
-          "ServerSideEncryptionConfiguration": [
-            {
-              "ServerSideEncryptionByDefault": {
-                "SSEAlgorithm": "AES256",
-              },
-            },
-          ],
-        },
-        "Tags": [
-          {
-            "Key": "aws-cdk:auto-delete-objects",
-            "Value": "true",
-          },
-        ],
-      },
-      "Type": "AWS::S3::Bucket",
-      "UpdateReplacePolicy": "Delete",
-    },
-    "FirehoseBkBucketPolicy5F3C33F8": {
-      "Properties": {
-        "Bucket": {
-          "Ref": "FirehoseBkBucketD182A5B2",
-        },
-        "PolicyDocument": {
-          "Statement": [
-            {
-              "Action": "s3:*",
-              "Condition": {
-                "Bool": {
-                  "aws:SecureTransport": "false",
-                },
-              },
-              "Effect": "Deny",
-              "Principal": {
-                "AWS": "*",
-              },
-              "Resource": [
-                {
-                  "Fn::GetAtt": [
-                    "FirehoseBkBucketD182A5B2",
-                    "Arn",
-                  ],
-                },
-                {
-                  "Fn::Join": [
-                    "",
-                    [
-                      {
-                        "Fn::GetAtt": [
-                          "FirehoseBkBucketD182A5B2",
-                          "Arn",
-                        ],
-                      },
-                      "/*",
-                    ],
-                  ],
-                },
-              ],
-            },
-            {
-              "Action": [
-                "s3:PutBucketPolicy",
-                "s3:GetBucket*",
-                "s3:List*",
-                "s3:DeleteObject*",
-              ],
-              "Effect": "Allow",
-              "Principal": {
-                "AWS": {
-                  "Fn::GetAtt": [
-                    "CustomS3AutoDeleteObjectsCustomResourceProviderRole3B1BD092",
-                    "Arn",
-                  ],
-                },
-              },
-              "Resource": [
-                {
-                  "Fn::GetAtt": [
-                    "FirehoseBkBucketD182A5B2",
-                    "Arn",
-                  ],
-                },
-                {
-                  "Fn::Join": [
-                    "",
-                    [
-                      {
-                        "Fn::GetAtt": [
-                          "FirehoseBkBucketD182A5B2",
-                          "Arn",
-                        ],
-                      },
-                      "/*",
-                    ],
-                  ],
-                },
-              ],
-            },
-          ],
-          "Version": "2012-10-17",
-        },
-      },
-      "Type": "AWS::S3::BucketPolicy",
-    },
-    "FirehoseBucket407758F1": {
-      "DeletionPolicy": "Delete",
-      "Properties": {
-        "BucketEncryption": {
-          "ServerSideEncryptionConfiguration": [
-            {
-              "ServerSideEncryptionByDefault": {
-                "SSEAlgorithm": "AES256",
-              },
-            },
-          ],
-        },
-        "Tags": [
-          {
-            "Key": "aws-cdk:auto-delete-objects",
-            "Value": "true",
-          },
-        ],
-      },
-      "Type": "AWS::S3::Bucket",
-      "UpdateReplacePolicy": "Delete",
-    },
-    "FirehoseBucketAutoDeleteObjectsCustomResourceD3E44B23": {
-      "DeletionPolicy": "Delete",
-      "DependsOn": [
-        "FirehoseBucketPolicy005BD2F0",
-      ],
-      "Properties": {
-        "BucketName": {
-          "Ref": "FirehoseBucket407758F1",
-        },
-        "ServiceToken": {
-          "Fn::GetAtt": [
-            "CustomS3AutoDeleteObjectsCustomResourceProviderHandler9D90184F",
-            "Arn",
-          ],
-        },
-      },
-      "Type": "Custom::S3AutoDeleteObjects",
-      "UpdateReplacePolicy": "Delete",
-    },
-    "FirehoseBucketPolicy005BD2F0": {
-      "Properties": {
-        "Bucket": {
-          "Ref": "FirehoseBucket407758F1",
-        },
-        "PolicyDocument": {
-          "Statement": [
-            {
-              "Action": "s3:*",
-              "Condition": {
-                "Bool": {
-                  "aws:SecureTransport": "false",
-                },
-              },
-              "Effect": "Deny",
-              "Principal": {
-                "AWS": "*",
-              },
-              "Resource": [
-                {
-                  "Fn::GetAtt": [
-                    "FirehoseBucket407758F1",
-                    "Arn",
-                  ],
-                },
-                {
-                  "Fn::Join": [
-                    "",
-                    [
-                      {
-                        "Fn::GetAtt": [
-                          "FirehoseBucket407758F1",
-                          "Arn",
-                        ],
-                      },
-                      "/*",
-                    ],
-                  ],
-                },
-              ],
-            },
-            {
-              "Action": [
-                "s3:PutBucketPolicy",
-                "s3:GetBucket*",
-                "s3:List*",
-                "s3:DeleteObject*",
-              ],
-              "Effect": "Allow",
-              "Principal": {
-                "AWS": {
-                  "Fn::GetAtt": [
-                    "CustomS3AutoDeleteObjectsCustomResourceProviderRole3B1BD092",
-                    "Arn",
-                  ],
-                },
-              },
-              "Resource": [
-                {
-                  "Fn::GetAtt": [
-                    "FirehoseBucket407758F1",
-                    "Arn",
-                  ],
-                },
-                {
-                  "Fn::Join": [
-                    "",
-                    [
-                      {
-                        "Fn::GetAtt": [
-                          "FirehoseBucket407758F1",
-                          "Arn",
-                        ],
-                      },
-                      "/*",
-                    ],
-                  ],
-                },
-              ],
-            },
-          ],
-          "Version": "2012-10-17",
-        },
-      },
-      "Type": "AWS::S3::BucketPolicy",
     },
     "TestResourceBucket13D16153": {
       "DeletionPolicy": "Delete",
@@ -2714,6 +2436,318 @@ exports[`deliveryS3Stack 1`] = `
     },
   },
   "Resources": {
+    "CustomS3AutoDeleteObjectsCustomResourceProviderHandler9D90184F": {
+      "DependsOn": [
+        "CustomS3AutoDeleteObjectsCustomResourceProviderRole3B1BD092",
+      ],
+      "Properties": {
+        "Code": {
+          "S3Bucket": {
+            "Fn::Sub": "cdk-hnb659fds-assets-\${AWS::AccountId}-ap-northeast-1",
+          },
+          "S3Key": "HASH-REPLACED.zip",
+        },
+        "Description": {
+          "Fn::Join": [
+            "",
+            [
+              "Lambda function for auto-deleting objects in ",
+              {
+                "Ref": "DestinationBucket4BECDB47",
+              },
+              " S3 bucket.",
+            ],
+          ],
+        },
+        "Handler": "index.handler",
+        "MemorySize": 128,
+        "Role": {
+          "Fn::GetAtt": [
+            "CustomS3AutoDeleteObjectsCustomResourceProviderRole3B1BD092",
+            "Arn",
+          ],
+        },
+        "Runtime": "nodejs20.x",
+        "Timeout": 900,
+      },
+      "Type": "AWS::Lambda::Function",
+    },
+    "CustomS3AutoDeleteObjectsCustomResourceProviderRole3B1BD092": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "lambda.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Sub": "arn:\${AWS::Partition}:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+    },
+    "DestinationBucket4BECDB47": {
+      "DeletionPolicy": "Delete",
+      "Properties": {
+        "BucketEncryption": {
+          "ServerSideEncryptionConfiguration": [
+            {
+              "ServerSideEncryptionByDefault": {
+                "SSEAlgorithm": "AES256",
+              },
+            },
+          ],
+        },
+        "Tags": [
+          {
+            "Key": "aws-cdk:auto-delete-objects",
+            "Value": "true",
+          },
+        ],
+      },
+      "Type": "AWS::S3::Bucket",
+      "UpdateReplacePolicy": "Delete",
+    },
+    "DestinationBucketAutoDeleteObjectsCustomResource8ECA4428": {
+      "DeletionPolicy": "Delete",
+      "DependsOn": [
+        "DestinationBucketPolicyFCD81088",
+      ],
+      "Properties": {
+        "BucketName": {
+          "Ref": "DestinationBucket4BECDB47",
+        },
+        "ServiceToken": {
+          "Fn::GetAtt": [
+            "CustomS3AutoDeleteObjectsCustomResourceProviderHandler9D90184F",
+            "Arn",
+          ],
+        },
+      },
+      "Type": "Custom::S3AutoDeleteObjects",
+      "UpdateReplacePolicy": "Delete",
+    },
+    "DestinationBucketPolicyFCD81088": {
+      "Properties": {
+        "Bucket": {
+          "Ref": "DestinationBucket4BECDB47",
+        },
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "s3:*",
+              "Condition": {
+                "Bool": {
+                  "aws:SecureTransport": "false",
+                },
+              },
+              "Effect": "Deny",
+              "Principal": {
+                "AWS": "*",
+              },
+              "Resource": [
+                {
+                  "Fn::GetAtt": [
+                    "DestinationBucket4BECDB47",
+                    "Arn",
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      {
+                        "Fn::GetAtt": [
+                          "DestinationBucket4BECDB47",
+                          "Arn",
+                        ],
+                      },
+                      "/*",
+                    ],
+                  ],
+                },
+              ],
+            },
+            {
+              "Action": [
+                "s3:PutBucketPolicy",
+                "s3:GetBucket*",
+                "s3:List*",
+                "s3:DeleteObject*",
+              ],
+              "Effect": "Allow",
+              "Principal": {
+                "AWS": {
+                  "Fn::GetAtt": [
+                    "CustomS3AutoDeleteObjectsCustomResourceProviderRole3B1BD092",
+                    "Arn",
+                  ],
+                },
+              },
+              "Resource": [
+                {
+                  "Fn::GetAtt": [
+                    "DestinationBucket4BECDB47",
+                    "Arn",
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      {
+                        "Fn::GetAtt": [
+                          "DestinationBucket4BECDB47",
+                          "Arn",
+                        ],
+                      },
+                      "/*",
+                    ],
+                  ],
+                },
+              ],
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+      },
+      "Type": "AWS::S3::BucketPolicy",
+    },
+    "FirehoseBkBucketAutoDeleteObjectsCustomResource34499E1B": {
+      "DeletionPolicy": "Delete",
+      "DependsOn": [
+        "FirehoseBkBucketPolicy5F3C33F8",
+      ],
+      "Properties": {
+        "BucketName": {
+          "Ref": "FirehoseBkBucketD182A5B2",
+        },
+        "ServiceToken": {
+          "Fn::GetAtt": [
+            "CustomS3AutoDeleteObjectsCustomResourceProviderHandler9D90184F",
+            "Arn",
+          ],
+        },
+      },
+      "Type": "Custom::S3AutoDeleteObjects",
+      "UpdateReplacePolicy": "Delete",
+    },
+    "FirehoseBkBucketD182A5B2": {
+      "DeletionPolicy": "Delete",
+      "Properties": {
+        "BucketEncryption": {
+          "ServerSideEncryptionConfiguration": [
+            {
+              "ServerSideEncryptionByDefault": {
+                "SSEAlgorithm": "AES256",
+              },
+            },
+          ],
+        },
+        "Tags": [
+          {
+            "Key": "aws-cdk:auto-delete-objects",
+            "Value": "true",
+          },
+        ],
+      },
+      "Type": "AWS::S3::Bucket",
+      "UpdateReplacePolicy": "Delete",
+    },
+    "FirehoseBkBucketPolicy5F3C33F8": {
+      "Properties": {
+        "Bucket": {
+          "Ref": "FirehoseBkBucketD182A5B2",
+        },
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "s3:*",
+              "Condition": {
+                "Bool": {
+                  "aws:SecureTransport": "false",
+                },
+              },
+              "Effect": "Deny",
+              "Principal": {
+                "AWS": "*",
+              },
+              "Resource": [
+                {
+                  "Fn::GetAtt": [
+                    "FirehoseBkBucketD182A5B2",
+                    "Arn",
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      {
+                        "Fn::GetAtt": [
+                          "FirehoseBkBucketD182A5B2",
+                          "Arn",
+                        ],
+                      },
+                      "/*",
+                    ],
+                  ],
+                },
+              ],
+            },
+            {
+              "Action": [
+                "s3:PutBucketPolicy",
+                "s3:GetBucket*",
+                "s3:List*",
+                "s3:DeleteObject*",
+              ],
+              "Effect": "Allow",
+              "Principal": {
+                "AWS": {
+                  "Fn::GetAtt": [
+                    "CustomS3AutoDeleteObjectsCustomResourceProviderRole3B1BD092",
+                    "Arn",
+                  ],
+                },
+              },
+              "Resource": [
+                {
+                  "Fn::GetAtt": [
+                    "FirehoseBkBucketD182A5B2",
+                    "Arn",
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      {
+                        "Fn::GetAtt": [
+                          "FirehoseBkBucketD182A5B2",
+                          "Arn",
+                        ],
+                      },
+                      "/*",
+                    ],
+                  ],
+                },
+              ],
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+      },
+      "Type": "AWS::S3::BucketPolicy",
+    },
     "FirehoseWithLambdaCustomLayer9FB598A7": {
       "DeletionPolicy": "Delete",
       "Properties": {
@@ -2893,7 +2927,10 @@ exports[`deliveryS3Stack 1`] = `
         "DeliveryStreamType": "KinesisStreamAsSource",
         "ExtendedS3DestinationConfiguration": {
           "BucketARN": {
-            "Fn::ImportValue": "dev-data-str-base-stack:ExportsOutputFnGetAttFirehoseBucket407758F1Arn8ACCD3F6",
+            "Fn::GetAtt": [
+              "DestinationBucket4BECDB47",
+              "Arn",
+            ],
           },
           "BufferingHints": {
             "IntervalInSeconds": 60,
@@ -2936,6 +2973,14 @@ exports[`deliveryS3Stack 1`] = `
                       ],
                     },
                   },
+                  {
+                    "ParameterName": "BufferIntervalInSeconds",
+                    "ParameterValue": "10",
+                  },
+                  {
+                    "ParameterName": "BufferSizeInMBs",
+                    "ParameterValue": "3",
+                  },
                 ],
                 "Type": "Lambda",
               },
@@ -2974,7 +3019,14 @@ exports[`deliveryS3Stack 1`] = `
           },
           "S3BackupConfiguration": {
             "BucketARN": {
-              "Fn::ImportValue": "dev-data-str-base-stack:ExportsOutputFnGetAttFirehoseBkBucketD182A5B2Arn8DA37ED1",
+              "Fn::GetAtt": [
+                "FirehoseBkBucketD182A5B2",
+                "Arn",
+              ],
+            },
+            "BufferingHints": {
+              "IntervalInSeconds": 60,
+              "SizeInMBs": 5,
             },
             "CloudWatchLoggingOptions": {
               "Enabled": true,
@@ -3048,14 +3100,20 @@ exports[`deliveryS3Stack 1`] = `
               "Effect": "Allow",
               "Resource": [
                 {
-                  "Fn::ImportValue": "dev-data-str-base-stack:ExportsOutputFnGetAttFirehoseBucket407758F1Arn8ACCD3F6",
+                  "Fn::GetAtt": [
+                    "DestinationBucket4BECDB47",
+                    "Arn",
+                  ],
                 },
                 {
                   "Fn::Join": [
                     "",
                     [
                       {
-                        "Fn::ImportValue": "dev-data-str-base-stack:ExportsOutputFnGetAttFirehoseBucket407758F1Arn8ACCD3F6",
+                        "Fn::GetAtt": [
+                          "DestinationBucket4BECDB47",
+                          "Arn",
+                        ],
                       },
                       "/*",
                     ],
@@ -3092,14 +3150,20 @@ exports[`deliveryS3Stack 1`] = `
               "Effect": "Allow",
               "Resource": [
                 {
-                  "Fn::ImportValue": "dev-data-str-base-stack:ExportsOutputFnGetAttFirehoseBkBucketD182A5B2Arn8DA37ED1",
+                  "Fn::GetAtt": [
+                    "FirehoseBkBucketD182A5B2",
+                    "Arn",
+                  ],
                 },
                 {
                   "Fn::Join": [
                     "",
                     [
                       {
-                        "Fn::ImportValue": "dev-data-str-base-stack:ExportsOutputFnGetAttFirehoseBkBucketD182A5B2Arn8DA37ED1",
+                        "Fn::GetAtt": [
+                          "FirehoseBkBucketD182A5B2",
+                          "Arn",
+                        ],
                       },
                       "/*",
                     ],

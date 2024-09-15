@@ -84,7 +84,6 @@ interface ScriptLogGroupNames {
 }
 
 interface KdsCWDashboardProps {
-  prefix: string
   /** API GW RestAPI */
   restApi?: RestApi
   /** KDS DataStream */

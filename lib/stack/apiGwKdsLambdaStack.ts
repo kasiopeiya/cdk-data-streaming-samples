@@ -42,7 +42,6 @@ export class ApiGwKdsLambdaStack extends Stack {
     * Consumer側
     -------------------------------------------------------------------------- */
     const consumer = new KdsLambdaConsumer(this, 'KdsLambdaConsumer', {
-      prefix: props.prefix,
       dataStream: kdsDataStream.dataStream,
       lambdaEntry: './resources/lambda/kinesis/index.ts',
       billing: dynamodb.Billing.onDemand()
@@ -87,7 +86,6 @@ export class ApiGwKdsLambdaStack extends Stack {
 
     // Dashboard
     new KdsCWDashboard(this, 'KdsCWDashborad', {
-      prefix: props.prefix,
       alarms: cwAlarms,
       dataStream: kdsDataStream.dataStream,
       restApi: producer.restApi,

@@ -1,4 +1,4 @@
-import { type Stack, Stage, type Environment } from 'aws-cdk-lib'
+import { type Stack, Stage, type Environment, Duration } from 'aws-cdk-lib'
 import { type Construct } from 'constructs'
 
 import { type Config } from '../../config'
@@ -11,7 +11,7 @@ export abstract class StageBase extends Stage {
     const prefix: string = config.prefix
 
     /*
-    * ステートフルリソース用スタック
+    * 共通リソース用スタック
     -------------------------------------------------------------------------- */
     const baseStack = new BaseStack(scope, `${prefix}-base-stack`, { env })
 
@@ -20,13 +20,10 @@ export abstract class StageBase extends Stage {
     -------------------------------------------------------------------------- */
     const deliveryS3Stack = new DeliveryS3Stack(scope, `${prefix}-sample-delivery-s3-stack`, {
       env,
-      prefix: config.prefix,
-      bucket: baseStack.firehoseBucket,
       enableLambdaProcessor: true,
-      s3BackupOptions: {
-        bucket: baseStack.firehoseBkBucket
-      }
+      bufferingInterval: Duration.seconds(60)
     })
+    deliveryS3Stack.addDependency(baseStack)
 
     /*
     * APIGW - KDS - Lambda構成スタック
@@ -39,6 +36,7 @@ export abstract class StageBase extends Stage {
         prefix: config.prefix
       }
     )
+    apiGwKdsLambdaStack.addDependency(baseStack)
 
     return {
       baseStack,

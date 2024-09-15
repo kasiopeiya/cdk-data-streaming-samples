@@ -2,7 +2,6 @@ import * as path from 'path'
 
 import { Duration, Stack, type StackProps, RemovalPolicy } from 'aws-cdk-lib'
 import { type Construct } from 'constructs'
-import { type Bucket } from 'aws-cdk-lib/aws-s3'
 import * as kinesisfirehose_alpha from '@aws-cdk/aws-kinesisfirehose-alpha'
 import * as kinesisfirehose_destination_alpha from '@aws-cdk/aws-kinesisfirehose-destinations-alpha'
 import { type Function as LambdaFunction } from 'aws-cdk-lib/aws-lambda'
@@ -10,6 +9,7 @@ import * as logs from 'aws-cdk-lib/aws-logs'
 import { type Alarm } from 'aws-cdk-lib/aws-cloudwatch'
 import * as cwAction from 'aws-cdk-lib/aws-cloudwatch-actions'
 import { StreamMode, type CfnStream } from 'aws-cdk-lib/aws-kinesis'
+import * as s3 from 'aws-cdk-lib/aws-s3'
 
 import { KdsDataStream } from '../construct/kdsDataStream'
 import { KdsCWDashboard } from '../construct/kdsCWDashboard'
@@ -17,37 +17,48 @@ import { FirehoseWithLambda } from '../construct/firehoseWithLambda'
 import { KdsScaleOutLambda } from '../construct/kdsScaleOutLambda'
 
 interface DeliveryS3StackProps extends StackProps {
-  /** プレフィックス */
-  prefix: string
-  /** 配信先S3バケット */
-  bucket: Bucket
   /** 配信のバッファリング秒数 0 ~ 900, 動的パーティショニング使用時は 60 ~ 900 */
   bufferingInterval?: Duration
   /** Lambda関数による加工処理有効化フラグ */
   enableLambdaProcessor?: boolean
-  /** Lambda関数加工処理設定 */
-  dataProcessorOptions?: kinesisfirehose_alpha.DataProcessorProps
-  /** バックアップ配信設定 */
-  s3BackupOptions?: {
-    bucket: kinesisfirehose_destination_alpha.DestinationS3BackupProps['bucket']
-    bufferingInterval?: kinesisfirehose_destination_alpha.DestinationS3BackupProps['bufferingInterval']
-    bufferingSize?: kinesisfirehose_destination_alpha.DestinationS3BackupProps['bufferingSize']
-  }
+  /** Lambda加工処理のバッファリング設定 */
+  processorBufferingInterval?: Duration
 }
 
 /**
  * S3への配信構成
  */
 export class DeliveryS3Stack extends Stack {
-  constructor(scope: Construct, id: string, props: DeliveryS3StackProps) {
+  constructor(scope: Construct, id: string, props?: DeliveryS3StackProps) {
     super(scope, id, props)
 
+    props ??= {}
     props.enableLambdaProcessor ??= false
+    props.bufferingInterval ??= Duration.seconds(5)
 
     /*
     * Kinesis Data Streams
     -------------------------------------------------------------------------- */
     const kdsDataStream = new KdsDataStream(this, 'KdsDataStream')
+
+    /*
+    * S3
+    -------------------------------------------------------------------------- */
+    // Firehose配信先バケット
+    const destinationBucket = new s3.Bucket(this, 'DestinationBucket', {
+      autoDeleteObjects: true,
+      removalPolicy: RemovalPolicy.DESTROY,
+      encryption: s3.BucketEncryption.S3_MANAGED,
+      enforceSSL: true
+    })
+
+    // Firehose加工処理時のバックアップ用
+    const firehoseBkBucket = new s3.Bucket(this, 'FirehoseBkBucket', {
+      autoDeleteObjects: true,
+      removalPolicy: RemovalPolicy.DESTROY,
+      encryption: s3.BucketEncryption.S3_MANAGED,
+      enforceSSL: true
+    })
 
     /*
     * Data Firehose
@@ -60,7 +71,6 @@ export class DeliveryS3Stack extends Stack {
       // Lambda加工処理を実施する場合
       firehoseWithLambda = new FirehoseWithLambda(this, 'FirehoseWithLambda', {
         sourceStream: kdsDataStream.dataStream,
-        destinationBucket: props.bucket,
         lambdaEntry: path.join(
           'resources',
           'lambda',
@@ -68,17 +78,16 @@ export class DeliveryS3Stack extends Stack {
           'dynamicPartitioning',
           'index.ts'
         ),
-        s3BackupOptions: {
-          bucket: props.s3BackupOptions?.bucket
-        }
+        destinationBucket,
+        backupBucket: firehoseBkBucket,
+        bufferingInterval: props.bufferingInterval,
+        processorBufferingInterval: props.processorBufferingInterval
       })
       deliveryStream = firehoseWithLambda.deliveryStream
       lambdaFunc = firehoseWithLambda.lambdaFunc
     } else {
       // 配信のみの場合
-      props.bufferingInterval ??= Duration.seconds(5)
-
-      const s3Destination = new kinesisfirehose_destination_alpha.S3Bucket(props.bucket, {
+      const s3Destination = new kinesisfirehose_destination_alpha.S3Bucket(destinationBucket, {
         bufferingInterval: props.bufferingInterval,
         dataOutputPrefix: 'data/!{timestamp:yyyy/MM/dd/HH}/',
         errorOutputPrefix: 'error/!{firehose:error-output-type}/!{timestamp:yyyy/MM/dd/HH}/',
@@ -131,7 +140,6 @@ export class DeliveryS3Stack extends Stack {
 
     // Dashboard
     new KdsCWDashboard(this, 'KdsCWDashborad', {
-      prefix: props.prefix,
       alarms: cwAlarms,
       dataStream: kdsDataStream.dataStream,
       deliveryStream,

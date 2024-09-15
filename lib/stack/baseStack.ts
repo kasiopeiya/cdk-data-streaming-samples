@@ -13,30 +13,12 @@ import { AlarmNotificationHandler } from '../construct/alarmNotificationHandler'
  * ステートフルなリソースを構築する
  */
 export class BaseStack extends Stack {
-  public readonly firehoseBucket: Bucket
-  public readonly firehoseBkBucket: Bucket
-
   constructor(scope: Construct, id: string, props?: StackProps) {
     super(scope, id, props)
 
     /*
     * S3
     -------------------------------------------------------------------------- */
-    this.firehoseBucket = new Bucket(this, 'FirehoseBucket', {
-      autoDeleteObjects: true,
-      removalPolicy: RemovalPolicy.DESTROY,
-      encryption: BucketEncryption.S3_MANAGED,
-      enforceSSL: true
-    })
-
-    // Firehoseのバックアップ用
-    this.firehoseBkBucket = new Bucket(this, 'FirehoseBkBucket', {
-      autoDeleteObjects: true,
-      removalPolicy: RemovalPolicy.DESTROY,
-      encryption: BucketEncryption.S3_MANAGED,
-      enforceSSL: true
-    })
-
     // テスト資材配置用
     const testResourceBucket = new Bucket(this, 'TestResourceBucket', {
       bucketName: `cdk-samples-test-resource-bucket-${this.account}`,
@@ -109,11 +91,5 @@ export class BaseStack extends Stack {
     new AlarmNotificationHandler(this, 'AlarmNotificationHandler', {
       topic: alarmTopic
     })
-
-    /*
-    * 出力設定
-    -------------------------------------------------------------------------- */
-    this.exportValue(this.firehoseBkBucket.bucketArn)
-    this.exportValue(this.firehoseBucket.bucketArn)
   }
 }
