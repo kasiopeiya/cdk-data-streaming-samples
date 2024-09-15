@@ -5,6 +5,7 @@ import { type Config } from '../../config'
 import { BaseStack } from '../stack/baseStack'
 import { DeliveryS3Stack } from '../stack/deliveryS3Stack'
 import { ApiGwKdsLambdaStack } from '../stack/apiGwKdsLambdaStack'
+import { SampleVpcStack } from '../stack/sampleVpcStack'
 
 export abstract class StageBase extends Stage {
   createCommonStacks(scope: Construct, config: Config, env: Environment): Record<string, Stack> {
@@ -14,6 +15,11 @@ export abstract class StageBase extends Stage {
     * 共通リソース用スタック
     -------------------------------------------------------------------------- */
     const baseStack = new BaseStack(scope, `${prefix}-base-stack`, { env })
+
+    /*
+    * 共通リソース用スタック
+    -------------------------------------------------------------------------- */
+    const baseVpcStack = new SampleVpcStack(scope, `${prefix}-base-vpc-stack`, { env })
 
     /*
     * S3配信構成用スタック
@@ -40,6 +46,7 @@ export abstract class StageBase extends Stage {
 
     return {
       baseStack,
+      baseVpcStack,
       deliveryS3Stack,
       apiGwKdsLambdaStack
     }
