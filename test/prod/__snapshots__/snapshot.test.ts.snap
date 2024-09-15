@@ -776,31 +776,14 @@ exports[`apiGwKdsLambdaStack 1`] = `
                   "QueueName",
                 ],
               },
-              "",{"stat":"Sum"}]],"yAxis":{"left":{"min":0}},"period":60,"stat":"Sum"}},{"type":"text","width":24,"height":1,"x":0,"y":100,"properties":{"markdown":"# Logs"}},{"type":"text","width":12,"height":4,"x":0,"y":101,"properties":{"markdown":"# Producer\\nAPI GWに対してリクエストを送信するクライアントスクリプトのログ情報\\n- Success_Requests: 送信成功したリクエスト数, 「Success_Requests * レコード数(/request) = Success_Records」なら欠損レコードなし\\n- Retried_Requests: リトライしたリクエスト数\\n- Failed_Requests: 送信できなかったリクエスト数, １つでもあれば欠損あり\\n        "}},{"type":"text","width":12,"height":4,"x":12,"y":101,"properties":{"markdown":"# Consumer\\nLambda関数から出力されるログ情報\\n- Success_Records: 処理が正常に完了したレコード数\\n- Retried_Records: DynamoDBのPK重複エラー数\\n- Failed_Records: レコード重複以外のエラー数(DynamoDBのスロットリングなど), リトライ対象\\n        "}},{"type":"log","width":12,"height":3,"x":0,"y":105,"properties":{"view":"table","title":"Producer側スクリプトログサマリ(Sum)","region":"",
+              "",{"stat":"Sum"}]],"yAxis":{"left":{"min":0}},"period":60,"stat":"Sum"}},{"type":"text","width":24,"height":1,"x":0,"y":100,"properties":{"markdown":"# Logs"}},{"type":"text","width":12,"height":12,"x":0,"y":101,"properties":{"markdown":"# Producer\\n### Producerスクリプトのログ情報\\n- Success_Requests: 送信成功したリクエスト数, 「Success_Requests * レコード数(/request) = Success_Records」なら欠損レコードなし\\n- Retried_Requests: リトライしたリクエスト数\\n- Failed_Requests: 送信できなかったリクエスト数, １つでもあれば欠損あり\\n\\n### Logs Insight Queryサンプル\\n#### カウント\\n\`\`\`\\nfields @message |\\nparse @message \\"SUCCESS\\" as @Success |\\nparse @message \\"RETRY\\" as @Retry |\\nparse @message \\"FAILED\\" as @Failed |\\nstats count(@Success) as Success_Requests, count(@Retry) as Retried_Requests, count(@Failed) as Failed_Requests\\n\`\`\`\\n#### エラーログ詳細確認\\n\`\`\`\\nfields @message |\\nparse @message like \\"Request failed with status code\\"\\n\`\`\`\\n\\n### LogGroup\\n[/test/script/apiGwPutRecord](https://ap-northeast-1.console.aws.amazon.com/cloudwatch/home?region=ap-northeast-1#logsV2:log-groups/log-group/$252Ftest$252Fscript$252FapiGwPutRecord)\\n[/test/script/apiGwPutRecords](https://ap-northeast-1.console.aws.amazon.com/cloudwatch/home?region=ap-northeast-1#logsV2:log-groups/log-group/$252Ftest$252Fscript$252FapiGwPutRecords)\\n[/test/script/sdkPutRecords](https://ap-northeast-1.console.aws.amazon.com/cloudwatch/home?region=ap-northeast-1#logsV2:log-groups/log-group/$252Ftest$252Fscript$252FsdkPutRecords)\\n        "}},{"type":"text","width":12,"height":12,"x":12,"y":101,"properties":{"markdown":"# Consumer\\n### Lambda関数ログ情報\\n- Success_Records: 処理が正常に完了したレコード数\\n- Retried_Records: DynamoDBのPK重複エラー数\\n- Failed_Records: レコード重複以外のエラー数(DynamoDBのスロットリングなど), リトライ対象\\n\\n### Logs Insight Queryサンプル\\n#### カウント\\n\`\`\`\\nfields @message |\\nparse @message \\"SUCCESS\\" as @Success |\\nparse @message \\"RETRY\\" as @Retry |\\nparse @message \\"FAILED\\" as @Failed |\\nstats count(@Success) as Success_Records, count(@Retry) as Retried_Records, count(@Failed) as Failed_Records\\n\`\`\`\\n#### エラーログ詳細確認\\n\`\`\`\\nfields @message |\\nparse @message like \\"FAILED\\"\\n\`\`\`\\n\\n### LogGroup\\n[",
               {
-                "Ref": "AWS::Region",
+                "Fn::GetAtt": [
+                  "KdsLambdaConsumerLambdaFuncLogRetentionF79B65AA",
+                  "LogGroupName",
+                ],
               },
-              "","query":"SOURCE '/apigw/client/putRecords' | fields @message\\n| parse @message \\"SUCCESS\\" as @Success\\n| parse @message \\"RETRY\\" as @Retry\\n| parse @message \\"FAILED\\" as @Failed\\n| stats count(@Success) as Success_Requests, count(@Retry) as Retried_Requests, count(@Failed) as Failed_Requests"}},{"type":"log","width":12,"height":3,"x":12,"y":105,"properties":{"view":"table","title":"Consmer側Lambda関数ログサマリ(Sum)","region":"",
-              {
-                "Ref": "AWS::Region",
-              },
-              "","query":"SOURCE '/aws/lambda/",
-              {
-                "Ref": "KdsLambdaConsumerLambdaFunc571FC7AA",
-              },
-              "' | fields @message\\n| parse @message \\"SUCCESS\\" as @Success\\n| parse @message \\"RETRY\\" as @Retry\\n| parse @message \\"FAILED\\" as @Failed\\n| stats count(@Success) as Success_Records, count(@Retry) as Retried_Records, count(@Failed) as Failed_Records"}},{"type":"log","width":12,"height":15,"x":0,"y":108,"properties":{"view":"table","title":"Producer側スクリプトエラーログ詳細: スロットリングエラーを除く","region":"",
-              {
-                "Ref": "AWS::Region",
-              },
-              "","query":"SOURCE '/apigw/client/putRecords' | fields @message\\n| parse @message like \\"Request failed with status code\\"\\n| parse @message not like \\"Request failed with status code 400\\""}},{"type":"log","width":12,"height":15,"x":12,"y":108,"properties":{"view":"table","title":"Consumer側スクリプトエラーログ詳細","region":"",
-              {
-                "Ref": "AWS::Region",
-              },
-              "","query":"SOURCE '/aws/lambda/",
-              {
-                "Ref": "KdsLambdaConsumerLambdaFunc571FC7AA",
-              },
-              "' | fields @message\\n| parse @message like \\"FAILED\\""}}]}",
+              "](https://ap-northeast-1.console.aws.amazon.com/cloudwatch/home?region=ap-northeast-1#logsV2:log-groups/log-group/$252Ftest$252Fscript$252FapiGwPutRecord)\\n        "}}]}",
             ],
           ],
         },
@@ -1041,6 +1024,28 @@ exports[`apiGwKdsLambdaStack 1`] = `
         "StartingPosition": "TRIM_HORIZON",
       },
       "Type": "AWS::Lambda::EventSourceMapping",
+    },
+    "KdsLambdaConsumerLambdaFuncLogRetentionF79B65AA": {
+      "Properties": {
+        "LogGroupName": {
+          "Fn::Join": [
+            "",
+            [
+              "/aws/lambda/",
+              {
+                "Ref": "KdsLambdaConsumerLambdaFunc571FC7AA",
+              },
+            ],
+          ],
+        },
+        "ServiceToken": {
+          "Fn::GetAtt": [
+            "LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8aFD4BFC8A",
+            "Arn",
+          ],
+        },
+      },
+      "Type": "Custom::LogRetention",
     },
     "KdsLambdaConsumerLambdaFuncServiceRoleCF9C7104": {
       "Properties": {
@@ -1603,6 +1608,85 @@ exports[`apiGwKdsLambdaStack 1`] = `
       },
       "Type": "AWS::Logs::LogGroup",
       "UpdateReplacePolicy": "Delete",
+    },
+    "LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8aFD4BFC8A": {
+      "DependsOn": [
+        "LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8aServiceRoleDefaultPolicyADDA7DEB",
+        "LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8aServiceRole9741ECFB",
+      ],
+      "Properties": {
+        "Code": {
+          "S3Bucket": {
+            "Fn::Sub": "cdk-hnb659fds-assets-\${AWS::AccountId}-ap-northeast-1",
+          },
+          "S3Key": "HASH-REPLACED.zip",
+        },
+        "Handler": "index.handler",
+        "Role": {
+          "Fn::GetAtt": [
+            "LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8aServiceRole9741ECFB",
+            "Arn",
+          ],
+        },
+        "Runtime": "nodejs20.x",
+        "Timeout": 900,
+      },
+      "Type": "AWS::Lambda::Function",
+    },
+    "LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8aServiceRole9741ECFB": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "lambda.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
+              ],
+            ],
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+    },
+    "LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8aServiceRoleDefaultPolicyADDA7DEB": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "logs:PutRetentionPolicy",
+                "logs:DeleteRetentionPolicy",
+              ],
+              "Effect": "Allow",
+              "Resource": "*",
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8aServiceRoleDefaultPolicyADDA7DEB",
+        "Roles": [
+          {
+            "Ref": "LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8aServiceRole9741ECFB",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
     },
   },
   "Rules": {

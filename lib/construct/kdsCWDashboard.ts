@@ -54,12 +54,8 @@ interface LambdaSectionWidgets extends CommonWidgets {
 
 /** ログセクションで利用可能なWidget */
 interface LogsSectionWidgets extends CommonWidgets {
-  producerTitleWid: cw.TextWidget
-  consumerTitleWid: cw.TextWidget
-  clientScriptLogTableWid: cw.LogQueryWidget
-  clientScriptLogWid: cw.LogQueryWidget
-  lambdaFunctionLogTableWid: cw.LogQueryWidget
-  lambdaFunctionLogWid: cw.LogQueryWidget
+  producerLogDescriptionWid: cw.TextWidget
+  consumerLogDescriptionWid: cw.TextWidget
 }
 
 /** Firehoseセクションで利用可能なWidget */
@@ -80,6 +76,13 @@ interface CustomMetricsKeys {
   metricName: string
 }
 
+/** Producer ScriptのCloudWatch Logs LogGroup名 */
+interface ScriptLogGroupNames {
+  apiGwPutRecord: string
+  apiGwPutRecords: string
+  sdkPutRecords: string
+}
+
 interface KdsCWDashboardProps {
   prefix: string
   /** API GW RestAPI */
@@ -93,7 +96,11 @@ interface KdsCWDashboardProps {
   /** Data Firehose */
   deliveryStream?: DeliveryStream
   /** CloudWatch Alarms */
-  alarms: cw.Alarm[]
+  alarms?: cw.Alarm[]
+  /** Logs Insightの設定 */
+  logsInsightOption?: {
+    logGroupNames?: ScriptLogGroupNames
+  }
 }
 
 export class KdsCWDashboard extends Construct {
@@ -113,6 +120,7 @@ export class KdsCWDashboard extends Construct {
   private readonly logsWidgets: LogsSectionWidgets
   private readonly shardCountMetricsKeys: CustomMetricsKeys
   private readonly batchSizeMetricsKeys: CustomMetricsKeys
+  private readonly logGroupNames: ScriptLogGroupNames
 
   constructor(scope: Construct, id: string, props: KdsCWDashboardProps) {
     super(scope, id)
@@ -125,6 +133,14 @@ export class KdsCWDashboard extends Construct {
       nameSpace: 'Custom/LambdaMetrics',
       metricName: 'LambdaBatchSize'
     }
+
+    props.logsInsightOption ??= {}
+    props.logsInsightOption.logGroupNames ??= {
+      apiGwPutRecord: '/test/script/apiGwPutRecord',
+      apiGwPutRecords: '/test/script/apiGwPutRecords',
+      sdkPutRecords: '/test/script/sdkPutRecords'
+    }
+    this.logGroupNames = props.logsInsightOption.logGroupNames
 
     /*
     * CloudWatch Dashboard
@@ -201,14 +217,9 @@ export class KdsCWDashboard extends Construct {
     if (props.restApi !== undefined && props.lambdaFunction !== undefined) {
       this.logsWidgets = this.createLogsWidgets()
       dashboard.addWidgets(this.logsWidgets.titleWid)
-      dashboard.addWidgets(this.logsWidgets.producerTitleWid, this.logsWidgets.consumerTitleWid)
       dashboard.addWidgets(
-        this.logsWidgets.clientScriptLogTableWid,
-        this.logsWidgets.lambdaFunctionLogTableWid
-      )
-      dashboard.addWidgets(
-        this.logsWidgets.clientScriptLogWid,
-        this.logsWidgets.lambdaFunctionLogWid
+        this.logsWidgets.producerLogDescriptionWid,
+        this.logsWidgets.consumerLogDescriptionWid
       )
     }
 
@@ -648,91 +659,73 @@ export class KdsCWDashboard extends Construct {
       width: 24
     })
 
-    const producerTitleWid = new cw.TextWidget({
+    // Producer Log
+    const region = Stack.of(this).region
+    const producerLogDescriptionWid = new cw.TextWidget({
       markdown: `# Producer
-API GWに対してリクエストを送信するクライアントスクリプトのログ情報
+### Producerスクリプトのログ情報
 - Success_Requests: 送信成功したリクエスト数, 「Success_Requests * レコード数(/request) = Success_Records」なら欠損レコードなし
 - Retried_Requests: リトライしたリクエスト数
 - Failed_Requests: 送信できなかったリクエスト数, １つでもあれば欠損あり
+
+### Logs Insight Queryサンプル
+#### カウント
+\`\`\`
+fields @message |
+parse @message "SUCCESS" as @Success |
+parse @message "RETRY" as @Retry |
+parse @message "FAILED" as @Failed |
+stats count(@Success) as Success_Requests, count(@Retry) as Retried_Requests, count(@Failed) as Failed_Requests
+\`\`\`
+#### エラーログ詳細確認
+\`\`\`
+fields @message |
+parse @message like "Request failed with status code"
+\`\`\`
+
+### LogGroup
+[${this.logGroupNames.apiGwPutRecord}](https://${region}.console.aws.amazon.com/cloudwatch/home?region=${region}#logsV2:log-groups/log-group/${this.logGroupNames.apiGwPutRecord.replaceAll('/', '$252F')})
+[${this.logGroupNames.apiGwPutRecords}](https://${region}.console.aws.amazon.com/cloudwatch/home?region=${region}#logsV2:log-groups/log-group/${this.logGroupNames.apiGwPutRecords.replaceAll('/', '$252F')})
+[${this.logGroupNames.sdkPutRecords}](https://${region}.console.aws.amazon.com/cloudwatch/home?region=${region}#logsV2:log-groups/log-group/${this.logGroupNames.sdkPutRecords.replaceAll('/', '$252F')})
         `,
-      height: 4,
+      height: 12,
       width: 12
     })
-    const consumerTitleWid = new cw.TextWidget({
+
+    // Consumer Log
+    const consumerLogDescriptionWid = new cw.TextWidget({
       markdown: `# Consumer
-Lambda関数から出力されるログ情報
+### Lambda関数ログ情報
 - Success_Records: 処理が正常に完了したレコード数
 - Retried_Records: DynamoDBのPK重複エラー数
 - Failed_Records: レコード重複以外のエラー数(DynamoDBのスロットリングなど), リトライ対象
+
+### Logs Insight Queryサンプル
+#### カウント
+\`\`\`
+fields @message |
+parse @message "SUCCESS" as @Success |
+parse @message "RETRY" as @Retry |
+parse @message "FAILED" as @Failed |
+stats count(@Success) as Success_Records, count(@Retry) as Retried_Records, count(@Failed) as Failed_Records
+\`\`\`
+#### エラーログ詳細確認
+\`\`\`
+fields @message |
+parse @message like "FAILED"
+\`\`\`
+
+### LogGroup
+[${this.lambdaFunction.logGroup.logGroupName}](https://${region}.console.aws.amazon.com/cloudwatch/home?region=${region}#logsV2:log-groups/log-group/${this.logGroupNames.apiGwPutRecord.replaceAll('/', '$252F')})
         `,
-      height: 4,
+      height: 12,
       width: 12
-    })
-
-    // Client Script Logs
-    const clientScriptLogTableWid = new cw.LogQueryWidget({
-      title: 'Producer側スクリプトログサマリ(Sum)',
-      logGroupNames: ['/apigw/client/putRecords'],
-      view: cw.LogQueryVisualizationType.TABLE,
-      queryLines: [
-        'fields @message',
-        'parse @message "SUCCESS" as @Success',
-        'parse @message "RETRY" as @Retry',
-        'parse @message "FAILED" as @Failed',
-        'stats count(@Success) as Success_Requests, count(@Retry) as Retried_Requests, count(@Failed) as Failed_Requests'
-      ],
-      width: this.defaultWidth,
-      height: 3
-    })
-
-    // 書き込みスループット超過エラー以外のログ詳細を表示
-    const clientScriptLogWid = new cw.LogQueryWidget({
-      title: 'Producer側スクリプトエラーログ詳細: スロットリングエラーを除く',
-      logGroupNames: ['/apigw/client/putRecords'],
-      view: cw.LogQueryVisualizationType.TABLE,
-      queryLines: [
-        'fields @message',
-        'parse @message like "Request failed with status code"',
-        'parse @message not like "Request failed with status code 400"'
-      ],
-      width: this.defaultWidth,
-      height: 15
-    })
-
-    // Lammbda Function Logs
-    const lambdaFunctionLogTableWid = new cw.LogQueryWidget({
-      title: 'Consmer側Lambda関数ログサマリ(Sum)',
-      logGroupNames: [`/aws/lambda/${this.lambdaFunction.functionName}`],
-      view: cw.LogQueryVisualizationType.TABLE,
-      queryLines: [
-        'fields @message',
-        'parse @message "SUCCESS" as @Success',
-        'parse @message "RETRY" as @Retry',
-        'parse @message "FAILED" as @Failed',
-        'stats count(@Success) as Success_Records, count(@Retry) as Retried_Records, count(@Failed) as Failed_Records'
-      ],
-      width: this.defaultWidth,
-      height: 3
-    })
-
-    // Lambda処理失敗時のログ詳細を表示
-    const lambdaFunctionLogWid = new cw.LogQueryWidget({
-      title: 'Consumer側スクリプトエラーログ詳細',
-      logGroupNames: [`/aws/lambda/${this.lambdaFunction.functionName}`],
-      view: cw.LogQueryVisualizationType.TABLE,
-      queryLines: ['fields @message', 'parse @message like "FAILED"'],
-      width: this.defaultWidth,
-      height: 15
     })
 
     return {
       titleWid,
-      producerTitleWid,
-      consumerTitleWid,
-      clientScriptLogTableWid,
-      clientScriptLogWid,
-      lambdaFunctionLogTableWid,
-      lambdaFunctionLogWid
+      producerLogDescriptionWid,
+      consumerLogDescriptionWid
     }
   }
 
