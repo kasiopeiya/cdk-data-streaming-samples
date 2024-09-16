@@ -1,6 +1,6 @@
 import * as path from 'path'
 
-import { Duration, Stack, type StackProps, RemovalPolicy } from 'aws-cdk-lib'
+import { Duration, Stack, type StackProps, RemovalPolicy, Tags } from 'aws-cdk-lib'
 import { type Construct } from 'constructs'
 import * as kinesisfirehose_alpha from '@aws-cdk/aws-kinesisfirehose-alpha'
 import * as kinesisfirehose_destination_alpha from '@aws-cdk/aws-kinesisfirehose-destinations-alpha'
@@ -31,6 +31,8 @@ interface DeliveryS3StackProps extends StackProps {
 export class DeliveryS3Stack extends Stack {
   constructor(scope: Construct, id: string, props?: DeliveryS3StackProps) {
     super(scope, id, props)
+
+    Tags.of(this).add('StackName', this.stackName)
 
     props ??= {}
     props.enableLambdaProcessor ??= false

@@ -84,12 +84,21 @@ exports[`apiGwKdsLambdaStack 1`] = `
           ],
         },
         "Name": "Default",
+        "Tags": [
+          {
+            "Key": "StackName",
+            "Value": "prod-data-str-sample-apigw-kds-lambda-stack",
+          },
+        ],
       },
       "Type": "AWS::ApiGateway::RestApi",
     },
     "KdsApiGwProducerAPIGWUrlParameterF380F99B": {
       "Properties": {
         "Name": "/apiGwKds/prod-data-str-sample-apigw-kds-lambda-stack/url",
+        "Tags": {
+          "StackName": "prod-data-str-sample-apigw-kds-lambda-stack",
+        },
         "Type": "String",
         "Value": {
           "Fn::Join": [
@@ -159,11 +168,17 @@ exports[`apiGwKdsLambdaStack 1`] = `
             ],
           },
         ],
+        "Tags": [
+          {
+            "Key": "StackName",
+            "Value": "prod-data-str-sample-apigw-kds-lambda-stack",
+          },
+        ],
       },
       "Type": "AWS::IAM::Role",
       "UpdateReplacePolicy": "Retain",
     },
-    "KdsApiGwProducerDeploymentE4B8A8B485d40d806f35b57e7900733bb03d773b": {
+    "KdsApiGwProducerDeploymentE4B8A8B4b244705509cd0f12787e63376e8c5dfe": {
       "DependsOn": [
         "KdsApiGwProducerstreamsrecordPUTF0440163",
         "KdsApiGwProducerstreamsrecordB638860A",
@@ -185,7 +200,7 @@ exports[`apiGwKdsLambdaStack 1`] = `
       ],
       "Properties": {
         "DeploymentId": {
-          "Ref": "KdsApiGwProducerDeploymentE4B8A8B485d40d806f35b57e7900733bb03d773b",
+          "Ref": "KdsApiGwProducerDeploymentE4B8A8B4b244705509cd0f12787e63376e8c5dfe",
         },
         "MethodSettings": [
           {
@@ -199,6 +214,12 @@ exports[`apiGwKdsLambdaStack 1`] = `
           "Ref": "KdsApiGwProducerA4899BB0",
         },
         "StageName": "v1",
+        "Tags": [
+          {
+            "Key": "StackName",
+            "Value": "prod-data-str-sample-apigw-kds-lambda-stack",
+          },
+        ],
         "TracingEnabled": false,
       },
       "Type": "AWS::ApiGateway::Stage",
@@ -217,6 +238,12 @@ exports[`apiGwKdsLambdaStack 1`] = `
           ],
           "Version": "2012-10-17",
         },
+        "Tags": [
+          {
+            "Key": "StackName",
+            "Value": "prod-data-str-sample-apigw-kds-lambda-stack",
+          },
+        ],
       },
       "Type": "AWS::IAM::Role",
     },
@@ -266,6 +293,12 @@ exports[`apiGwKdsLambdaStack 1`] = `
         "Namespace": "AWS/ApiGateway",
         "Period": 60,
         "Statistic": "Sum",
+        "Tags": [
+          {
+            "Key": "StackName",
+            "Value": "prod-data-str-sample-apigw-kds-lambda-stack",
+          },
+        ],
         "Threshold": 0,
         "TreatMissingData": "notBreaching",
       },
@@ -287,6 +320,12 @@ exports[`apiGwKdsLambdaStack 1`] = `
         "Namespace": "AWS/ApiGateway",
         "Period": 60,
         "Statistic": "Sum",
+        "Tags": [
+          {
+            "Key": "StackName",
+            "Value": "prod-data-str-sample-apigw-kds-lambda-stack",
+          },
+        ],
         "Threshold": 0,
         "TreatMissingData": "notBreaching",
       },
@@ -811,6 +850,12 @@ exports[`apiGwKdsLambdaStack 1`] = `
         "StreamModeDetails": {
           "StreamMode": "PROVISIONED",
         },
+        "Tags": [
+          {
+            "Key": "StackName",
+            "Value": "prod-data-str-sample-apigw-kds-lambda-stack",
+          },
+        ],
       },
       "Type": "AWS::Kinesis::Stream",
       "UpdateReplacePolicy": "Delete",
@@ -833,6 +878,12 @@ exports[`apiGwKdsLambdaStack 1`] = `
         "Namespace": "AWS/Kinesis",
         "Period": 60,
         "Statistic": "Sum",
+        "Tags": [
+          {
+            "Key": "StackName",
+            "Value": "prod-data-str-sample-apigw-kds-lambda-stack",
+          },
+        ],
         "Threshold": 0,
         "TreatMissingData": "notBreaching",
       },
@@ -841,6 +892,9 @@ exports[`apiGwKdsLambdaStack 1`] = `
     "KdsDataStreamparameter9E23EE0A": {
       "Properties": {
         "Name": "/prod-data-str-sample-apigw-kds-lambda-stack/stream/name",
+        "Tags": {
+          "StackName": "prod-data-str-sample-apigw-kds-lambda-stack",
+        },
         "Type": "String",
         "Value": {
           "Ref": "KdsDataStream7B329BF0",
@@ -874,6 +928,12 @@ exports[`apiGwKdsLambdaStack 1`] = `
         "Namespace": "AWS/Kinesis",
         "Period": 60,
         "Statistic": "Sum",
+        "Tags": [
+          {
+            "Key": "StackName",
+            "Value": "prod-data-str-sample-apigw-kds-lambda-stack",
+          },
+        ],
         "Threshold": 500,
         "TreatMissingData": "notBreaching",
       },
@@ -905,6 +965,12 @@ exports[`apiGwKdsLambdaStack 1`] = `
         "Namespace": "AWS/Kinesis",
         "Period": 60,
         "Statistic": "Sum",
+        "Tags": [
+          {
+            "Key": "StackName",
+            "Value": "prod-data-str-sample-apigw-kds-lambda-stack",
+          },
+        ],
         "Threshold": 500,
         "TreatMissingData": "notBreaching",
       },
@@ -929,6 +995,14 @@ exports[`apiGwKdsLambdaStack 1`] = `
     },
     "KdsLambdaConsumerKinesisDeadLetterQueue4D912974": {
       "DeletionPolicy": "Delete",
+      "Properties": {
+        "Tags": [
+          {
+            "Key": "StackName",
+            "Value": "prod-data-str-sample-apigw-kds-lambda-stack",
+          },
+        ],
+      },
       "Type": "AWS::SQS::Queue",
       "UpdateReplacePolicy": "Delete",
     },
@@ -976,6 +1050,12 @@ exports[`apiGwKdsLambdaStack 1`] = `
           ],
         },
         "Runtime": "nodejs20.x",
+        "Tags": [
+          {
+            "Key": "StackName",
+            "Value": "prod-data-str-sample-apigw-kds-lambda-stack",
+          },
+        ],
         "Timeout": 180,
         "TracingConfig": {
           "Mode": "Active",
@@ -1073,6 +1153,12 @@ exports[`apiGwKdsLambdaStack 1`] = `
                 ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
               ],
             ],
+          },
+        ],
+        "Tags": [
+          {
+            "Key": "StackName",
+            "Value": "prod-data-str-sample-apigw-kds-lambda-stack",
           },
         ],
       },
@@ -1186,6 +1272,12 @@ exports[`apiGwKdsLambdaStack 1`] = `
           ],
         },
         "RetentionInDays": 1,
+        "Tags": [
+          {
+            "Key": "StackName",
+            "Value": "prod-data-str-sample-apigw-kds-lambda-stack",
+          },
+        ],
       },
       "Type": "AWS::Logs::LogGroup",
       "UpdateReplacePolicy": "Delete",
@@ -1259,6 +1351,12 @@ exports[`apiGwKdsLambdaStack 1`] = `
         "Namespace": "AWS/SQS",
         "Period": 60,
         "Statistic": "Sum",
+        "Tags": [
+          {
+            "Key": "StackName",
+            "Value": "prod-data-str-sample-apigw-kds-lambda-stack",
+          },
+        ],
         "Threshold": 0,
         "TreatMissingData": "notBreaching",
       },
@@ -1282,6 +1380,12 @@ exports[`apiGwKdsLambdaStack 1`] = `
         "Namespace": "AWS/Lambda",
         "Period": 60,
         "Statistic": "Sum",
+        "Tags": [
+          {
+            "Key": "StackName",
+            "Value": "prod-data-str-sample-apigw-kds-lambda-stack",
+          },
+        ],
         "Threshold": 0,
         "TreatMissingData": "notBreaching",
       },
@@ -1365,6 +1469,12 @@ exports[`apiGwKdsLambdaStack 1`] = `
           ],
         },
         "Runtime": "nodejs20.x",
+        "Tags": [
+          {
+            "Key": "StackName",
+            "Value": "prod-data-str-sample-apigw-kds-lambda-stack",
+          },
+        ],
         "Timeout": 180,
       },
       "Type": "AWS::Lambda::Function",
@@ -1426,6 +1536,12 @@ exports[`apiGwKdsLambdaStack 1`] = `
             ],
           },
         ],
+        "Tags": [
+          {
+            "Key": "StackName",
+            "Value": "prod-data-str-sample-apigw-kds-lambda-stack",
+          },
+        ],
       },
       "Type": "AWS::IAM::Role",
     },
@@ -1444,6 +1560,12 @@ exports[`apiGwKdsLambdaStack 1`] = `
           ],
         },
         "RetentionInDays": 1,
+        "Tags": [
+          {
+            "Key": "StackName",
+            "Value": "prod-data-str-sample-apigw-kds-lambda-stack",
+          },
+        ],
       },
       "Type": "AWS::Logs::LogGroup",
       "UpdateReplacePolicy": "Delete",
@@ -1526,6 +1648,12 @@ exports[`apiGwKdsLambdaStack 1`] = `
           ],
         },
         "Runtime": "nodejs20.x",
+        "Tags": [
+          {
+            "Key": "StackName",
+            "Value": "prod-data-str-sample-apigw-kds-lambda-stack",
+          },
+        ],
         "Timeout": 180,
       },
       "Type": "AWS::Lambda::Function",
@@ -1556,6 +1684,12 @@ exports[`apiGwKdsLambdaStack 1`] = `
                 ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
               ],
             ],
+          },
+        ],
+        "Tags": [
+          {
+            "Key": "StackName",
+            "Value": "prod-data-str-sample-apigw-kds-lambda-stack",
           },
         ],
       },
@@ -1605,6 +1739,12 @@ exports[`apiGwKdsLambdaStack 1`] = `
           ],
         },
         "RetentionInDays": 1,
+        "Tags": [
+          {
+            "Key": "StackName",
+            "Value": "prod-data-str-sample-apigw-kds-lambda-stack",
+          },
+        ],
       },
       "Type": "AWS::Logs::LogGroup",
       "UpdateReplacePolicy": "Delete",
@@ -1629,6 +1769,12 @@ exports[`apiGwKdsLambdaStack 1`] = `
           ],
         },
         "Runtime": "nodejs20.x",
+        "Tags": [
+          {
+            "Key": "StackName",
+            "Value": "prod-data-str-sample-apigw-kds-lambda-stack",
+          },
+        ],
         "Timeout": 900,
       },
       "Type": "AWS::Lambda::Function",
@@ -1659,6 +1805,12 @@ exports[`apiGwKdsLambdaStack 1`] = `
                 ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
               ],
             ],
+          },
+        ],
+        "Tags": [
+          {
+            "Key": "StackName",
+            "Value": "prod-data-str-sample-apigw-kds-lambda-stack",
           },
         ],
       },
@@ -1758,6 +1910,12 @@ exports[`baseStack 1`] = `
             "Arn",
           ],
         },
+        "Tags": [
+          {
+            "Key": "StackName",
+            "Value": "prod-data-str-base-stack",
+          },
+        ],
       },
       "Type": "AWS::StepFunctions::StateMachine",
       "UpdateReplacePolicy": "Delete",
@@ -1776,6 +1934,12 @@ exports[`baseStack 1`] = `
           ],
           "Version": "2012-10-17",
         },
+        "Tags": [
+          {
+            "Key": "StackName",
+            "Value": "prod-data-str-base-stack",
+          },
+        ],
       },
       "Type": "AWS::IAM::Role",
     },
@@ -1816,6 +1980,12 @@ exports[`baseStack 1`] = `
           ],
           "Version": "2012-10-17",
         },
+        "Tags": [
+          {
+            "Key": "StackName",
+            "Value": "prod-data-str-base-stack",
+          },
+        ],
       },
       "Type": "AWS::IAM::Role",
     },
@@ -1891,6 +2061,14 @@ exports[`baseStack 1`] = `
     },
     "AlarmNotificationTopic58BFACC9": {
       "DeletionPolicy": "Delete",
+      "Properties": {
+        "Tags": [
+          {
+            "Key": "StackName",
+            "Value": "prod-data-str-base-stack",
+          },
+        ],
+      },
       "Type": "AWS::SNS::Topic",
       "UpdateReplacePolicy": "Delete",
     },
@@ -1920,6 +2098,12 @@ exports[`baseStack 1`] = `
                 ":iam::aws:policy/service-role/AmazonAPIGatewayPushToCloudWatchLogs",
               ],
             ],
+          },
+        ],
+        "Tags": [
+          {
+            "Key": "StackName",
+            "Value": "prod-data-str-base-stack",
           },
         ],
       },
@@ -1971,6 +2155,12 @@ exports[`baseStack 1`] = `
           ],
         },
         "Runtime": "python3.9",
+        "Tags": [
+          {
+            "Key": "StackName",
+            "Value": "prod-data-str-base-stack",
+          },
+        ],
         "Timeout": 900,
       },
       "Type": "AWS::Lambda::Function",
@@ -2001,6 +2191,12 @@ exports[`baseStack 1`] = `
                 ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
               ],
             ],
+          },
+        ],
+        "Tags": [
+          {
+            "Key": "StackName",
+            "Value": "prod-data-str-base-stack",
           },
         ],
       },
@@ -2190,6 +2386,10 @@ exports[`baseStack 1`] = `
             "Key": "aws-cdk:cr-owned:3c1e193c",
             "Value": "true",
           },
+          {
+            "Key": "StackName",
+            "Value": "prod-data-str-base-stack",
+          },
         ],
       },
       "Type": "AWS::S3::Bucket",
@@ -2342,6 +2542,12 @@ exports[`baseStack 1`] = `
       "DeletionPolicy": "Delete",
       "Properties": {
         "RetentionInDays": 1,
+        "Tags": [
+          {
+            "Key": "StackName",
+            "Value": "prod-data-str-base-stack",
+          },
+        ],
       },
       "Type": "AWS::Logs::LogGroup",
       "UpdateReplacePolicy": "Delete",
@@ -2351,6 +2557,12 @@ exports[`baseStack 1`] = `
       "Properties": {
         "LogGroupName": "/test/script/apiGwPutRecord",
         "RetentionInDays": 1,
+        "Tags": [
+          {
+            "Key": "StackName",
+            "Value": "prod-data-str-base-stack",
+          },
+        ],
       },
       "Type": "AWS::Logs::LogGroup",
       "UpdateReplacePolicy": "Delete",
@@ -2360,6 +2572,12 @@ exports[`baseStack 1`] = `
       "Properties": {
         "LogGroupName": "/test/script/apiGwPutRecords",
         "RetentionInDays": 1,
+        "Tags": [
+          {
+            "Key": "StackName",
+            "Value": "prod-data-str-base-stack",
+          },
+        ],
       },
       "Type": "AWS::Logs::LogGroup",
       "UpdateReplacePolicy": "Delete",
@@ -2369,6 +2587,12 @@ exports[`baseStack 1`] = `
       "Properties": {
         "LogGroupName": "/test/script/sdkPutRecords",
         "RetentionInDays": 1,
+        "Tags": [
+          {
+            "Key": "StackName",
+            "Value": "prod-data-str-base-stack",
+          },
+        ],
       },
       "Type": "AWS::Logs::LogGroup",
       "UpdateReplacePolicy": "Delete",
@@ -2443,6 +2667,10 @@ exports[`baseVpcStack 1`] = `
             "Key": "Name",
             "Value": "data-str-test-vpc",
           },
+          {
+            "Key": "StackName",
+            "Value": "prod-data-str-base-vpc-stack",
+          },
         ],
       },
       "Type": "AWS::EC2::VPC",
@@ -2453,6 +2681,10 @@ exports[`baseVpcStack 1`] = `
           {
             "Key": "Name",
             "Value": "data-str-test-vpc",
+          },
+          {
+            "Key": "StackName",
+            "Value": "prod-data-str-base-vpc-stack",
           },
         ],
       },
@@ -2487,6 +2719,10 @@ exports[`baseVpcStack 1`] = `
           {
             "Key": "Name",
             "Value": "prod/data-str-base-vpc-stack/Vpc/private-with-egressSubnet1",
+          },
+          {
+            "Key": "StackName",
+            "Value": "prod-data-str-base-vpc-stack",
           },
         ],
         "VpcId": {
@@ -2531,6 +2767,10 @@ exports[`baseVpcStack 1`] = `
             "Key": "Name",
             "Value": "prod/data-str-base-vpc-stack/Vpc/private-with-egressSubnet1",
           },
+          {
+            "Key": "StackName",
+            "Value": "prod-data-str-base-vpc-stack",
+          },
         ],
         "VpcId": {
           "Ref": "Vpc8378EB38",
@@ -2561,6 +2801,10 @@ exports[`baseVpcStack 1`] = `
             "Key": "Name",
             "Value": "prod/data-str-base-vpc-stack/Vpc/publicSubnet1",
           },
+          {
+            "Key": "StackName",
+            "Value": "prod-data-str-base-vpc-stack",
+          },
         ],
       },
       "Type": "AWS::EC2::EIP",
@@ -2585,6 +2829,10 @@ exports[`baseVpcStack 1`] = `
             "Key": "Name",
             "Value": "prod/data-str-base-vpc-stack/Vpc/publicSubnet1",
           },
+          {
+            "Key": "StackName",
+            "Value": "prod-data-str-base-vpc-stack",
+          },
         ],
       },
       "Type": "AWS::EC2::NatGateway",
@@ -2595,6 +2843,10 @@ exports[`baseVpcStack 1`] = `
           {
             "Key": "Name",
             "Value": "prod/data-str-base-vpc-stack/Vpc/publicSubnet1",
+          },
+          {
+            "Key": "StackName",
+            "Value": "prod-data-str-base-vpc-stack",
           },
         ],
         "VpcId": {
@@ -2638,6 +2890,10 @@ exports[`baseVpcStack 1`] = `
           {
             "Key": "Name",
             "Value": "prod/data-str-base-vpc-stack/Vpc/publicSubnet1",
+          },
+          {
+            "Key": "StackName",
+            "Value": "prod-data-str-base-vpc-stack",
           },
         ],
         "VpcId": {
@@ -2783,6 +3039,10 @@ exports[`deliveryS3Stack 1`] = `
           {
             "Key": "aws-cdk:auto-delete-objects",
             "Value": "true",
+          },
+          {
+            "Key": "StackName",
+            "Value": "prod-data-str-sample-delivery-s3-stack",
           },
         ],
       },
@@ -2930,6 +3190,10 @@ exports[`deliveryS3Stack 1`] = `
             "Key": "aws-cdk:auto-delete-objects",
             "Value": "true",
           },
+          {
+            "Key": "StackName",
+            "Value": "prod-data-str-sample-delivery-s3-stack",
+          },
         ],
       },
       "Type": "AWS::S3::Bucket",
@@ -3072,6 +3336,12 @@ exports[`deliveryS3Stack 1`] = `
           ],
         },
         "Runtime": "nodejs20.x",
+        "Tags": [
+          {
+            "Key": "StackName",
+            "Value": "prod-data-str-sample-delivery-s3-stack",
+          },
+        ],
         "Timeout": 180,
       },
       "Type": "AWS::Lambda::Function",
@@ -3102,6 +3372,12 @@ exports[`deliveryS3Stack 1`] = `
                 ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
               ],
             ],
+          },
+        ],
+        "Tags": [
+          {
+            "Key": "StackName",
+            "Value": "prod-data-str-sample-delivery-s3-stack",
           },
         ],
       },
@@ -3151,6 +3427,12 @@ exports[`deliveryS3Stack 1`] = `
           ],
         },
         "RetentionInDays": 1,
+        "Tags": [
+          {
+            "Key": "StackName",
+            "Value": "prod-data-str-sample-delivery-s3-stack",
+          },
+        ],
       },
       "Type": "AWS::Logs::LogGroup",
       "UpdateReplacePolicy": "Delete",
@@ -3159,6 +3441,12 @@ exports[`deliveryS3Stack 1`] = `
       "DeletionPolicy": "Delete",
       "Properties": {
         "RetentionInDays": 1,
+        "Tags": [
+          {
+            "Key": "StackName",
+            "Value": "prod-data-str-sample-delivery-s3-stack",
+          },
+        ],
       },
       "Type": "AWS::Logs::LogGroup",
       "UpdateReplacePolicy": "Delete",
@@ -3177,6 +3465,12 @@ exports[`deliveryS3Stack 1`] = `
       "DeletionPolicy": "Delete",
       "Properties": {
         "RetentionInDays": 1,
+        "Tags": [
+          {
+            "Key": "StackName",
+            "Value": "prod-data-str-sample-delivery-s3-stack",
+          },
+        ],
       },
       "Type": "AWS::Logs::LogGroup",
       "UpdateReplacePolicy": "Delete",
@@ -3333,6 +3627,12 @@ exports[`deliveryS3Stack 1`] = `
             ],
           },
         },
+        "Tags": [
+          {
+            "Key": "StackName",
+            "Value": "prod-data-str-sample-delivery-s3-stack",
+          },
+        ],
       },
       "Type": "AWS::KinesisFirehose::DeliveryStream",
     },
@@ -3350,6 +3650,12 @@ exports[`deliveryS3Stack 1`] = `
           ],
           "Version": "2012-10-17",
         },
+        "Tags": [
+          {
+            "Key": "StackName",
+            "Value": "prod-data-str-sample-delivery-s3-stack",
+          },
+        ],
       },
       "Type": "AWS::IAM::Role",
     },
@@ -3509,6 +3815,12 @@ exports[`deliveryS3Stack 1`] = `
           ],
           "Version": "2012-10-17",
         },
+        "Tags": [
+          {
+            "Key": "StackName",
+            "Value": "prod-data-str-sample-delivery-s3-stack",
+          },
+        ],
       },
       "Type": "AWS::IAM::Role",
     },
@@ -3565,6 +3877,12 @@ exports[`deliveryS3Stack 1`] = `
         "Namespace": "AWS/Firehose",
         "Period": 300,
         "Statistic": "Average",
+        "Tags": [
+          {
+            "Key": "StackName",
+            "Value": "prod-data-str-sample-delivery-s3-stack",
+          },
+        ],
         "Threshold": 0,
         "TreatMissingData": "notBreaching",
       },
@@ -3588,6 +3906,12 @@ exports[`deliveryS3Stack 1`] = `
         "Namespace": "AWS/Lambda",
         "Period": 60,
         "Statistic": "Sum",
+        "Tags": [
+          {
+            "Key": "StackName",
+            "Value": "prod-data-str-sample-delivery-s3-stack",
+          },
+        ],
         "Threshold": 0,
         "TreatMissingData": "notBreaching",
       },
@@ -3611,6 +3935,12 @@ exports[`deliveryS3Stack 1`] = `
         "Namespace": "AWS/Firehose",
         "Period": 300,
         "Statistic": "Average",
+        "Tags": [
+          {
+            "Key": "StackName",
+            "Value": "prod-data-str-sample-delivery-s3-stack",
+          },
+        ],
         "Threshold": 0,
         "TreatMissingData": "notBreaching",
       },
@@ -3920,6 +4250,12 @@ exports[`deliveryS3Stack 1`] = `
         "StreamModeDetails": {
           "StreamMode": "PROVISIONED",
         },
+        "Tags": [
+          {
+            "Key": "StackName",
+            "Value": "prod-data-str-sample-delivery-s3-stack",
+          },
+        ],
       },
       "Type": "AWS::Kinesis::Stream",
       "UpdateReplacePolicy": "Delete",
@@ -3942,6 +4278,12 @@ exports[`deliveryS3Stack 1`] = `
         "Namespace": "AWS/Kinesis",
         "Period": 60,
         "Statistic": "Sum",
+        "Tags": [
+          {
+            "Key": "StackName",
+            "Value": "prod-data-str-sample-delivery-s3-stack",
+          },
+        ],
         "Threshold": 0,
         "TreatMissingData": "notBreaching",
       },
@@ -3950,6 +4292,9 @@ exports[`deliveryS3Stack 1`] = `
     "KdsDataStreamparameter9E23EE0A": {
       "Properties": {
         "Name": "/prod-data-str-sample-delivery-s3-stack/stream/name",
+        "Tags": {
+          "StackName": "prod-data-str-sample-delivery-s3-stack",
+        },
         "Type": "String",
         "Value": {
           "Ref": "KdsDataStream7B329BF0",
@@ -3983,6 +4328,12 @@ exports[`deliveryS3Stack 1`] = `
         "Namespace": "AWS/Kinesis",
         "Period": 60,
         "Statistic": "Sum",
+        "Tags": [
+          {
+            "Key": "StackName",
+            "Value": "prod-data-str-sample-delivery-s3-stack",
+          },
+        ],
         "Threshold": 500,
         "TreatMissingData": "notBreaching",
       },
@@ -4014,6 +4365,12 @@ exports[`deliveryS3Stack 1`] = `
         "Namespace": "AWS/Kinesis",
         "Period": 60,
         "Statistic": "Sum",
+        "Tags": [
+          {
+            "Key": "StackName",
+            "Value": "prod-data-str-sample-delivery-s3-stack",
+          },
+        ],
         "Threshold": 500,
         "TreatMissingData": "notBreaching",
       },
@@ -4097,6 +4454,12 @@ exports[`deliveryS3Stack 1`] = `
           ],
         },
         "Runtime": "nodejs20.x",
+        "Tags": [
+          {
+            "Key": "StackName",
+            "Value": "prod-data-str-sample-delivery-s3-stack",
+          },
+        ],
         "Timeout": 180,
       },
       "Type": "AWS::Lambda::Function",
@@ -4158,6 +4521,12 @@ exports[`deliveryS3Stack 1`] = `
             ],
           },
         ],
+        "Tags": [
+          {
+            "Key": "StackName",
+            "Value": "prod-data-str-sample-delivery-s3-stack",
+          },
+        ],
       },
       "Type": "AWS::IAM::Role",
     },
@@ -4176,6 +4545,12 @@ exports[`deliveryS3Stack 1`] = `
           ],
         },
         "RetentionInDays": 1,
+        "Tags": [
+          {
+            "Key": "StackName",
+            "Value": "prod-data-str-sample-delivery-s3-stack",
+          },
+        ],
       },
       "Type": "AWS::Logs::LogGroup",
       "UpdateReplacePolicy": "Delete",
@@ -4258,6 +4633,12 @@ exports[`deliveryS3Stack 1`] = `
           ],
         },
         "Runtime": "nodejs20.x",
+        "Tags": [
+          {
+            "Key": "StackName",
+            "Value": "prod-data-str-sample-delivery-s3-stack",
+          },
+        ],
         "Timeout": 180,
       },
       "Type": "AWS::Lambda::Function",
@@ -4288,6 +4669,12 @@ exports[`deliveryS3Stack 1`] = `
                 ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
               ],
             ],
+          },
+        ],
+        "Tags": [
+          {
+            "Key": "StackName",
+            "Value": "prod-data-str-sample-delivery-s3-stack",
           },
         ],
       },
@@ -4337,6 +4724,12 @@ exports[`deliveryS3Stack 1`] = `
           ],
         },
         "RetentionInDays": 1,
+        "Tags": [
+          {
+            "Key": "StackName",
+            "Value": "prod-data-str-sample-delivery-s3-stack",
+          },
+        ],
       },
       "Type": "AWS::Logs::LogGroup",
       "UpdateReplacePolicy": "Delete",

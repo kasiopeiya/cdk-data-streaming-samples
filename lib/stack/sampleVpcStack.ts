@@ -1,4 +1,4 @@
-import { Stack, type StackProps, CfnOutput } from 'aws-cdk-lib'
+import { Stack, type StackProps, CfnOutput, Tags } from 'aws-cdk-lib'
 import { type Construct } from 'constructs'
 import * as ec2 from 'aws-cdk-lib/aws-ec2'
 
@@ -10,6 +10,8 @@ export class SampleVpcStack extends Stack {
 
   constructor(scope: Construct, id: string, props?: StackProps) {
     super(scope, id, props)
+
+    Tags.of(this).add('StackName', this.stackName)
 
     /*
     * VPC

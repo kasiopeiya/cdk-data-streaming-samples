@@ -1,4 +1,4 @@
-import { Stack, type StackProps } from 'aws-cdk-lib'
+import { Stack, Tags, type StackProps } from 'aws-cdk-lib'
 import { type Construct } from 'constructs'
 import * as dynamodb from 'aws-cdk-lib/aws-dynamodb'
 import { type Vpc } from 'aws-cdk-lib/aws-ec2'
@@ -24,6 +24,8 @@ interface ApiGwKdsLambdaStackProps extends StackProps {
 export class ApiGwKdsLambdaStack extends Stack {
   constructor(scope: Construct, id: string, props: ApiGwKdsLambdaStackProps) {
     super(scope, id, props)
+
+    Tags.of(this).add('StackName', this.stackName)
 
     /*
     * Kinesis Data Streams

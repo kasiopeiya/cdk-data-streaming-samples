@@ -1,4 +1,4 @@
-import { Stack, type StackProps, RemovalPolicy } from 'aws-cdk-lib'
+import { Stack, type StackProps, RemovalPolicy, Tags } from 'aws-cdk-lib'
 import { type Construct } from 'constructs'
 import { Bucket, BucketEncryption } from 'aws-cdk-lib/aws-s3'
 import * as s3Deploy from 'aws-cdk-lib/aws-s3-deployment'
@@ -15,6 +15,8 @@ import { AlarmNotificationHandler } from '../construct/alarmNotificationHandler'
 export class BaseStack extends Stack {
   constructor(scope: Construct, id: string, props?: StackProps) {
     super(scope, id, props)
+
+    Tags.of(this).add('StackName', this.stackName)
 
     /*
     * S3
