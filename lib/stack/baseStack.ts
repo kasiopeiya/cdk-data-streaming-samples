@@ -8,6 +8,7 @@ import * as sns from 'aws-cdk-lib/aws-sns'
 import * as logs from 'aws-cdk-lib/aws-logs'
 
 import { AlarmNotificationHandler } from '../construct/alarmNotificationHandler'
+import { TestDataInjection } from '../construct/testDataInjection'
 
 /**
  * ステートフルなリソースを構築する
@@ -93,5 +94,11 @@ export class BaseStack extends Stack {
     new AlarmNotificationHandler(this, 'AlarmNotificationHandler', {
       topic: alarmTopic
     })
+
+    /*
+    * CodeBuild
+    -------------------------------------------------------------------------- */
+    // テストデータ投入用BuildProject
+    new TestDataInjection(this, 'TestDataInjection')
   }
 }
