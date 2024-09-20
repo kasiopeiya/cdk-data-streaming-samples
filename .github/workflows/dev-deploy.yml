@@ -8,11 +8,8 @@ on:
   push:
     branches:
       - main
-    paths:
-      - 'bin/**'
-      - 'lib/**'
-      - 'resources/**'
-      - 'config.ts'
+    paths-ignore:
+      - '**.md'
   workflow_dispatch:
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
