@@ -34,7 +34,7 @@ export const config: Config = {
   totalSendCount: 10,
   sendInterval: 5,
   baseRecordNumberPerRequest: 100,
-  baseRecordSize: 100,
+  baseRecordSize: 210,
   retryInterval: 1,
   maxRetryCount: 4,
   apiGwUrlParamKey: '/apiGwKds/dev-data-str-sample-apigw-kds-lambda-stack/url',

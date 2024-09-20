@@ -21,7 +21,7 @@ export const config: Config = {
   region: 'ap-northeast-1',
   totalSendTimeMin: 3,
   requestsPerMin: 100,
-  baseRecordSize: 100,
+  baseRecordSize: 200,
   retryInterval: 1,
   maxRetryCount: 4,
   apiGwUrlParamKey: '/apiGwKds/dev-data-str-sample-apigw-kds-lambda-stack/url',

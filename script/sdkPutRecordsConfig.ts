@@ -17,8 +17,6 @@ interface Config {
   retryInterval: number
   /** 最大リトライ回数 */
   maxRetryCount: number
-  /** 最大時のリクエストあたりレコード数 */
-  maxRecordNumberPerRequest: number
   /** カウントアップ設定、インターバルごとに+1 */
   incrementalParameters?: {
     /** 最大時のリクエストあたりレコード数 */
@@ -35,8 +33,7 @@ export const config: Config = {
   concurrentExecution: 3,
   sendInterval: 5,
   baseRecordNumberPerRequest: 100,
-  maxRecordNumberPerRequest: 100,
-  baseRecordSize: 100,
+  baseRecordSize: 200,
   retryInterval: 1,
   maxRetryCount: 4
   // incrementalParameters: {
