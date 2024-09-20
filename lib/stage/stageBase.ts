@@ -17,7 +17,7 @@ export abstract class StageBase extends Stage {
     const baseStack = new BaseStack(scope, `${prefix}-base-stack`, { env })
 
     /*
-    * 共通リソース用スタック
+    * VPCスタック
     -------------------------------------------------------------------------- */
     const baseVpcStack = new SampleVpcStack(scope, `${prefix}-base-vpc-stack`, { env })
 
