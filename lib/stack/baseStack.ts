@@ -99,6 +99,6 @@ export class BaseStack extends Stack {
     * CodeBuild
     -------------------------------------------------------------------------- */
     // テストデータ投入用BuildProject
-    new TestDataInjection(this, 'TestDataInjection')
+    new TestDataInjection(this, 'TestDataInjection', { testResourceBucket })
   }
 }

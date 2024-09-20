@@ -8,6 +8,7 @@ import * as logs from 'aws-cdk-lib/aws-logs'
 import * as iam from 'aws-cdk-lib/aws-iam'
 
 interface TestDataInjectionProps {
+  testResourceBucket: s3.Bucket
   computeType?: codebuild.ComputeType
 }
 
@@ -15,10 +16,8 @@ interface TestDataInjectionProps {
  * Producerスクリプトを実行し、テストデータ投入するためのCodeBuild Projectを構築する
  */
 export class TestDataInjection extends Construct {
-  constructor(scope: Construct, id: string, props?: TestDataInjectionProps) {
+  constructor(scope: Construct, id: string, props: TestDataInjectionProps) {
     super(scope, id)
-
-    props ??= {}
 
     /*
     * S3
@@ -63,8 +62,8 @@ export class TestDataInjection extends Construct {
         post_build: {
           commands: [
             'rm -rf node_modules',
-            'echo succeeded > result.txt',
             'cd ./sh',
+            'echo succeeded > result.txt',
             'bash ./checkScriptLog.sh "../$SCRIPT_NAME.log" | tee checkScriptLog.sh.log',
             'cat result.txt',
             'bash ./checkCwAlarms.sh "StackName" "$STACK_NAME" | tee checkCwAlarms.sh.log',
@@ -82,6 +81,7 @@ export class TestDataInjection extends Construct {
     const buildProject = new codebuild.Project(this, 'Project', {
       projectName: `${Stack.of(this).stackName}-project`,
       buildSpec: codebuild.BuildSpec.fromObject(buildSpecTemplate),
+      source: codebuild.Source.s3({ bucket: props.testResourceBucket, path: '' }),
       environment: {
         privileged: true,
         buildImage: codebuild.LinuxBuildImage.fromAsset(this, 'MyImage', {

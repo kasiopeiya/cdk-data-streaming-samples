@@ -2504,8 +2504,8 @@ exports[`baseStack 1`] = `
     "post_build": {
       "commands": [
         "rm -rf node_modules",
-        "echo succeeded > result.txt",
         "cd ./sh",
+        "echo succeeded > result.txt",
         "bash ./checkScriptLog.sh \\"../$SCRIPT_NAME.log\\" | tee checkScriptLog.sh.log",
         "cat result.txt",
         "bash ./checkCwAlarms.sh \\"StackName\\" \\"$STACK_NAME\\" | tee checkCwAlarms.sh.log",
@@ -2520,7 +2520,18 @@ exports[`baseStack 1`] = `
     ]
   }
 }",
-          "Type": "NO_SOURCE",
+          "Location": {
+            "Fn::Join": [
+              "",
+              [
+                {
+                  "Ref": "TestResourceBucket13D16153",
+                },
+                "/",
+              ],
+            ],
+          },
+          "Type": "S3",
         },
         "Tags": [
           {
@@ -2558,6 +2569,36 @@ exports[`baseStack 1`] = `
       "Properties": {
         "PolicyDocument": {
           "Statement": [
+            {
+              "Action": [
+                "s3:GetObject*",
+                "s3:GetBucket*",
+                "s3:List*",
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::GetAtt": [
+                    "TestResourceBucket13D16153",
+                    "Arn",
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      {
+                        "Fn::GetAtt": [
+                          "TestResourceBucket13D16153",
+                          "Arn",
+                        ],
+                      },
+                      "/",
+                    ],
+                  ],
+                },
+              ],
+            },
             {
               "Action": [
                 "s3:GetObject*",
