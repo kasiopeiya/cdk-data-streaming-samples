@@ -2354,6 +2354,458 @@ exports[`baseStack 1`] = `
       },
       "Type": "AWS::IAM::Role",
     },
+    "TestDataInjectionArtifactBucketCA0A3E45": {
+      "DeletionPolicy": "RetainExceptOnCreate",
+      "Properties": {
+        "Tags": [
+          {
+            "Key": "StackName",
+            "Value": "prod-data-str-base-stack",
+          },
+        ],
+      },
+      "Type": "AWS::S3::Bucket",
+      "UpdateReplacePolicy": "Retain",
+    },
+    "TestDataInjectionArtifactBucketPolicyF6EAEDA1": {
+      "Properties": {
+        "Bucket": {
+          "Ref": "TestDataInjectionArtifactBucketCA0A3E45",
+        },
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "s3:*",
+              "Condition": {
+                "Bool": {
+                  "aws:SecureTransport": "false",
+                },
+              },
+              "Effect": "Deny",
+              "Principal": {
+                "AWS": "*",
+              },
+              "Resource": [
+                {
+                  "Fn::GetAtt": [
+                    "TestDataInjectionArtifactBucketCA0A3E45",
+                    "Arn",
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      {
+                        "Fn::GetAtt": [
+                          "TestDataInjectionArtifactBucketCA0A3E45",
+                          "Arn",
+                        ],
+                      },
+                      "/*",
+                    ],
+                  ],
+                },
+              ],
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+      },
+      "Type": "AWS::S3::BucketPolicy",
+    },
+    "TestDataInjectionLogGroup1FAD4AB6": {
+      "DeletionPolicy": "Delete",
+      "Properties": {
+        "RetentionInDays": 7,
+        "Tags": [
+          {
+            "Key": "StackName",
+            "Value": "prod-data-str-base-stack",
+          },
+        ],
+      },
+      "Type": "AWS::Logs::LogGroup",
+      "UpdateReplacePolicy": "Delete",
+    },
+    "TestDataInjectionProject5B02AD05": {
+      "Properties": {
+        "Artifacts": {
+          "Location": {
+            "Ref": "TestDataInjectionArtifactBucketCA0A3E45",
+          },
+          "NamespaceType": "BUILD_ID",
+          "OverrideArtifactName": true,
+          "Packaging": "ZIP",
+          "Type": "S3",
+        },
+        "Cache": {
+          "Modes": [
+            "LOCAL_DOCKER_LAYER_CACHE",
+          ],
+          "Type": "LOCAL",
+        },
+        "EncryptionKey": "alias/aws/s3",
+        "Environment": {
+          "ComputeType": "BUILD_GENERAL1_SMALL",
+          "Image": {
+            "Fn::Sub": "\${AWS::AccountId}.dkr.ecr.ap-northeast-1.\${AWS::URLSuffix}/cdk-hnb659fds-container-assets-\${AWS::AccountId}-ap-northeast-1:c788c3602ea579b1e1f2c0292b5d5983832f98e3cf518d93f264b3975c6b0b32",
+          },
+          "ImagePullCredentialsType": "SERVICE_ROLE",
+          "PrivilegedMode": true,
+          "Type": "LINUX_CONTAINER",
+        },
+        "LogsConfig": {
+          "CloudWatchLogs": {
+            "GroupName": {
+              "Ref": "TestDataInjectionLogGroup1FAD4AB6",
+            },
+            "Status": "ENABLED",
+          },
+        },
+        "Name": "prod-data-str-base-stack-project",
+        "ServiceRole": {
+          "Fn::GetAtt": [
+            "TestDataInjectionProjectRole4E3E8CA8",
+            "Arn",
+          ],
+        },
+        "Source": {
+          "BuildSpec": "{
+  "version": 0.2,
+  "env": {
+    "shell": "bash",
+    "variables": {
+      "SCRIPT_NAME": "apiGwPutRecords",
+      "STACK_NAME": "dev-data-str-sample-apigw-kds-lambda-stack"
+    }
+  },
+  "phases": {
+    "install": {
+      "command": [
+        "ls -al",
+        "npm ci",
+        "node --version",
+        "jq --version"
+      ]
+    },
+    "pre_build": {
+      "commands": [
+        "ls -al",
+        "echo \\"$SCRIPT_NAME\\"",
+        "echo \\"$STACK_NAME\\""
+      ]
+    },
+    "build": {
+      "commands": [
+        "npx ts-node \\"$SCRIPT_NAME.ts\\""
+      ]
+    },
+    "post_build": {
+      "commands": [
+        "rm -rf node_modules",
+        "echo succeeded > result.txt",
+        "cd ./sh",
+        "bash ./checkScriptLog.sh \\"../$SCRIPT_NAME.log\\" | tee checkScriptLog.sh.log",
+        "cat result.txt",
+        "bash ./checkCwAlarms.sh \\"StackName\\" \\"$STACK_NAME\\" | tee checkCwAlarms.sh.log",
+        "cat result.txt",
+        "if [ $(cat result.txt) == \\"failed\\" ]; then exit 1; fi"
+      ]
+    }
+  },
+  "artifacts": {
+    "files": [
+      "**/*"
+    ]
+  }
+}",
+          "Type": "NO_SOURCE",
+        },
+        "Tags": [
+          {
+            "Key": "StackName",
+            "Value": "prod-data-str-base-stack",
+          },
+        ],
+      },
+      "Type": "AWS::CodeBuild::Project",
+    },
+    "TestDataInjectionProjectRole4E3E8CA8": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "codebuild.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "Tags": [
+          {
+            "Key": "StackName",
+            "Value": "prod-data-str-base-stack",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+    },
+    "TestDataInjectionProjectRoleDefaultPolicy249F1ED7": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "s3:GetObject*",
+                "s3:GetBucket*",
+                "s3:List*",
+                "s3:DeleteObject*",
+                "s3:PutObject",
+                "s3:PutObjectLegalHold",
+                "s3:PutObjectRetention",
+                "s3:PutObjectTagging",
+                "s3:PutObjectVersionTagging",
+                "s3:Abort*",
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::GetAtt": [
+                    "TestDataInjectionArtifactBucketCA0A3E45",
+                    "Arn",
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      {
+                        "Fn::GetAtt": [
+                          "TestDataInjectionArtifactBucketCA0A3E45",
+                          "Arn",
+                        ],
+                      },
+                      "/*",
+                    ],
+                  ],
+                },
+              ],
+            },
+            {
+              "Action": [
+                "ecr:BatchCheckLayerAvailability",
+                "ecr:GetDownloadUrlForLayer",
+                "ecr:BatchGetImage",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:",
+                    {
+                      "Ref": "AWS::Partition",
+                    },
+                    ":ecr:ap-northeast-1:",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":repository/",
+                    {
+                      "Fn::Sub": "cdk-hnb659fds-container-assets-\${AWS::AccountId}-ap-northeast-1",
+                    },
+                  ],
+                ],
+              },
+            },
+            {
+              "Action": "ecr:GetAuthorizationToken",
+              "Effect": "Allow",
+              "Resource": "*",
+            },
+            {
+              "Action": [
+                "logs:CreateLogStream",
+                "logs:PutLogEvents",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::GetAtt": [
+                  "TestDataInjectionLogGroup1FAD4AB6",
+                  "Arn",
+                ],
+              },
+            },
+            {
+              "Action": [
+                "logs:CreateLogGroup",
+                "logs:CreateLogStream",
+                "logs:PutLogEvents",
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition",
+                      },
+                      ":logs:ap-northeast-1:",
+                      {
+                        "Ref": "AWS::AccountId",
+                      },
+                      ":log-group:/aws/codebuild/",
+                      {
+                        "Ref": "TestDataInjectionProject5B02AD05",
+                      },
+                    ],
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition",
+                      },
+                      ":logs:ap-northeast-1:",
+                      {
+                        "Ref": "AWS::AccountId",
+                      },
+                      ":log-group:/aws/codebuild/",
+                      {
+                        "Ref": "TestDataInjectionProject5B02AD05",
+                      },
+                      ":*",
+                    ],
+                  ],
+                },
+              ],
+            },
+            {
+              "Action": [
+                "codebuild:CreateReportGroup",
+                "codebuild:CreateReport",
+                "codebuild:UpdateReport",
+                "codebuild:BatchPutTestCases",
+                "codebuild:BatchPutCodeCoverages",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:",
+                    {
+                      "Ref": "AWS::Partition",
+                    },
+                    ":codebuild:ap-northeast-1:",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":report-group/",
+                    {
+                      "Ref": "TestDataInjectionProject5B02AD05",
+                    },
+                    "-*",
+                  ],
+                ],
+              },
+            },
+            {
+              "Action": [
+                "ssmmessages:CreateControlChannel",
+                "ssmmessages:CreateDataChannel",
+                "ssmmessages:OpenControlChannel",
+                "ssmmessages:OpenDataChannel",
+                "logs:DescribeLogGroups",
+                "logs:CreateLogStream",
+                "logs:PutLogEvents",
+                "s3:GetEncryptionConfiguration",
+                "s3:PutObject",
+              ],
+              "Effect": "Allow",
+              "Resource": "*",
+            },
+            {
+              "Action": [
+                "s3:DeleteObject*",
+                "s3:PutObject",
+                "s3:PutObjectLegalHold",
+                "s3:PutObjectRetention",
+                "s3:PutObjectTagging",
+                "s3:PutObjectVersionTagging",
+                "s3:Abort*",
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::GetAtt": [
+                    "TestDataInjectionArtifactBucketCA0A3E45",
+                    "Arn",
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      {
+                        "Fn::GetAtt": [
+                          "TestDataInjectionArtifactBucketCA0A3E45",
+                          "Arn",
+                        ],
+                      },
+                      "/*",
+                    ],
+                  ],
+                },
+              ],
+            },
+            {
+              "Action": "execute-api:Invoke",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:ssm:ap-northeast-1:",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":parameter*",
+                  ],
+                ],
+              },
+            },
+            {
+              "Action": "tag:GetResources",
+              "Effect": "Allow",
+              "Resource": "*",
+            },
+            {
+              "Action": "cloudwatch:DescribeAlarms",
+              "Effect": "Allow",
+              "Resource": "*",
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "TestDataInjectionProjectRoleDefaultPolicy249F1ED7",
+        "Roles": [
+          {
+            "Ref": "TestDataInjectionProjectRole4E3E8CA8",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
     "TestResourceBucket13D16153": {
       "DeletionPolicy": "Delete",
       "Properties": {
