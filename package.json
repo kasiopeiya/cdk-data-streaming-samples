@@ -26,7 +26,7 @@
     "@commitlint/config-conventional": "^19.5.0",
     "@types/jest": "^29.5.13",
     "@types/node": "20.12.4",
-    "@typescript-eslint/eslint-plugin": "^6.4.1",
+    "@typescript-eslint/eslint-plugin": "^8.6.0",
     "aws-cdk": "2.159.1",
     "depcheck": "^1.4.7",
     "eslint": "^8.57.1",
