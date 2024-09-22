@@ -3,6 +3,7 @@ import { type Construct } from 'constructs'
 
 import { type Config } from '../../config'
 import { BaseStack } from '../stack/baseStack'
+import { BaseTestResourceStack } from '../stack/baseTestResourceStack'
 import { DeliveryS3Stack } from '../stack/deliveryS3Stack'
 import { ApiGwKdsLambdaStack } from '../stack/apiGwKdsLambdaStack'
 import { SampleVpcStack } from '../stack/sampleVpcStack'
@@ -15,6 +16,15 @@ export abstract class StageBase extends Stage {
     * 共通リソース用スタック
     -------------------------------------------------------------------------- */
     const baseStack = new BaseStack(scope, `${prefix}-base-stack`, { env })
+
+    /*
+    * 共通リソース用スタック
+    -------------------------------------------------------------------------- */
+    const baseTestResourceStack = new BaseTestResourceStack(
+      scope,
+      `${prefix}-base-test-resource-stack`,
+      { env }
+    )
 
     /*
     * VPCスタック
@@ -46,6 +56,7 @@ export abstract class StageBase extends Stage {
 
     return {
       baseStack,
+      baseTestResourceStack,
       baseVpcStack,
       deliveryS3Stack,
       apiGwKdsLambdaStack

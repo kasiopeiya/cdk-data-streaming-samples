@@ -2120,6 +2120,92 @@ exports[`baseStack 1`] = `
       },
       "Type": "AWS::ApiGateway::Account",
     },
+    "apiGwPutRecordLog1FED03EE": {
+      "DeletionPolicy": "Delete",
+      "Properties": {
+        "LogGroupName": "/test/script/apiGwPutRecord",
+        "RetentionInDays": 1,
+        "Tags": [
+          {
+            "Key": "StackName",
+            "Value": "dev-data-str-base-stack",
+          },
+        ],
+      },
+      "Type": "AWS::Logs::LogGroup",
+      "UpdateReplacePolicy": "Delete",
+    },
+    "apiGwPutRecordsLog349C966D": {
+      "DeletionPolicy": "Delete",
+      "Properties": {
+        "LogGroupName": "/test/script/apiGwPutRecords",
+        "RetentionInDays": 1,
+        "Tags": [
+          {
+            "Key": "StackName",
+            "Value": "dev-data-str-base-stack",
+          },
+        ],
+      },
+      "Type": "AWS::Logs::LogGroup",
+      "UpdateReplacePolicy": "Delete",
+    },
+    "sdkPutRecordsLog47997B07": {
+      "DeletionPolicy": "Delete",
+      "Properties": {
+        "LogGroupName": "/test/script/sdkPutRecords",
+        "RetentionInDays": 1,
+        "Tags": [
+          {
+            "Key": "StackName",
+            "Value": "dev-data-str-base-stack",
+          },
+        ],
+      },
+      "Type": "AWS::Logs::LogGroup",
+      "UpdateReplacePolicy": "Delete",
+    },
+  },
+  "Rules": {
+    "CheckBootstrapVersion": {
+      "Assertions": [
+        {
+          "Assert": {
+            "Fn::Not": [
+              {
+                "Fn::Contains": [
+                  [
+                    "1",
+                    "2",
+                    "3",
+                    "4",
+                    "5",
+                  ],
+                  {
+                    "Ref": "BootstrapVersion",
+                  },
+                ],
+              },
+            ],
+          },
+          "AssertDescription": "CDK bootstrap stack version 6 required. Please run 'cdk bootstrap' with a recent version of the CDK CLI.",
+        },
+      ],
+    },
+  },
+}
+`;
+
+exports[`baseTestResourceStack 1`] = `
+{
+  "Parameters": {
+    "BootstrapVersion": {
+      "Default": "/cdk-bootstrap/hnb659fds/version",
+      "Description": "Version of the CDK Bootstrap resources in this environment, automatically retrieved from SSM Parameter Store. [cdk:skip]",
+      "Type": "AWS::SSM::Parameter::Value<String>",
+    },
+  },
+  "Resources": {
     "CustomCDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756C81C01536": {
       "DependsOn": [
         "CustomCDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756CServiceRoleDefaultPolicy88902FDF",
@@ -2158,7 +2244,7 @@ exports[`baseStack 1`] = `
         "Tags": [
           {
             "Key": "StackName",
-            "Value": "dev-data-str-base-stack",
+            "Value": "dev-data-str-base-test-resource-stack",
           },
         ],
         "Timeout": 900,
@@ -2196,7 +2282,7 @@ exports[`baseStack 1`] = `
         "Tags": [
           {
             "Key": "StackName",
-            "Value": "dev-data-str-base-stack",
+            "Value": "dev-data-str-base-test-resource-stack",
           },
         ],
       },
@@ -2360,7 +2446,7 @@ exports[`baseStack 1`] = `
         "Tags": [
           {
             "Key": "StackName",
-            "Value": "dev-data-str-base-stack",
+            "Value": "dev-data-str-base-test-resource-stack",
           },
         ],
       },
@@ -2421,7 +2507,7 @@ exports[`baseStack 1`] = `
         "Tags": [
           {
             "Key": "StackName",
-            "Value": "dev-data-str-base-stack",
+            "Value": "dev-data-str-base-test-resource-stack",
           },
         ],
       },
@@ -2463,7 +2549,7 @@ exports[`baseStack 1`] = `
             "Status": "ENABLED",
           },
         },
-        "Name": "dev-data-str-base-stack-project",
+        "Name": "dev-data-str-base-test-resource-stack-project",
         "ServiceRole": {
           "Fn::GetAtt": [
             "TestDataInjectionProjectRole4E3E8CA8",
@@ -2482,7 +2568,7 @@ exports[`baseStack 1`] = `
   },
   "phases": {
     "install": {
-      "command": [
+      "commands": [
         "ls -al",
         "npm ci",
         "node --version",
@@ -2536,7 +2622,7 @@ exports[`baseStack 1`] = `
         "Tags": [
           {
             "Key": "StackName",
-            "Value": "dev-data-str-base-stack",
+            "Value": "dev-data-str-base-test-resource-stack",
           },
         ],
       },
@@ -2559,7 +2645,7 @@ exports[`baseStack 1`] = `
         "Tags": [
           {
             "Key": "StackName",
-            "Value": "dev-data-str-base-stack",
+            "Value": "dev-data-str-base-test-resource-stack",
           },
         ],
       },
@@ -2810,7 +2896,42 @@ exports[`baseStack 1`] = `
               ],
             },
             {
+              "Action": [
+                "s3:GetObject*",
+                "s3:GetBucket*",
+                "s3:List*",
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::GetAtt": [
+                    "TestResourceBucket13D16153",
+                    "Arn",
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      {
+                        "Fn::GetAtt": [
+                          "TestResourceBucket13D16153",
+                          "Arn",
+                        ],
+                      },
+                      "/*",
+                    ],
+                  ],
+                },
+              ],
+            },
+            {
               "Action": "execute-api:Invoke",
+              "Effect": "Allow",
+              "Resource": "*",
+            },
+            {
+              "Action": "ssm:GetParameter",
               "Effect": "Allow",
               "Resource": {
                 "Fn::Join": [
@@ -2876,12 +2997,12 @@ exports[`baseStack 1`] = `
             "Value": "true",
           },
           {
-            "Key": "aws-cdk:cr-owned:ef5975a2",
+            "Key": "aws-cdk:cr-owned:3dae15d1",
             "Value": "true",
           },
           {
             "Key": "StackName",
-            "Value": "dev-data-str-base-stack",
+            "Value": "dev-data-str-base-test-resource-stack",
           },
         ],
       },
@@ -3038,52 +3159,7 @@ exports[`baseStack 1`] = `
         "Tags": [
           {
             "Key": "StackName",
-            "Value": "dev-data-str-base-stack",
-          },
-        ],
-      },
-      "Type": "AWS::Logs::LogGroup",
-      "UpdateReplacePolicy": "Delete",
-    },
-    "apiGwPutRecordLog1FED03EE": {
-      "DeletionPolicy": "Delete",
-      "Properties": {
-        "LogGroupName": "/test/script/apiGwPutRecord",
-        "RetentionInDays": 1,
-        "Tags": [
-          {
-            "Key": "StackName",
-            "Value": "dev-data-str-base-stack",
-          },
-        ],
-      },
-      "Type": "AWS::Logs::LogGroup",
-      "UpdateReplacePolicy": "Delete",
-    },
-    "apiGwPutRecordsLog349C966D": {
-      "DeletionPolicy": "Delete",
-      "Properties": {
-        "LogGroupName": "/test/script/apiGwPutRecords",
-        "RetentionInDays": 1,
-        "Tags": [
-          {
-            "Key": "StackName",
-            "Value": "dev-data-str-base-stack",
-          },
-        ],
-      },
-      "Type": "AWS::Logs::LogGroup",
-      "UpdateReplacePolicy": "Delete",
-    },
-    "sdkPutRecordsLog47997B07": {
-      "DeletionPolicy": "Delete",
-      "Properties": {
-        "LogGroupName": "/test/script/sdkPutRecords",
-        "RetentionInDays": 1,
-        "Tags": [
-          {
-            "Key": "StackName",
-            "Value": "dev-data-str-base-stack",
+            "Value": "dev-data-str-base-test-resource-stack",
           },
         ],
       },
