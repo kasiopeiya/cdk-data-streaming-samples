@@ -51,7 +51,7 @@ export class TestDataInjection extends Construct {
       },
       phases: {
         install: {
-          command: ['ls -al', 'npm ci', 'node --version', 'jq --version']
+          commands: ['ls -al', 'npm ci', 'node --version', 'jq --version']
         },
         pre_build: {
           commands: ['ls -al', 'echo "$SCRIPT_NAME"', 'echo "$STACK_NAME"']
@@ -100,11 +100,18 @@ export class TestDataInjection extends Construct {
     -------------------------------------------------------------------------- */
     // S3
     artifactBucket.grantWrite(buildProject)
+    props.testResourceBucket.grantRead(buildProject)
 
     // API GW実行
     buildProject.addToRolePolicy(
       new iam.PolicyStatement({
         actions: ['execute-api:Invoke'],
+        resources: ['*']
+      })
+    )
+    buildProject.addToRolePolicy(
+      new iam.PolicyStatement({
+        actions: ['ssm:GetParameter'],
         resources: [`arn:aws:ssm:${Stack.of(this).region}:${Stack.of(this).account}:parameter*`]
       })
     )
