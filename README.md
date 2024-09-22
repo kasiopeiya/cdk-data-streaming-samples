@@ -37,6 +37,32 @@ vi apiGwPutRecordsConfig.ts
 npx ts-node apiGwPutRecords.ts
 ```
 
+### CodeBuildでスクリプト実行
+
+| 環境変数    | 説明                 | 利用可能な値                                                                      |
+| ----------- | -------------------- | --------------------------------------------------------------------------------- |
+| SCRIPT_NAME | 実行するスクリプト名 | apiGwPutRecord, apiGwPutRecords, sdkPutRecords                                    |
+| STACK_NAME  | 実行対象のスタック名 | dev-data-str-sample-apigw-kds-lambda-stack, dev-data-str-sample-delivery-s3-stack |
+
+CLIコマンド例
+
+```bash
+aws codebuild start-build \
+    --project-name dev-data-str-base-stack-project \
+    --environment-variables-override '[
+        {
+            "name": "SCRIPT_NAME",
+            "value": "apiGwPutRecords",
+            "type": "PLAINTEXT"
+        },
+        {
+            "name": "STACK_NAME",
+            "value": "dev-data-str-sample-apigw-kds-lambda-stack",
+            "type": "PLAINTEXT"
+        }
+    ]'
+```
+
 ### （参考）composeを使わずにdockerのみで構築する場合
 
 ```bash
