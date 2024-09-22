@@ -1,4 +1,4 @@
-FROM node:18.18.2-slim
+FROM node:20.17.0-slim
 
 # AWS CLIのインストール
 RUN apt-get update && apt-get install -y unzip curl vim dpkg wget jq && \
