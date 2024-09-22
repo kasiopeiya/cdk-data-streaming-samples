@@ -41,17 +41,10 @@
     "prettier": "^3.3.3",
     "standard-version": "^9.5.0",
     "ts-jest": "^29.2.5",
-    "ts-node": "^10.9.2",
     "typescript": "~5.6.2",
     "winston": "^3.14.2"
   },
   "dependencies": {
-    "esbuild": "^0.23.1",
-    "husky": "^9.1.5",
-    "typescript": "~5.5.4",
-    "ts-node": "^10.9.2",
-    "aws-cdk": "2.155.0",
-    "winston": "^3.14.2",
     "@aws-cdk/aws-kinesisfirehose-alpha": "^2.155.0-alpha.0",
     "@aws-cdk/aws-kinesisfirehose-destinations-alpha": "^2.155.0-alpha.0",
     "@aws-lambda-powertools/tracer": "^1.18.1",
@@ -59,9 +52,15 @@
     "@aws-sdk/client-dynamodb": "^3.651.1",
     "@aws-sdk/client-kinesis": "^3.651.1",
     "@aws-sdk/lib-dynamodb": "^3.651.1",
+    "aws-cdk": "2.155.0",
     "aws-cdk-lib": "2.155.0",
     "cdk-nag": "^2.28.195",
-    "constructs": "^10.3.0"
+    "constructs": "^10.3.0",
+    "esbuild": "^0.23.1",
+    "husky": "^9.1.5",
+    "tsx": "^4.19.1",
+    "typescript": "~5.5.4",
+    "winston": "^3.14.2"
   },
   "lint-staged": {
     "*.{ts,tsx}": [

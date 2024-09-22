@@ -34,7 +34,7 @@ ls
 # 設定ファイルの編集
 vi apiGwPutRecordsConfig.ts
 # 実行
-npx ts-node apiGwPutRecords.ts
+npx tsx apiGwPutRecords.ts
 ```
 
 ### CodeBuildでスクリプト実行

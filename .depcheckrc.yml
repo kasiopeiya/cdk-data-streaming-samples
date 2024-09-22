@@ -9,7 +9,7 @@ specials:
 ignores:
   - eslint*
   - prettier
-  - ts-node
+  - tsx
   - esbuild
   - depcheck
   - '@types/node'

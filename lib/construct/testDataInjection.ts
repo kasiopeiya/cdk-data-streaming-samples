@@ -57,7 +57,7 @@ export class TestDataInjection extends Construct {
           commands: ['ls -al', 'echo "$SCRIPT_NAME"', 'echo "$STACK_NAME"']
         },
         build: {
-          commands: ['npx ts-node "$SCRIPT_NAME.ts"']
+          commands: ['npx tsx "$SCRIPT_NAME.ts"']
         },
         post_build: {
           commands: [
