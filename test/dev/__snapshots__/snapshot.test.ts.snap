@@ -2584,7 +2584,7 @@ exports[`baseTestResourceStack 1`] = `
     },
     "build": {
       "commands": [
-        "npx ts-node \\"$SCRIPT_NAME.ts\\""
+        "npx tsx \\"$SCRIPT_NAME.ts\\""
       ]
     },
     "post_build": {
