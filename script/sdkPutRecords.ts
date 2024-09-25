@@ -90,7 +90,6 @@ async function main(): Promise<void> {
 
       const command = new PutRecordsCommand(params)
       tasks.push(
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
         limit(async () => {
           await sendRequest(command, requestId, maxRetryCount)
         })

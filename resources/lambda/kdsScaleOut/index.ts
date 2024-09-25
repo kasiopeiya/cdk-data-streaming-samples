@@ -24,7 +24,7 @@ const logger = winston.createLogger({
  * ハンドラー関数
  * @param event
  */
-export const handler = async (event: unknown): Promise<any> => {
+export const handler = async () => {
   if (process.env.DATA_STREAM_NAME === undefined) {
     throw new Error('Required environmental variable is not defined')
   }

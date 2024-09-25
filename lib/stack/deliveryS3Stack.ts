@@ -122,7 +122,7 @@ export class DeliveryS3Stack extends Stack {
       partitionCountExceededAlarm,
       dataFreshnessAlarm,
       lambdaErrorsAlarm
-    ].filter((value, _) => value !== undefined)
+    ].filter((value) => value !== undefined)
 
     // Alarm Action
     const cfnStream = kdsDataStream.dataStream.node.defaultChild as CfnStream

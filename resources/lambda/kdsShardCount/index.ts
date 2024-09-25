@@ -17,7 +17,7 @@ if (process.env.DATA_STREAM_NAME === undefined) {
  * ハンドラー関数
  * @param event
  */
-export const handler = async (event: unknown): Promise<any> => {
+export const handler = async () => {
   try {
     // シャード数を取得します
     const shardCount = await getOpenShardCount()

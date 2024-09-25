@@ -72,17 +72,19 @@ const logger = winston.createLogger({
  * ハンドラー関数
  * @param event
  */
-const lambdaHandler = async (event: unknown): Promise<any> => {
+const lambdaHandler = async (
+  event: EventProps
+): Promise<void | { batchItemFailures: object[] }> => {
   // X-Rayトレース
   tracer.captureAWSv3Client(dynamoClient)
 
   // CloudWatchカスタムメトリクス送信
   // バッチサイズ
-  const batchSize = (event as EventProps).Records.length
+  const batchSize = event.Records.length
   await sendMetricToCloudWatch(batchSize)
   logger.info(`Lambda Start: batch size ${batchSize}`)
 
-  for (const record of (event as EventProps).Records) {
+  for (const record of event.Records) {
     const decodedData: string = Buffer.from(record.kinesis.data, 'base64').toString('utf-8')
     const recordData = JSON.parse(decodedData)
     const currentDate = new Date()
@@ -105,7 +107,7 @@ const lambdaHandler = async (event: unknown): Promise<any> => {
       logger.info(
         `SUCCESS: id=${recordData.recordId}, statusCode=${response.$metadata.httpStatusCode}`
       )
-    } catch (e: any) {
+    } catch (e: ConditionalCheckFailedException | unknown) {
       if (e instanceof ConditionalCheckFailedException) {
         // 条件付き書き込みエラー, アイテムがテーブルにすでにあった場合
         logger.warn(`RETRY: id=${recordData.recordId} 登録済みのため処理をスキップします`)
@@ -122,7 +124,8 @@ const lambdaHandler = async (event: unknown): Promise<any> => {
 
     try {
       // やりたい処理を記載
-    } catch (e: any) {
+    } catch (e: unknown) {
+      logger.error(e)
       // 再実行のため、DynamoDBからレコード削除
       const command = new DeleteCommand({
         TableName: tableName,

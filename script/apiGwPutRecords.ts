@@ -4,7 +4,7 @@
  * IAM認可設定のためリクストの署名が必要、署名には環境変数のアクセスキー、なければIAM Roleを使用する
  * 接続先API GWのURLがParamemter Storeに登録されている必要あり
  */
-import axios, { type AxiosError } from 'axios'
+import axios, { AxiosError } from 'axios'
 import { SignatureV4 } from '@aws-sdk/signature-v4'
 import { HttpRequest } from '@aws-sdk/protocol-http'
 import {
@@ -121,7 +121,6 @@ const main = async (): Promise<void> => {
       // リクエスト署名: APIGW IAM認可機能
       const signedRequest = await signHttpReqeust(request)
       tasks.push(
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
         limit(async () => {
           await sendRequest(url_, signedRequest, requestId, maxRetryCount)
         })
@@ -222,7 +221,7 @@ const signHttpReqeust = async (req: HttpRequest_): Promise<HttpRequest_> => {
     service: 'execute-api',
     sha256: Sha256
   })
-  // eslint-disable-next-line @typescript-eslint/return-await
+
   return await signer.sign(req)
 }
 
@@ -268,15 +267,18 @@ const sendRequest = async (
     logger.info(
       `SUCCESS: requestId: ${requestId}, status: ${response.status} ${response.statusText}, FailedRecordCount: ${data.FailedRecordCount}`
     )
-  } catch (e: any) {
-    if ((e as AxiosError).response === undefined) {
+  } catch (e: unknown) {
+    if (e instanceof AxiosError) {
       // レスポンスがない場合
-      logger.warn('No respnose received.')
+      if (e.response === undefined) {
+        logger.warn('No respnose received.')
+      } else {
+        logger.warn(
+          `WARNING: requestId: ${requestId}, status: ${e.response.status} ${JSON.stringify(e.response.data)}`
+        )
+      }
     } else {
-      // エラーレスポンス出力
-      logger.warn(
-        `WARNING: requestId: ${requestId}, status: ${e.response.status} ${JSON.stringify(e.response.data)}`
-      )
+      logger.warn(e)
     }
 
     if (retries > 0) {

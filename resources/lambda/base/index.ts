@@ -15,7 +15,7 @@ const logger = winston.createLogger({
  * ハンドラー関数
  * @param event
  */
-export const lambdaHandler = async (event: unknown): Promise<any> => {
+export const lambdaHandler = async (event: unknown) => {
   logger.info('関数実行しました')
   logger.info(event)
 }
