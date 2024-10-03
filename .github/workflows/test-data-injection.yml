@@ -1,0 +1,75 @@
+##################################################################################
+# サンプルスクリプトを実行してテストデータを投入する
+##################################################################################
+
+name: test-data-injection-action
+run-name: ${{ github.workflow }} workflow
+on:
+  workflow_dispatch:
+    inputs:
+        github_env:
+          type: choice
+          description: target env
+          options:
+            - dev
+            - stg
+        stack_name:
+          type: choice
+          description: target stack name
+          default: data-str-sample-apigw-kds-lambda-stack
+          options:
+            - data-str-sample-apigw-kds-lambda-stack
+            - data-str-sample-delivery-s3-stack
+        producer_script_name:
+          type: choice
+          description: the script name to use as the producer
+          default:
+          options:
+            - apiGwPutRecord
+            - apiGwPutRecords
+            - sdkPutRecords
+
+jobs:
+  test-data-injection:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      id-token: write
+    steps:
+      - run: cat $GITHUB_EVENT_PATH
+      - run: lsb_release -d
+      - run: gh --version
+
+      - uses: actions/checkout@v4
+
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.ROLE_TO_ASSUME }}
+          aws-region: ap-northeast-1
+      - run: aws sts get-caller-identity
+
+      - name: set env variables
+        env:
+          ENV_NAME: ${{ vars.ENV_NAME }}
+        run: |
+          echo "ENV_NAME=${{ env.ENV_NAME }}"
+          echo "ENV_NAME=${{ env.ENV_NAME }}" >> $GITHUB_ENV
+          echo "DEV_ACCOUNT_ID=${{ secrets.DEV_ACCOUNT_ID }}" >> $GITHUB_ENV
+          echo "PROD_ACCOUNT_ID=${{ secrets.PROD_ACCOUNT_ID }}" >> $GITHUB_ENV
+
+      - name: launch build project
+        run: |
+          aws codebuild start-build \
+            --project-name dev-data-str-base-stack-project \
+            --environment-variables-override '[
+                {
+                    "name": "SCRIPT_NAME",
+                    "value": "apiGwPutRecords",
+                    "type": "PLAINTEXT"
+                },
+                {
+                    "name": "STACK_NAME",
+                    "value": "dev-data-str-sample-apigw-kds-lambda-stack",
+                    "type": "PLAINTEXT"
+                }
+            ]'
