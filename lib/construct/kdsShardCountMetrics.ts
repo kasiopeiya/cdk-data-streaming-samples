@@ -14,6 +14,9 @@ interface KdsShardCountMetricsProps {
   metricName: string
 }
 
+/**
+ * アカウント内のオンデマンドモードのKDS DataStreamのシャード数をカスタムメトリクスとして送信する仕組みを構築
+ */
 export class KdsShardCountMetrics extends Construct {
   constructor(scope: Construct, id: string, props: KdsShardCountMetricsProps) {
     super(scope, id)
