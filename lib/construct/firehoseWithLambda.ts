@@ -30,7 +30,8 @@ interface FirehoseWithLambdaProps {
 }
 
 /**
- * 動的パーティショニングを使ったData FirehoseによるS3配信
+ * Data FirehoseによるS3配信
+ * Lambdaによる動的パーティショニングを使用して、S3 Bucket保存時のprefixを動的に生成
  */
 export class FirehoseWithLambda extends Construct {
   public readonly deliveryStream: kinesisfirehose_alpha.DeliveryStream

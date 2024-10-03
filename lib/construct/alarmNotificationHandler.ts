@@ -14,7 +14,7 @@ interface AlarmNotificationHandlerProps {
 
 /**
  * EventBridgeトリガーでCloudWatch Alarmのstatus変更を検知
- * Input TransformerとStep Functionで件名と本文を加工
+ * Input TransformerとStep Functionsでメール件名を加工
  */
 export class AlarmNotificationHandler extends Construct {
   constructor(scope: Construct, id: string, props: AlarmNotificationHandlerProps) {

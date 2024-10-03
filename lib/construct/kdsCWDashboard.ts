@@ -102,6 +102,9 @@ interface KdsCWDashboardProps {
   }
 }
 
+/**
+ * Kinesis Data Streamsとその関連サービスのためのCloudWatch Dashboard
+ */
 export class KdsCWDashboard extends Construct {
   private readonly defaultHeight: number = 8
   private readonly defaultWidth: number = 12

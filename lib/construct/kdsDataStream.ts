@@ -8,6 +8,9 @@ interface KdsDataStreamProps {
   dataStreamProps?: StreamProps
 }
 
+/**
+ * Kinesis Data Streamsとその関連リソースを構築するオリジナルconstruct
+ */
 export class KdsDataStream extends Construct {
   public readonly dataStream: Stream
 
