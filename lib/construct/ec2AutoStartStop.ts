@@ -21,7 +21,7 @@ export class Ec2AutoStartStop extends Construct {
     super(scope, id)
 
     props ??= {}
-    props.startSchedule ??= 'cron(0, 9 ? * * *)'
+    props.startSchedule ??= 'cron(0, 9 ? * MON-FRI *)'
     props.stopSchedule ??= 'cron(0, 22 ? * * *)'
 
     const region = Stack.of(this).region
