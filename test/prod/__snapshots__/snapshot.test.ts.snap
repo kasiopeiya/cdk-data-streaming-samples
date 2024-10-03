@@ -1102,6 +1102,12 @@ exports[`apiGwKdsLambdaStack 1`] = `
         "MaximumRetryAttempts": 5,
         "ParallelizationFactor": 1,
         "StartingPosition": "TRIM_HORIZON",
+        "Tags": [
+          {
+            "Key": "StackName",
+            "Value": "prod-data-str-sample-apigw-kds-lambda-stack",
+          },
+        ],
       },
       "Type": "AWS::Lambda::EventSourceMapping",
     },
@@ -2240,7 +2246,7 @@ exports[`baseTestResourceStack 1`] = `
             "Arn",
           ],
         },
-        "Runtime": "python3.9",
+        "Runtime": "python3.11",
         "Tags": [
           {
             "Key": "StackName",
