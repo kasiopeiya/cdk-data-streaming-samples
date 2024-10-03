@@ -11,6 +11,11 @@ export interface Ec2AutoStartStopProps {
   stopSchedule?: string
 }
 
+/**
+ * EC2インスタンスを自動起動停止する仕組みを構築する
+ * Systems Manager Maintenance WindowとAutomationを使用
+ * 起動停止対象はインスタンスのtagをベースに判断
+ */
 export class Ec2AutoStartStop extends Construct {
   constructor(scope: Construct, id: string, props?: Ec2AutoStartStopProps) {
     super(scope, id)
