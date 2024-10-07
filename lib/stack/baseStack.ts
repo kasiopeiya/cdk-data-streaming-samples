@@ -4,6 +4,7 @@ import * as iam from 'aws-cdk-lib/aws-iam'
 import * as apigw from 'aws-cdk-lib/aws-apigateway'
 import * as sns from 'aws-cdk-lib/aws-sns'
 import * as logs from 'aws-cdk-lib/aws-logs'
+import { Bucket, BucketEncryption, ObjectOwnership } from 'aws-cdk-lib/aws-s3'
 
 import { AlarmNotificationHandler } from '../construct/alarmNotificationHandler'
 
@@ -11,10 +12,44 @@ import { AlarmNotificationHandler } from '../construct/alarmNotificationHandler'
  * ステートフルなリソースを構築する
  */
 export class BaseStack extends Stack {
+  public readonly trailBucket: Bucket
+
   constructor(scope: Construct, id: string, props?: StackProps) {
     super(scope, id, props)
 
     Tags.of(this).add('StackName', this.stackName)
+
+    /*
+    /* S3
+    -------------------------------------------------------------------------- */
+    // CloudTrailログ出力先S3バケット
+    this.trailBucket = new Bucket(this, 'CloudTrailBucket', {
+      encryption: BucketEncryption.S3_MANAGED,
+      enforceSSL: true,
+      removalPolicy: RemovalPolicy.DESTROY,
+      objectOwnership: ObjectOwnership.OBJECT_WRITER,
+      autoDeleteObjects: true
+    })
+
+    const bucketAclPolicyStatement = new iam.PolicyStatement({
+      effect: iam.Effect.ALLOW,
+      principals: [new iam.ServicePrincipal('cloudtrail.amazonaws.com')],
+      actions: ['s3:GetBucketAcl'],
+      resources: [this.trailBucket.bucketArn, `${this.trailBucket.bucketArn}/*`]
+    })
+    const putObjectPolicyStatement = new iam.PolicyStatement({
+      effect: iam.Effect.ALLOW,
+      principals: [new iam.ServicePrincipal('cloudtrail.amazonaws.com')],
+      actions: ['s3:PutObject'],
+      resources: [this.trailBucket.bucketArn, `${this.trailBucket.bucketArn}/*`],
+      conditions: {
+        StringEquals: {
+          's3:x-amz-acl': 'bucket-owner-full-control'
+        }
+      }
+    })
+    this.trailBucket.addToResourcePolicy(bucketAclPolicyStatement)
+    this.trailBucket.addToResourcePolicy(putObjectPolicyStatement)
 
     /*
     * CloudWatch Logs
