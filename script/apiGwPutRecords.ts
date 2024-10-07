@@ -23,9 +23,10 @@ import {
   SSMClient
 } from '@aws-sdk/client-ssm'
 import { defaultProvider } from '@aws-sdk/credential-provider-node'
+import { z } from 'zod'
 
 import { config } from './apiGwPutRecordsConfig'
-import { generateSampleRecord, type RecordData } from './recordData'
+import { BasicRecordDataGenerator, RecordDataFactory } from './data'
 
 // 実行条件
 const region = config.region
@@ -179,8 +180,14 @@ const generateRecords = (
 ): KinesisRecord[] => {
   const records: KinesisRecord[] = []
 
+  const basicRecordDataGenerator = new BasicRecordDataGenerator()
+  const recordGenerator = new RecordDataFactory(basicRecordDataGenerator)
+  type recordDataProps = z.infer<typeof basicRecordDataGenerator.recordDataSchema>
+
   for (let recordIndex = 1; recordIndex <= numOfData; recordIndex++) {
-    const recordData: RecordData = generateSampleRecord(recordSize, requestId)
+    const recordData: recordDataProps = recordGenerator.generateRecord(recordSize, requestId)
+    recordGenerator.validate(recordData)
+
     const record: KinesisRecord = {
       data: JSON.stringify(recordData),
       PartitionKey: recordData.recordId

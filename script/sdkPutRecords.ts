@@ -13,9 +13,10 @@ import {
 import { SSMClient, GetParameterCommand } from '@aws-sdk/client-ssm'
 import plimit, { type LimitFunction } from 'p-limit'
 import { faker } from '@faker-js/faker'
+import { z } from 'zod'
 
 import { config } from './sdkPutRecordsConfig'
-import { generateSampleRecord, type RecordData } from './recordData'
+import { BasicRecordDataGenerator, RecordDataFactory } from './data'
 
 // 実行条件
 const concurrentExecution = config.concurrentExecution
@@ -136,8 +137,14 @@ function generateRecords(
 ): PutRecordsRequestEntry[] {
   const records: PutRecordsRequestEntry[] = []
 
+  const basicRecordDataGenerator = new BasicRecordDataGenerator()
+  const recordGenerator = new RecordDataFactory(basicRecordDataGenerator)
+  type recordDataProps = z.infer<typeof basicRecordDataGenerator.recordDataSchema>
+
   for (let recordIndex = 1; recordIndex <= numOfData; recordIndex++) {
-    const recordData: RecordData = generateSampleRecord(recordSize, requestId)
+    const recordData: recordDataProps = recordGenerator.generateRecord(recordSize, requestId)
+    recordGenerator.validate(recordData)
+
     const record: PutRecordsRequestEntry = {
       Data: Buffer.from(JSON.stringify(recordData)),
       PartitionKey: recordData.recordId
