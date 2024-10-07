@@ -1,4 +1,5 @@
-import { Tracer, captureLambdaHandler } from '@aws-lambda-powertools/tracer'
+import { Tracer } from '@aws-lambda-powertools/tracer'
+import { captureLambdaHandler } from '@aws-lambda-powertools/tracer/middleware'
 import middy from '@middy/core'
 import { ConditionalCheckFailedException, DynamoDBClient } from '@aws-sdk/client-dynamodb'
 import { DeleteCommand, PutCommand, DynamoDBDocumentClient } from '@aws-sdk/lib-dynamodb'
