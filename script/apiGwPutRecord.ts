@@ -23,9 +23,10 @@ import {
   SSMClient
 } from '@aws-sdk/client-ssm'
 import { defaultProvider } from '@aws-sdk/credential-provider-node'
+import { z } from 'zod'
 
 import { config } from './apiGwPutRecordConfig'
-import { generateSampleRecord, type RecordData } from './recordData'
+import { BasicRecordDataGenerator, RecordDataFactory } from './data'
 
 // 実行条件
 const region = config.region
@@ -75,6 +76,10 @@ const main = async (): Promise<void> => {
   ) {
     console.log(`${currentExecutionTimeMin}/${totalSendTimeMin}`)
 
+    const basicRecordDataGenerator = new BasicRecordDataGenerator()
+    const recordGenerator = new RecordDataFactory(basicRecordDataGenerator)
+    type recordDataProps = z.infer<typeof basicRecordDataGenerator.recordDataSchema>
+
     const tasks: Array<Promise<void>> = []
     for (
       let requetIndexInOneMin = 1;
@@ -90,7 +95,9 @@ const main = async (): Promise<void> => {
       const requestIdLength = 20
       const requestId = `${requestIdPrefix}${faker.string.alphanumeric(requestIdLength - requestIdPrefix.length)}`
       // レコード作成
-      const recordData: RecordData = generateSampleRecord(baseRecordSize, requestId)
+      const recordData: recordDataProps = recordGenerator.generateRecord(baseRecordSize, requestId)
+      recordGenerator.validate(recordData)
+
       const record: KinesisRecord = {
         data: JSON.stringify(recordData),
         PartitionKey: recordData.recordId
