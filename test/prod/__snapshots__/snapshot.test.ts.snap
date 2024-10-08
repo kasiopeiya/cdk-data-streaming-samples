@@ -5630,6 +5630,441 @@ exports[`kinesisLoggingStack 1`] = `
     },
   },
   "Resources": {
+    "CloudTrailLogAnalytics12F1DDFC": {
+      "DependsOn": [
+        "CloudTrailLogAnalyticsDatabase6595B6BB",
+      ],
+      "Properties": {
+        "CatalogId": {
+          "Ref": "AWS::AccountId",
+        },
+        "DatabaseName": "cloudtrail_logs_database",
+        "TableInput": {
+          "Name": "cloudtrail_logs_table",
+          "Parameters": {
+            "classification": "cloudtrail",
+            "compressionType": "gzip",
+            "projection.date.format": "yyyy/MM/dd",
+            "projection.date.interval": "1",
+            "projection.date.interval.unit": "DAYS",
+            "projection.date.range": "NOW-1YEARS,NOW+9HOUR",
+            "projection.date.type": "date",
+            "projection.enabled": "true",
+            "projection.region.type": "enum",
+            "projection.region.values": "us-east-1,us-east-2,us-west-1,us-west-2,af-south-1,ap-east-1,ap-south-1,ap-northeast-2,ap-southeast-1,ap-southeast-2,ap-northeast-1,ca-central-1,eu-central-1,eu-west-1,eu-west-2,eu-south-1,eu-west-3,eu-north-1,me-south-1,sa-east-1",
+            "storage.location.template": {
+              "Fn::Join": [
+                "",
+                [
+                  "s3://",
+                  {
+                    "Fn::ImportValue": "prod-data-str-base-stack:ExportsOutputRefCloudTrailBucket98B0BFE15D7C465F",
+                  },
+                  "/AWSLogs/",
+                  {
+                    "Ref": "AWS::AccountId",
+                  },
+                  "/CloudTrail/\${region}/\${date}",
+                ],
+              ],
+            },
+            "typeOfData": "file",
+          },
+          "PartitionKeys": [
+            {
+              "Name": "region",
+              "Type": "string",
+            },
+            {
+              "Name": "date",
+              "Type": "string",
+            },
+          ],
+          "StorageDescriptor": {
+            "Columns": [
+              {
+                "Name": "eventVersion",
+                "Type": "string",
+              },
+              {
+                "Name": "useridentity",
+                "Type": "struct<type:string,principalId:string,arn:string,accountId:string,invokedBy:string,accessKeyId:string,userName:string,sessionContext:struct<attributes:struct<mfaAuthenticated:string,creationDate:string>,sessionIssuer:struct<type:string,principalId:string,arn:string,accountId:string,userName:string>>>",
+              },
+              {
+                "Name": "eventTime",
+                "Type": "string",
+              },
+              {
+                "Name": "eventSource",
+                "Type": "string",
+              },
+              {
+                "Name": "eventName",
+                "Type": "string",
+              },
+              {
+                "Name": "awsRegion",
+                "Type": "string",
+              },
+              {
+                "Name": "sourceIpAddress",
+                "Type": "string",
+              },
+              {
+                "Name": "userAgent",
+                "Type": "string",
+              },
+              {
+                "Name": "errorCode",
+                "Type": "string",
+              },
+              {
+                "Name": "errorMessage",
+                "Type": "string",
+              },
+              {
+                "Name": "requestParameters",
+                "Type": "string",
+              },
+              {
+                "Name": "responseElements",
+                "Type": "string",
+              },
+              {
+                "Name": "additionalEventData",
+                "Type": "string",
+              },
+              {
+                "Name": "requestId",
+                "Type": "string",
+              },
+              {
+                "Name": "eventId",
+                "Type": "string",
+              },
+              {
+                "Name": "resources",
+                "Type": "array<struct<arn:string,accountId:string,type:string>>",
+              },
+              {
+                "Name": "eventType",
+                "Type": "string",
+              },
+              {
+                "Name": "apiVersion",
+                "Type": "string",
+              },
+              {
+                "Name": "readOnly",
+                "Type": "string",
+              },
+              {
+                "Name": "recipientAccountId",
+                "Type": "string",
+              },
+              {
+                "Name": "serviceEventDetails",
+                "Type": "string",
+              },
+              {
+                "Name": "sharedEventID",
+                "Type": "string",
+              },
+              {
+                "Name": "vpcEndpointId",
+                "Type": "string",
+              },
+            ],
+            "InputFormat": "com.amazon.emr.cloudtrail.CloudTrailInputFormat",
+            "Location": {
+              "Fn::Join": [
+                "",
+                [
+                  "s3://",
+                  {
+                    "Fn::ImportValue": "prod-data-str-base-stack:ExportsOutputRefCloudTrailBucket98B0BFE15D7C465F",
+                  },
+                  "/AWSLogs/",
+                  {
+                    "Ref": "AWS::AccountId",
+                  },
+                  "/CloudTrail/",
+                ],
+              ],
+            },
+            "OutputFormat": "org.apache.hadoop.hive.ql.io.HiveIgnoreKeyTextOutputFormat",
+            "SerdeInfo": {
+              "Parameters": {
+                "serialization.format": "1",
+              },
+              "SerializationLibrary": "com.amazon.emr.hive.serde.CloudTrailSerde",
+            },
+          },
+          "TableType": "EXTERNAL_TABLE",
+        },
+      },
+      "Type": "AWS::Glue::Table",
+    },
+    "CloudTrailLogAnalyticsBucket21F5FE2B": {
+      "DeletionPolicy": "Delete",
+      "Properties": {
+        "Tags": [
+          {
+            "Key": "aws-cdk:auto-delete-objects",
+            "Value": "true",
+          },
+          {
+            "Key": "StackName",
+            "Value": "prod-data-str-kinesis-logging-stack",
+          },
+        ],
+      },
+      "Type": "AWS::S3::Bucket",
+      "UpdateReplacePolicy": "Delete",
+    },
+    "CloudTrailLogAnalyticsBucketAutoDeleteObjectsCustomResource4BBECC78": {
+      "DeletionPolicy": "Delete",
+      "DependsOn": [
+        "CloudTrailLogAnalyticsBucketPolicy9566F027",
+      ],
+      "Properties": {
+        "BucketName": {
+          "Ref": "CloudTrailLogAnalyticsBucket21F5FE2B",
+        },
+        "ServiceToken": {
+          "Fn::GetAtt": [
+            "CustomS3AutoDeleteObjectsCustomResourceProviderHandler9D90184F",
+            "Arn",
+          ],
+        },
+      },
+      "Type": "Custom::S3AutoDeleteObjects",
+      "UpdateReplacePolicy": "Delete",
+    },
+    "CloudTrailLogAnalyticsBucketPolicy9566F027": {
+      "Properties": {
+        "Bucket": {
+          "Ref": "CloudTrailLogAnalyticsBucket21F5FE2B",
+        },
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "s3:*",
+              "Condition": {
+                "Bool": {
+                  "aws:SecureTransport": "false",
+                },
+              },
+              "Effect": "Deny",
+              "Principal": {
+                "AWS": "*",
+              },
+              "Resource": [
+                {
+                  "Fn::GetAtt": [
+                    "CloudTrailLogAnalyticsBucket21F5FE2B",
+                    "Arn",
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      {
+                        "Fn::GetAtt": [
+                          "CloudTrailLogAnalyticsBucket21F5FE2B",
+                          "Arn",
+                        ],
+                      },
+                      "/*",
+                    ],
+                  ],
+                },
+              ],
+            },
+            {
+              "Action": [
+                "s3:PutBucketPolicy",
+                "s3:GetBucket*",
+                "s3:List*",
+                "s3:DeleteObject*",
+              ],
+              "Effect": "Allow",
+              "Principal": {
+                "AWS": {
+                  "Fn::GetAtt": [
+                    "CustomS3AutoDeleteObjectsCustomResourceProviderRole3B1BD092",
+                    "Arn",
+                  ],
+                },
+              },
+              "Resource": [
+                {
+                  "Fn::GetAtt": [
+                    "CloudTrailLogAnalyticsBucket21F5FE2B",
+                    "Arn",
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      {
+                        "Fn::GetAtt": [
+                          "CloudTrailLogAnalyticsBucket21F5FE2B",
+                          "Arn",
+                        ],
+                      },
+                      "/*",
+                    ],
+                  ],
+                },
+              ],
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+      },
+      "Type": "AWS::S3::BucketPolicy",
+    },
+    "CloudTrailLogAnalyticsDatabase6595B6BB": {
+      "Properties": {
+        "CatalogId": {
+          "Ref": "AWS::AccountId",
+        },
+        "DatabaseInput": {
+          "Name": "cloudtrail_logs_database",
+        },
+      },
+      "Type": "AWS::Glue::Database",
+    },
+    "CloudTrailLogAnalyticsQuerySelectAll4EA55D3D": {
+      "DependsOn": [
+        "CloudTrailLogAnalyticsWorkGroup29A2A8C1",
+      ],
+      "Properties": {
+        "Database": "cloudtrail_logs_database",
+        "Name": "SelectAll",
+        "QueryString": "select * from cloudtrail_logs_database.cloudtrail_logs_table limit 50;",
+        "WorkGroup": "prod-data-str-kinesis-logging-stack-wg",
+      },
+      "Type": "AWS::Athena::NamedQuery",
+    },
+    "CloudTrailLogAnalyticsQuerySelectFromApiGw8835C252": {
+      "DependsOn": [
+        "CloudTrailLogAnalyticsWorkGroup29A2A8C1",
+      ],
+      "Properties": {
+        "Database": "cloudtrail_logs_database",
+        "Name": "SelectPutRecords",
+        "QueryString": "select * from cloudtrail_logs_database.cloudtrail_logs_table where eventname = 'PutRecords' and sourceipaddress = 'apigateway.amazonaws.com' limit 50;",
+        "WorkGroup": "prod-data-str-kinesis-logging-stack-wg",
+      },
+      "Type": "AWS::Athena::NamedQuery",
+    },
+    "CloudTrailLogAnalyticsQuerySelectPutRecords9BB668CF": {
+      "DependsOn": [
+        "CloudTrailLogAnalyticsWorkGroup29A2A8C1",
+      ],
+      "Properties": {
+        "Database": "cloudtrail_logs_database",
+        "Name": "SelectPutRecords",
+        "QueryString": "select * from cloudtrail_logs_database.cloudtrail_logs_table where eventname = 'PutRecords' limit 50;",
+        "WorkGroup": "prod-data-str-kinesis-logging-stack-wg",
+      },
+      "Type": "AWS::Athena::NamedQuery",
+    },
+    "CloudTrailLogAnalyticsWorkGroup29A2A8C1": {
+      "Properties": {
+        "Name": "prod-data-str-kinesis-logging-stack-wg",
+        "RecursiveDeleteOption": true,
+        "Tags": [
+          {
+            "Key": "StackName",
+            "Value": "prod-data-str-kinesis-logging-stack",
+          },
+        ],
+        "WorkGroupConfiguration": {
+          "BytesScannedCutoffPerQuery": 100000000,
+          "EngineVersion": {
+            "SelectedEngineVersion": "Athena engine version 3",
+          },
+          "ResultConfiguration": {
+            "OutputLocation": {
+              "Fn::Join": [
+                "",
+                [
+                  "s3://",
+                  {
+                    "Ref": "CloudTrailLogAnalyticsBucket21F5FE2B",
+                  },
+                  "/result",
+                ],
+              ],
+            },
+          },
+        },
+      },
+      "Type": "AWS::Athena::WorkGroup",
+    },
+    "CustomS3AutoDeleteObjectsCustomResourceProviderHandler9D90184F": {
+      "DependsOn": [
+        "CustomS3AutoDeleteObjectsCustomResourceProviderRole3B1BD092",
+      ],
+      "Properties": {
+        "Code": {
+          "S3Bucket": {
+            "Fn::Sub": "cdk-hnb659fds-assets-\${AWS::AccountId}-ap-northeast-1",
+          },
+          "S3Key": "HASH-REPLACED.zip",
+        },
+        "Description": {
+          "Fn::Join": [
+            "",
+            [
+              "Lambda function for auto-deleting objects in ",
+              {
+                "Ref": "CloudTrailLogAnalyticsBucket21F5FE2B",
+              },
+              " S3 bucket.",
+            ],
+          ],
+        },
+        "Handler": "index.handler",
+        "MemorySize": 128,
+        "Role": {
+          "Fn::GetAtt": [
+            "CustomS3AutoDeleteObjectsCustomResourceProviderRole3B1BD092",
+            "Arn",
+          ],
+        },
+        "Runtime": "nodejs20.x",
+        "Timeout": 900,
+      },
+      "Type": "AWS::Lambda::Function",
+    },
+    "CustomS3AutoDeleteObjectsCustomResourceProviderRole3B1BD092": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "lambda.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Sub": "arn:\${AWS::Partition}:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+    },
     "TrailDataStream153F3878": {
       "Properties": {
         "AdvancedEventSelectors": [
