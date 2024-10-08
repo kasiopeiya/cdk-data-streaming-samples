@@ -37,7 +37,7 @@ export abstract class StageBase extends Stage {
     /*
     * VPCスタック
     -------------------------------------------------------------------------- */
-    const baseVpcStack = new SampleVpcStack(scope, `${prefix}-base-vpc-stack`, { env })
+    const vpcStack = new SampleVpcStack(scope, `${prefix}-vpc-stack`, { env })
 
     /*
     * S3配信構成用スタック
@@ -66,7 +66,7 @@ export abstract class StageBase extends Stage {
       baseStack,
       baseTestResourceStack,
       kinesisLoggingStack,
-      baseVpcStack,
+      vpcStack,
       deliveryS3Stack,
       apiGwKdsLambdaStack
     }
