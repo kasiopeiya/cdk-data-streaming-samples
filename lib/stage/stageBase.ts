@@ -7,6 +7,7 @@ import { BaseTestResourceStack } from '../stack/baseTestResourceStack'
 import { DeliveryS3Stack } from '../stack/deliveryS3Stack'
 import { ApiGwKdsLambdaStack } from '../stack/apiGwKdsLambdaStack'
 import { SampleVpcStack } from '../stack/sampleVpcStack'
+import { KinesisLoggingStack } from '../stack/kinesisLoggingStack'
 
 export abstract class StageBase extends Stage {
   createCommonStacks(scope: Construct, config: Config, env: Environment): Record<string, Stack> {
@@ -25,6 +26,13 @@ export abstract class StageBase extends Stage {
       `${prefix}-base-test-resource-stack`,
       { env }
     )
+
+    /*
+    * Kinesisデータイベントログ出力設定スタック
+    -------------------------------------------------------------------------- */
+    const kinesisLoggingStack = new KinesisLoggingStack(this, `${prefix}-kinesis-logging-stack`, {
+      trailBucket: baseStack.trailBucket
+    })
 
     /*
     * VPCスタック
@@ -57,6 +65,7 @@ export abstract class StageBase extends Stage {
     return {
       baseStack,
       baseTestResourceStack,
+      kinesisLoggingStack,
       baseVpcStack,
       deliveryS3Stack,
       apiGwKdsLambdaStack
