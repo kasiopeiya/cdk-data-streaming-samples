@@ -19,7 +19,7 @@ export abstract class StageBase extends Stage {
     const baseStack = new BaseStack(scope, `${prefix}-base-stack`, { env })
 
     /*
-    * 共通リソース用スタック
+    * テストリソース構築用スタック
     -------------------------------------------------------------------------- */
     const baseTestResourceStack = new BaseTestResourceStack(
       scope,
