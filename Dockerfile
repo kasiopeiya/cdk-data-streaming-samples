@@ -1,6 +1,6 @@
 FROM node:20.17.0-slim
 
-# AWS CLIのインストール
+# vimやcurlなどの必要パッケージのインストール
 RUN apt-get update && apt-get install -y unzip curl vim dpkg wget jq && \
     curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip" && \
     unzip awscliv2.zip && \
