@@ -1,15 +1,15 @@
 import * as path from 'path'
 
 import { Construct } from 'constructs'
-import { type Stream } from 'aws-cdk-lib/aws-kinesis'
-import * as logs from 'aws-cdk-lib/aws-logs'
-import * as nodejsLambda from 'aws-cdk-lib/aws-lambda-nodejs'
-import * as lambda_ from 'aws-cdk-lib/aws-lambda'
 import { Duration, RemovalPolicy } from 'aws-cdk-lib'
-import * as iam from 'aws-cdk-lib/aws-iam'
+import { aws_kinesis as kds } from 'aws-cdk-lib'
+import { aws_logs as logs } from 'aws-cdk-lib'
+import { aws_lambda_nodejs as node } from 'aws-cdk-lib'
+import { aws_lambda as lambda } from 'aws-cdk-lib'
+import { aws_iam as iam } from 'aws-cdk-lib'
 
 interface KdsScaleOutLambdaProps {
-  dataStream: Stream
+  dataStream: kds.Stream
 }
 
 /**
@@ -17,7 +17,7 @@ interface KdsScaleOutLambdaProps {
  * 主にCW Alarm Actionでの使用を想定
  */
 export class KdsScaleOutLambda extends Construct {
-  public readonly func: lambda_.Function
+  public readonly func: lambda.Function
 
   constructor(scope: Construct, id: string, props: KdsScaleOutLambdaProps) {
     super(scope, id)
@@ -26,18 +26,18 @@ export class KdsScaleOutLambda extends Construct {
     * Lambda
     -------------------------------------------------------------------------- */
     // Layer
-    const customlayer = new lambda_.LayerVersion(this, 'CustomLayer', {
+    const customlayer = new lambda.LayerVersion(this, 'CustomLayer', {
       removalPolicy: RemovalPolicy.DESTROY,
-      code: lambda_.Code.fromAsset(path.join('resources', 'layer', 'common')),
-      compatibleArchitectures: [lambda_.Architecture.X86_64, lambda_.Architecture.ARM_64]
+      code: lambda.Code.fromAsset(path.join('resources', 'layer', 'common')),
+      compatibleArchitectures: [lambda.Architecture.X86_64, lambda.Architecture.ARM_64]
     })
 
     // Function
-    this.func = new nodejsLambda.NodejsFunction(this, 'LambdaFunc', {
+    this.func = new node.NodejsFunction(this, 'LambdaFunc', {
       entry: path.join('resources', 'lambda', 'kdsScaleOut', 'index.ts'),
       handler: 'handler',
-      runtime: lambda_.Runtime.NODEJS_20_X,
-      architecture: lambda_.Architecture.ARM_64,
+      runtime: lambda.Runtime.NODEJS_20_X,
+      architecture: lambda.Architecture.ARM_64,
       timeout: Duration.minutes(3),
       initialPolicy: [
         new iam.PolicyStatement({
@@ -49,8 +49,8 @@ export class KdsScaleOutLambda extends Construct {
         DATA_STREAM_NAME: props.dataStream.streamName
       },
       layers: [customlayer],
-      loggingFormat: lambda_.LoggingFormat.JSON,
-      systemLogLevelV2: lambda_.SystemLogLevel.WARN
+      loggingFormat: lambda.LoggingFormat.JSON,
+      systemLogLevelV2: lambda.SystemLogLevel.WARN
     })
 
     // Log

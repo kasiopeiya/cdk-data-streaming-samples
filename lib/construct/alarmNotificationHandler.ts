@@ -1,13 +1,13 @@
 import { Construct } from 'constructs'
-import { type ITopic } from 'aws-cdk-lib/aws-sns'
-import * as sfn from 'aws-cdk-lib/aws-stepfunctions'
-import * as tasks from 'aws-cdk-lib/aws-stepfunctions-tasks'
-import * as events from 'aws-cdk-lib/aws-events'
-import * as targets from 'aws-cdk-lib/aws-events-targets'
+import { aws_sns as sns } from 'aws-cdk-lib'
+import { aws_stepfunctions as sfn } from 'aws-cdk-lib'
+import { aws_stepfunctions_tasks as tasks } from 'aws-cdk-lib'
+import { aws_events as events } from 'aws-cdk-lib'
+import { aws_events_targets as targets } from 'aws-cdk-lib'
 
 interface AlarmNotificationHandlerProps {
   /** メール通知に使用するSNS Topic */
-  topic: ITopic
+  topic: sns.ITopic
   /** メール件名のプレフィックス */
   emailSubjectPrefix?: string
 }

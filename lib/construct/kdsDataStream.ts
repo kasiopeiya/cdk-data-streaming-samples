@@ -1,18 +1,18 @@
 import { Construct } from 'constructs'
-import { Stream, type StreamProps, StreamMode } from 'aws-cdk-lib/aws-kinesis'
-import * as ssm from 'aws-cdk-lib/aws-ssm'
 import { Duration, RemovalPolicy, Stack } from 'aws-cdk-lib'
-import * as cw from 'aws-cdk-lib/aws-cloudwatch'
+import { aws_kinesis as kds } from 'aws-cdk-lib'
+import { aws_ssm as ssm } from 'aws-cdk-lib'
+import { aws_cloudwatch as cw } from 'aws-cdk-lib'
 
 interface KdsDataStreamProps {
-  dataStreamProps?: StreamProps
+  dataStreamProps?: kds.StreamProps
 }
 
 /**
  * Kinesis Data Streamsとその関連リソースを構築するオリジナルconstruct
  */
 export class KdsDataStream extends Construct {
-  public readonly dataStream: Stream
+  public readonly dataStream: kds.Stream
 
   constructor(scope: Construct, id: string, props?: KdsDataStreamProps) {
     super(scope, id)
@@ -20,9 +20,9 @@ export class KdsDataStream extends Construct {
     /*
     * Kinesis Data Streams
     -------------------------------------------------------------------------- */
-    this.dataStream = new Stream(this, 'Resource', {
+    this.dataStream = new kds.Stream(this, 'Resource', {
       shardCount: 1,
-      streamMode: StreamMode.PROVISIONED,
+      streamMode: kds.StreamMode.PROVISIONED,
       removalPolicy: RemovalPolicy.DESTROY,
       ...props?.dataStreamProps
     })

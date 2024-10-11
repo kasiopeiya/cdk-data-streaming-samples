@@ -1,11 +1,11 @@
 import * as path from 'path'
 
-import { RemovalPolicy, Stack } from 'aws-cdk-lib'
 import { Construct } from 'constructs'
-import * as codebuild from 'aws-cdk-lib/aws-codebuild'
-import * as s3 from 'aws-cdk-lib/aws-s3'
-import * as logs from 'aws-cdk-lib/aws-logs'
-import * as iam from 'aws-cdk-lib/aws-iam'
+import { RemovalPolicy, Stack } from 'aws-cdk-lib'
+import { aws_codebuild as codebuild } from 'aws-cdk-lib'
+import { aws_s3 as s3 } from 'aws-cdk-lib'
+import { aws_logs as logs } from 'aws-cdk-lib'
+import { aws_iam as iam } from 'aws-cdk-lib'
 
 interface TestDataInjectionProps {
   testResourceBucket: s3.Bucket

@@ -1,13 +1,13 @@
 import { Duration, Stack } from 'aws-cdk-lib'
 import { Construct } from 'constructs'
-import * as cw from 'aws-cdk-lib/aws-cloudwatch'
-import { type CfnStream, type Stream } from 'aws-cdk-lib/aws-kinesis'
-import { type Function as LambdaFunction } from 'aws-cdk-lib/aws-lambda'
-import { type RestApi } from 'aws-cdk-lib/aws-apigateway'
-import { KdsShardCountMetrics } from './kdsShardCountMetrics'
+import { aws_cloudwatch as cw } from 'aws-cdk-lib'
+import { aws_kinesis as kds } from 'aws-cdk-lib'
+import { aws_lambda as lambda } from 'aws-cdk-lib'
+import { aws_apigateway as apigw } from 'aws-cdk-lib'
+import { aws_sqs as sqs } from 'aws-cdk-lib'
 import { type DeliveryStream } from '@aws-cdk/aws-kinesisfirehose-alpha'
-import { type Queue } from 'aws-cdk-lib/aws-sqs'
 
+import { KdsShardCountMetrics } from './kdsShardCountMetrics'
 import { alarmDescriptionTable } from '../../resources/dashboard/markdown'
 
 /** Dashboardの各セクション共通Widget */
@@ -85,13 +85,13 @@ interface ScriptLogGroupNames {
 
 interface KdsCWDashboardProps {
   /** API GW RestAPI */
-  restApi?: RestApi
+  restApi?: apigw.RestApi
   /** KDS DataStream */
-  dataStream?: Stream
+  dataStream?: kds.Stream
   /** Lambda Function */
-  lambdaFunction?: LambdaFunction
+  lambdaFunction?: lambda.Function
   /** Lambda DLQ */
-  lambdaDlq?: Queue
+  lambdaDlq?: sqs.Queue
   /** Data Firehose */
   deliveryStream?: DeliveryStream
   /** CloudWatch Alarms */
@@ -109,10 +109,10 @@ export class KdsCWDashboard extends Construct {
   private readonly defaultHeight: number = 8
   private readonly defaultWidth: number = 12
   private readonly alarms: cw.Alarm[]
-  private readonly restApi: RestApi
-  private readonly dataStream: Stream
-  private readonly lambdaFunction: LambdaFunction
-  private readonly lambdaDlq: Queue
+  private readonly restApi: apigw.RestApi
+  private readonly dataStream: kds.Stream
+  private readonly lambdaFunction: lambda.Function
+  private readonly lambdaDlq: sqs.Queue
   private readonly deliveryStream: DeliveryStream
   private readonly alarmWidgets: AlarmWidgets
   private readonly apiGwWidgets: ApiGwSectionWidgets
@@ -187,8 +187,8 @@ export class KdsCWDashboard extends Construct {
         this.kdsWidgets.iteratorAgeMillisecondsWid
       )
 
-      const cfnStream = this.dataStream.node.defaultChild as CfnStream
-      const capacityMode = (cfnStream.streamModeDetails as CfnStream.StreamModeDetailsProperty)
+      const cfnStream = this.dataStream.node.defaultChild as kds.CfnStream
+      const capacityMode = (cfnStream.streamModeDetails as kds.CfnStream.StreamModeDetailsProperty)
         .streamMode
       if (capacityMode === 'ON_DEMAND') {
         new KdsShardCountMetrics(this, 'KdsShardCountMetrics', {

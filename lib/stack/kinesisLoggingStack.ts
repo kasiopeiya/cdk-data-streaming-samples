@@ -1,12 +1,12 @@
-import { Stack, type StackProps, Tags } from 'aws-cdk-lib'
 import { type Construct } from 'constructs'
-import { Bucket } from 'aws-cdk-lib/aws-s3'
+import { Stack, type StackProps, Tags } from 'aws-cdk-lib'
+import { aws_s3 as s3 } from 'aws-cdk-lib'
 
 import { TrailDataStream } from '../construct/trailDataStream'
 import { CloudTrailLogAnalytics } from '../construct/awsLogAnalytics'
 
 interface KinesisLoggingStackProps extends StackProps {
-  trailBucket: Bucket
+  trailBucket: s3.Bucket
 }
 
 /**

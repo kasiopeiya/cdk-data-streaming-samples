@@ -1,12 +1,12 @@
 import { Construct } from 'constructs'
 import { RemovalPolicy, Stack } from 'aws-cdk-lib'
-import { Bucket } from 'aws-cdk-lib/aws-s3'
-import * as glue from 'aws-cdk-lib/aws-glue'
-import * as athena from 'aws-cdk-lib/aws-athena'
+import { aws_s3 as s3 } from 'aws-cdk-lib'
+import { aws_glue as glue } from 'aws-cdk-lib'
+import { aws_athena as athena } from 'aws-cdk-lib'
 
 export interface CloudTrailLogAnalyticsProps {
   /** CloudTrailのログが保存されているS3 Bucket */
-  dataBucket: Bucket
+  dataBucket: s3.Bucket
 }
 
 /**
@@ -179,7 +179,7 @@ export class CloudTrailLogAnalytics extends Construct {
     * Athena
     -------------------------------------------------------------------------- */
     // クエリ結果格納バケット
-    const athenaResultBucket = new Bucket(this, 'Bucket', {
+    const athenaResultBucket = new s3.Bucket(this, 'Bucket', {
       removalPolicy: RemovalPolicy.DESTROY,
       autoDeleteObjects: true,
       enforceSSL: true

@@ -1,15 +1,15 @@
 import * as path from 'path'
 
-import { Duration, Stack, type StackProps, RemovalPolicy, Tags } from 'aws-cdk-lib'
 import { type Construct } from 'constructs'
+import { Duration, Stack, type StackProps, RemovalPolicy, Tags } from 'aws-cdk-lib'
 import * as kinesisfirehose_alpha from '@aws-cdk/aws-kinesisfirehose-alpha'
 import * as kinesisfirehose_destination_alpha from '@aws-cdk/aws-kinesisfirehose-destinations-alpha'
-import { type Function as LambdaFunction } from 'aws-cdk-lib/aws-lambda'
-import * as logs from 'aws-cdk-lib/aws-logs'
-import { type Alarm } from 'aws-cdk-lib/aws-cloudwatch'
-import * as cwAction from 'aws-cdk-lib/aws-cloudwatch-actions'
-import { StreamMode, type CfnStream } from 'aws-cdk-lib/aws-kinesis'
-import * as s3 from 'aws-cdk-lib/aws-s3'
+import { aws_lambda as lambda } from 'aws-cdk-lib'
+import { aws_logs as logs } from 'aws-cdk-lib'
+import { aws_cloudwatch as cw } from 'aws-cdk-lib'
+import { aws_cloudwatch_actions as cwAction } from 'aws-cdk-lib'
+import { aws_kinesis as kds } from 'aws-cdk-lib'
+import { aws_s3 as s3 } from 'aws-cdk-lib'
 
 import { KdsDataStream } from '../construct/kdsDataStream'
 import { KdsCWDashboard } from '../construct/kdsCWDashboard'
@@ -66,7 +66,7 @@ export class DeliveryS3Stack extends Stack {
     * Data Firehose
     -------------------------------------------------------------------------- */
     let deliveryStream: kinesisfirehose_alpha.DeliveryStream
-    let lambdaFunc: LambdaFunction | undefined
+    let lambdaFunc: lambda.Function | undefined
     let firehoseWithLambda: FirehoseWithLambda | undefined
 
     if (props.enableLambdaProcessor) {
@@ -108,14 +108,14 @@ export class DeliveryS3Stack extends Stack {
     * Monitoring
     -------------------------------------------------------------------------- */
     // Alarm
-    const writePrvAlarm: Alarm = kdsDataStream.createWriteProvisionedAlarm()
-    const readPrvAlarm: Alarm = kdsDataStream.createReadProvisionedAlarm()
-    const iteratorAgeAlarm: Alarm = kdsDataStream.createIteratorAgeAlarm()
-    const partitionCountExceededAlarm: Alarm | undefined =
+    const writePrvAlarm: cw.Alarm = kdsDataStream.createWriteProvisionedAlarm()
+    const readPrvAlarm: cw.Alarm = kdsDataStream.createReadProvisionedAlarm()
+    const iteratorAgeAlarm: cw.Alarm = kdsDataStream.createIteratorAgeAlarm()
+    const partitionCountExceededAlarm: cw.Alarm | undefined =
       firehoseWithLambda?.createPartitionCountExceededAlarm()
-    const dataFreshnessAlarm: Alarm | undefined = firehoseWithLambda?.createDataFreshnessAlarm()
-    const lambdaErrorsAlarm: Alarm | undefined = firehoseWithLambda?.createLambdaErrorsAlarm()
-    const cwAlarms: Alarm[] = [
+    const dataFreshnessAlarm: cw.Alarm | undefined = firehoseWithLambda?.createDataFreshnessAlarm()
+    const lambdaErrorsAlarm: cw.Alarm | undefined = firehoseWithLambda?.createLambdaErrorsAlarm()
+    const cwAlarms: cw.Alarm[] = [
       writePrvAlarm,
       readPrvAlarm,
       iteratorAgeAlarm,
@@ -125,10 +125,10 @@ export class DeliveryS3Stack extends Stack {
     ].filter((value) => value !== undefined)
 
     // Alarm Action
-    const cfnStream = kdsDataStream.dataStream.node.defaultChild as CfnStream
-    const capacityMode = (cfnStream.streamModeDetails as CfnStream.StreamModeDetailsProperty)
+    const cfnStream = kdsDataStream.dataStream.node.defaultChild as kds.CfnStream
+    const capacityMode = (cfnStream.streamModeDetails as kds.CfnStream.StreamModeDetailsProperty)
       .streamMode
-    if (capacityMode === StreamMode.PROVISIONED) {
+    if (capacityMode === kds.StreamMode.PROVISIONED) {
       // BUG: cdkのバグで同じLambda関数を複数のAlarm Actionに設定するとエラーになるため、複数のLambdaを用意
       const kdsScaleOutLambda1 = new KdsScaleOutLambda(this, 'KdsScaleOutLambda1', {
         dataStream: kdsDataStream.dataStream

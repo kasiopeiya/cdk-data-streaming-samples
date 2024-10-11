@@ -1,6 +1,6 @@
 /** 開発環境用ステージ */
-import { type Stack, type StageProps, type Environment } from 'aws-cdk-lib'
 import { type Construct } from 'constructs'
+import { type Stack, type StageProps, type Environment } from 'aws-cdk-lib'
 
 import { devConfig, type Config } from '../../config'
 import { StageBase } from './stageBase'

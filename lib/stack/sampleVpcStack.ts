@@ -1,6 +1,6 @@
-import { Stack, type StackProps, CfnOutput, Tags } from 'aws-cdk-lib'
 import { type Construct } from 'constructs'
-import * as ec2 from 'aws-cdk-lib/aws-ec2'
+import { Stack, type StackProps, CfnOutput, Tags } from 'aws-cdk-lib'
+import { aws_ec2 as ec2 } from 'aws-cdk-lib'
 
 /**
  * VPC, Subnet(Public✖️1, Private✖️1), NatGatewayを構築する

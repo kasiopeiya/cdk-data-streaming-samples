@@ -1,15 +1,15 @@
 import { Duration, RemovalPolicy, Stack } from 'aws-cdk-lib'
 import { Construct } from 'constructs'
-import * as iam from 'aws-cdk-lib/aws-iam'
-import * as apigw from 'aws-cdk-lib/aws-apigateway'
-import * as ec2 from 'aws-cdk-lib/aws-ec2'
-import * as logs from 'aws-cdk-lib/aws-logs'
-import { type Stream } from 'aws-cdk-lib/aws-kinesis'
-import * as ssm from 'aws-cdk-lib/aws-ssm'
-import * as cw from 'aws-cdk-lib/aws-cloudwatch'
+import { aws_iam as iam } from 'aws-cdk-lib'
+import { aws_apigateway as apigw } from 'aws-cdk-lib'
+import { aws_ec2 as ec2 } from 'aws-cdk-lib'
+import { aws_logs as logs } from 'aws-cdk-lib'
+import { aws_kinesis as kds } from 'aws-cdk-lib'
+import { aws_ssm as ssm } from 'aws-cdk-lib'
+import { aws_cloudwatch as cw } from 'aws-cdk-lib'
 
 interface KdsApiGwProducerProps {
-  dataStream: Stream
+  dataStream: kds.Stream
   /* APIGWのタイプ, Privateの場合はVPCの指定が必須 */
   type?: apigw.EndpointType.PRIVATE | apigw.EndpointType.REGIONAL
   /* Private APIの場合に指定、VPC Endpointを作成するVPC */
@@ -218,7 +218,7 @@ export class KdsApiGwProducer extends Construct {
    * KDS PutRecords API統合用の設定作成
    * @param dataStream
    */
-  createPutRecordsIntegrationOption(dataStream: Stream): apigw.IntegrationOptions {
+  createPutRecordsIntegrationOption(dataStream: kds.Stream): apigw.IntegrationOptions {
     return {
       requestParameters: {
         'integration.request.header.Content-Type': "'x-amz-json-1.1'"
@@ -286,7 +286,7 @@ export class KdsApiGwProducer extends Construct {
    * KDS PutRecord API統合用のオプション作成
    * @param dataStream
    */
-  createPutRecordIntegrationOption(dataStream: Stream): apigw.IntegrationOptions {
+  createPutRecordIntegrationOption(dataStream: kds.Stream): apigw.IntegrationOptions {
     return {
       requestParameters: {
         'integration.request.header.Content-Type': "'x-amz-json-1.1'"

@@ -1,7 +1,7 @@
 import { Construct } from 'constructs'
-import { Bucket } from 'aws-cdk-lib/aws-s3'
-import * as iam from 'aws-cdk-lib/aws-iam'
-import * as cloudtrail from 'aws-cdk-lib/aws-cloudtrail'
+import { aws_s3 as s3 } from 'aws-cdk-lib'
+import { aws_iam as iam } from 'aws-cdk-lib'
+import { aws_cloudtrail as cloudtrail } from 'aws-cdk-lib'
 
 export const LogEvent = {
   READONLY: ['GetRecord', 'GetRecords'],
@@ -11,7 +11,7 @@ export const LogEvent = {
 
 interface TrailDataStreamProps {
   /** CloudTrailのログ保存先S3 Bucket */
-  trailBucket: Bucket
+  trailBucket: s3.Bucket
   /**
    * 記録するログイベントの種類
    * @default LogEvent.WRITEONLY

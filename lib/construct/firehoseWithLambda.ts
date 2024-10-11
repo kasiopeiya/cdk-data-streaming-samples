@@ -1,28 +1,27 @@
 import * as path from 'path'
 
-import { Duration, RemovalPolicy, Size, Stack } from 'aws-cdk-lib'
 import { Construct } from 'constructs'
-import { type Stream } from 'aws-cdk-lib/aws-kinesis'
-import { type Bucket } from 'aws-cdk-lib/aws-s3'
+import { Duration, RemovalPolicy, Size, Stack } from 'aws-cdk-lib'
+import { aws_kinesis as kds } from 'aws-cdk-lib'
+import { aws_s3 as s3 } from 'aws-cdk-lib'
+import { aws_lambda as lambda } from 'aws-cdk-lib'
+import { aws_kinesisfirehose as firehose } from 'aws-cdk-lib'
+import { aws_logs as logs } from 'aws-cdk-lib'
+import { aws_lambda_nodejs as nodejsLambda } from 'aws-cdk-lib'
+import { aws_iam as iam } from 'aws-cdk-lib'
+import { aws_cloudwatch as cw } from 'aws-cdk-lib'
 import * as kinesisfirehose_alpha from '@aws-cdk/aws-kinesisfirehose-alpha'
 import * as kinesisfirehose_destination_alpha from '@aws-cdk/aws-kinesisfirehose-destinations-alpha'
-import * as lambda_ from 'aws-cdk-lib/aws-lambda'
-import { type CfnDeliveryStream } from 'aws-cdk-lib/aws-kinesisfirehose'
-import * as logs from 'aws-cdk-lib/aws-logs'
-import * as nodejsLambda from 'aws-cdk-lib/aws-lambda-nodejs'
-import * as iam from 'aws-cdk-lib/aws-iam'
-import * as cw from 'aws-cdk-lib/aws-cloudwatch'
-import * as s3 from 'aws-cdk-lib/aws-s3'
 
 interface FirehoseWithLambdaProps {
   /** KDS Data Stream */
-  sourceStream: Stream
+  sourceStream: kds.Stream
   /** Firehoseと連携するLambda関数コードのパス */
   lambdaEntry: string
   /** 配信先S3バケット */
-  destinationBucket?: Bucket
+  destinationBucket?: s3.Bucket
   /** バックアップ先S3バケット */
-  backupBucket?: Bucket
+  backupBucket?: s3.Bucket
   /** 配信のバッファリング秒数 */
   bufferingInterval?: Duration
   /** Lambda加工処理のバッファリング設定 */
@@ -35,7 +34,7 @@ interface FirehoseWithLambdaProps {
  */
 export class FirehoseWithLambda extends Construct {
   public readonly deliveryStream: kinesisfirehose_alpha.DeliveryStream
-  public readonly lambdaFunc: lambda_.Function
+  public readonly lambdaFunc: lambda.Function
 
   constructor(scope: Construct, id: string, props: FirehoseWithLambdaProps) {
     super(scope, id)
@@ -52,10 +51,10 @@ export class FirehoseWithLambda extends Construct {
     * Lambda
     -------------------------------------------------------------------------- */
     // Layer
-    const customlayer = new lambda_.LayerVersion(this, 'CustomLayer', {
+    const customlayer = new lambda.LayerVersion(this, 'CustomLayer', {
       removalPolicy: RemovalPolicy.DESTROY,
-      code: lambda_.Code.fromAsset(path.join('resources', 'layer', 'common')),
-      compatibleArchitectures: [lambda_.Architecture.X86_64, lambda_.Architecture.ARM_64]
+      code: lambda.Code.fromAsset(path.join('resources', 'layer', 'common')),
+      compatibleArchitectures: [lambda.Architecture.X86_64, lambda.Architecture.ARM_64]
     })
 
     // Function
@@ -63,8 +62,8 @@ export class FirehoseWithLambda extends Construct {
       functionName: `${Stack.of(this).stackName}-func`,
       entry: props.lambdaEntry,
       handler: 'handler',
-      runtime: lambda_.Runtime.NODEJS_20_X,
-      architecture: lambda_.Architecture.ARM_64,
+      runtime: lambda.Runtime.NODEJS_20_X,
+      architecture: lambda.Architecture.ARM_64,
       memorySize: 512,
       timeout: Duration.minutes(3),
       initialPolicy: [
@@ -78,8 +77,8 @@ export class FirehoseWithLambda extends Construct {
         })
       ],
       layers: [customlayer],
-      loggingFormat: lambda_.LoggingFormat.JSON,
-      systemLogLevelV2: lambda_.SystemLogLevel.WARN
+      loggingFormat: lambda.LoggingFormat.JSON,
+      systemLogLevelV2: lambda.SystemLogLevel.WARN
     })
 
     /*
@@ -150,7 +149,7 @@ export class FirehoseWithLambda extends Construct {
       destinations: [s3Destination],
       sourceStream: props.sourceStream
     })
-    const cfnFirehose = this.deliveryStream.node.defaultChild as CfnDeliveryStream
+    const cfnFirehose = this.deliveryStream.node.defaultChild as firehose.CfnDeliveryStream
     cfnFirehose.addPropertyOverride(
       'ExtendedS3DestinationConfiguration.DynamicPartitioningConfiguration',
       {

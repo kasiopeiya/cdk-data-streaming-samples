@@ -1,10 +1,10 @@
-import { Stack, type StackProps, RemovalPolicy, Tags } from 'aws-cdk-lib'
 import { type Construct } from 'constructs'
-import * as iam from 'aws-cdk-lib/aws-iam'
-import * as apigw from 'aws-cdk-lib/aws-apigateway'
-import * as sns from 'aws-cdk-lib/aws-sns'
-import * as logs from 'aws-cdk-lib/aws-logs'
-import { Bucket, BucketEncryption, ObjectOwnership } from 'aws-cdk-lib/aws-s3'
+import { Stack, type StackProps, RemovalPolicy, Tags } from 'aws-cdk-lib'
+import { aws_iam as iam } from 'aws-cdk-lib'
+import { aws_apigateway as apigw } from 'aws-cdk-lib'
+import { aws_sns as sns } from 'aws-cdk-lib'
+import { aws_logs as logs } from 'aws-cdk-lib'
+import { aws_s3 as s3 } from 'aws-cdk-lib'
 
 import { AlarmNotificationHandler } from '../construct/alarmNotificationHandler'
 
@@ -12,7 +12,7 @@ import { AlarmNotificationHandler } from '../construct/alarmNotificationHandler'
  * ステートフルなリソースを構築する
  */
 export class BaseStack extends Stack {
-  public readonly trailBucket: Bucket
+  public readonly trailBucket: s3.Bucket
 
   constructor(scope: Construct, id: string, props?: StackProps) {
     super(scope, id, props)
@@ -23,11 +23,11 @@ export class BaseStack extends Stack {
     /* S3
     -------------------------------------------------------------------------- */
     // CloudTrailログ出力先S3バケット
-    this.trailBucket = new Bucket(this, 'CloudTrailBucket', {
-      encryption: BucketEncryption.S3_MANAGED,
+    this.trailBucket = new s3.Bucket(this, 'CloudTrailBucket', {
+      encryption: s3.BucketEncryption.S3_MANAGED,
       enforceSSL: true,
       removalPolicy: RemovalPolicy.DESTROY,
-      objectOwnership: ObjectOwnership.OBJECT_WRITER,
+      objectOwnership: s3.ObjectOwnership.OBJECT_WRITER,
       autoDeleteObjects: true
     })
 

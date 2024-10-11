@@ -1,6 +1,6 @@
 /** 本番環境用ステージ */
-import { Stack, type StageProps, type IAspect, Aspects, type Environment } from 'aws-cdk-lib'
 import { type IConstruct, type Construct } from 'constructs'
+import { Stack, type StageProps, type IAspect, Aspects, type Environment } from 'aws-cdk-lib'
 
 import { prodConfig, type Config } from '../../config'
 import { StageBase } from './stageBase'

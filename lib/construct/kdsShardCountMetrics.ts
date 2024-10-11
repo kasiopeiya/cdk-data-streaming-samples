@@ -1,15 +1,15 @@
-import { RemovalPolicy, Stack } from 'aws-cdk-lib'
 import { Construct } from 'constructs'
-import { type Stream } from 'aws-cdk-lib/aws-kinesis'
-import * as nodejsLambda from 'aws-cdk-lib/aws-lambda-nodejs'
-import * as lambda_ from 'aws-cdk-lib/aws-lambda'
-import * as events from 'aws-cdk-lib/aws-events'
-import * as targets from 'aws-cdk-lib/aws-events-targets'
-import * as iam from 'aws-cdk-lib/aws-iam'
-import * as logs from 'aws-cdk-lib/aws-logs'
+import { RemovalPolicy, Stack } from 'aws-cdk-lib'
+import { aws_kinesis as kds } from 'aws-cdk-lib'
+import { aws_lambda_nodejs as node } from 'aws-cdk-lib'
+import { aws_lambda as lambda } from 'aws-cdk-lib'
+import { aws_events as events } from 'aws-cdk-lib'
+import { aws_events_targets as targets } from 'aws-cdk-lib'
+import { aws_iam as iam } from 'aws-cdk-lib'
+import { aws_logs as logs } from 'aws-cdk-lib'
 
 interface KdsShardCountMetricsProps {
-  dataStream: Stream
+  dataStream: kds.Stream
   nameSpace: string
   metricName: string
 }
@@ -26,12 +26,12 @@ export class KdsShardCountMetrics extends Construct {
     const metricName_ = 'OpenShardCount'
 
     // Lambda Function
-    const lambdaFunc = new nodejsLambda.NodejsFunction(this, 'LambdaFunc', {
+    const lambdaFunc = new node.NodejsFunction(this, 'LambdaFunc', {
       functionName: `${Stack.of(this).stackName}-put-metrics-func`,
       entry: './resources/lambda/kdsShardCount/index.ts',
       handler: 'handler',
-      runtime: lambda_.Runtime.NODEJS_18_X,
-      architecture: lambda_.Architecture.ARM_64,
+      runtime: lambda.Runtime.NODEJS_18_X,
+      architecture: lambda.Architecture.ARM_64,
       initialPolicy: [
         new iam.PolicyStatement({
           actions: [

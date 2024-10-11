@@ -1,8 +1,8 @@
 import { Stack, type StackProps, RemovalPolicy, Tags } from 'aws-cdk-lib'
 import { type Construct } from 'constructs'
-import { Bucket, BucketEncryption } from 'aws-cdk-lib/aws-s3'
-import * as s3Deploy from 'aws-cdk-lib/aws-s3-deployment'
-import * as logs from 'aws-cdk-lib/aws-logs'
+import { aws_s3 as s3 } from 'aws-cdk-lib'
+import { aws_s3_deployment as s3Deploy } from 'aws-cdk-lib'
+import { aws_logs as logs } from 'aws-cdk-lib'
 
 import { TestDataInjection } from '../construct/testDataInjection'
 
@@ -19,11 +19,11 @@ export class BaseTestResourceStack extends Stack {
     * S3
     -------------------------------------------------------------------------- */
     // テスト資材配置用
-    const testResourceBucket = new Bucket(this, 'TestResourceBucket', {
+    const testResourceBucket = new s3.Bucket(this, 'TestResourceBucket', {
       bucketName: `cdk-samples-test-resource-bucket-${this.account}`,
       autoDeleteObjects: true,
       removalPolicy: RemovalPolicy.DESTROY,
-      encryption: BucketEncryption.S3_MANAGED,
+      encryption: s3.BucketEncryption.S3_MANAGED,
       enforceSSL: true
     })
     // ローカルリソースをS3に配置

@@ -2,22 +2,22 @@ import * as path from 'path'
 
 import { Construct } from 'constructs'
 import { Duration, RemovalPolicy, Stack } from 'aws-cdk-lib'
-import * as logs from 'aws-cdk-lib/aws-logs'
-import * as nodejsLambda from 'aws-cdk-lib/aws-lambda-nodejs'
-import * as lambda_ from 'aws-cdk-lib/aws-lambda'
-import { SqsDlq } from 'aws-cdk-lib/aws-lambda-event-sources'
-import * as sqs from 'aws-cdk-lib/aws-sqs'
-import * as iam from 'aws-cdk-lib/aws-iam'
-import * as dynamodb from 'aws-cdk-lib/aws-dynamodb'
-import { type Stream } from 'aws-cdk-lib/aws-kinesis'
-import * as cw from 'aws-cdk-lib/aws-cloudwatch'
+import { aws_logs as logs } from 'aws-cdk-lib'
+import { aws_lambda_nodejs as node } from 'aws-cdk-lib'
+import { aws_lambda as lambda } from 'aws-cdk-lib'
+import { aws_lambda_event_sources as eventSource } from 'aws-cdk-lib'
+import { aws_sqs as sqs } from 'aws-cdk-lib'
+import { aws_iam as iam } from 'aws-cdk-lib'
+import { aws_dynamodb as dynamodb } from 'aws-cdk-lib'
+import { aws_kinesis as kds } from 'aws-cdk-lib'
+import { aws_cloudwatch as cw } from 'aws-cdk-lib'
 
 interface KdsLambdaConsumerProps {
-  dataStream: Stream
+  dataStream: kds.Stream
   /** Lambda関数のhandlerモジュールファイルパス */
   lambdaEntry: string
   /** Lambda Event Source Mappiing設定  */
-  eventSourceMappingOption?: lambda_.EventSourceMappingOptions
+  eventSourceMappingOption?: lambda.EventSourceMappingOptions
   /** DynamoDBの読み込み書き込みキャパシティ設定 */
   billing?: dynamodb.Billing
 }
@@ -27,7 +27,7 @@ interface KdsLambdaConsumerProps {
  * DynamoDBによる重複排除処理を含む
  */
 export class KdsLambdaConsumer extends Construct {
-  public readonly kdsConsumerFunction: lambda_.Function
+  public readonly kdsConsumerFunction: lambda.Function
   public readonly logGroup: logs.LogGroup
   public readonly dlq: sqs.Queue
 
@@ -64,20 +64,20 @@ export class KdsLambdaConsumer extends Construct {
     this.dlq = new sqs.Queue(this, 'KinesisDeadLetterQueue')
 
     // Lambda Layer
-    const customlayer = new lambda_.LayerVersion(this, 'CustomLayer', {
+    const customlayer = new lambda.LayerVersion(this, 'CustomLayer', {
       removalPolicy: RemovalPolicy.DESTROY,
-      code: lambda_.Code.fromAsset(path.join('resources', 'layer', 'common')),
-      compatibleArchitectures: [lambda_.Architecture.X86_64, lambda_.Architecture.ARM_64]
+      code: lambda.Code.fromAsset(path.join('resources', 'layer', 'common')),
+      compatibleArchitectures: [lambda.Architecture.X86_64, lambda.Architecture.ARM_64]
     })
 
     // Lambda Function
     const funcName = `${Stack.name}-kds-consumer-func`
-    this.kdsConsumerFunction = new nodejsLambda.NodejsFunction(this, 'LambdaFunc', {
+    this.kdsConsumerFunction = new node.NodejsFunction(this, 'LambdaFunc', {
       functionName: funcName,
       entry: props.lambdaEntry,
       handler: 'handler',
-      runtime: lambda_.Runtime.NODEJS_20_X,
-      architecture: lambda_.Architecture.ARM_64,
+      runtime: lambda.Runtime.NODEJS_20_X,
+      architecture: lambda.Architecture.ARM_64,
       memorySize: 512,
       timeout: Duration.minutes(3),
       initialPolicy: [
@@ -97,9 +97,9 @@ export class KdsLambdaConsumer extends Construct {
         NAMESPACE: 'Custom/LambdaMetrics'
       },
       layers: [customlayer],
-      tracing: lambda_.Tracing.ACTIVE,
-      loggingFormat: lambda_.LoggingFormat.JSON,
-      systemLogLevelV2: lambda_.SystemLogLevel.WARN
+      tracing: lambda.Tracing.ACTIVE,
+      loggingFormat: lambda.LoggingFormat.JSON,
+      systemLogLevelV2: lambda.SystemLogLevel.WARN
     })
 
     // Event Source Mapping
@@ -113,8 +113,8 @@ export class KdsLambdaConsumer extends Construct {
       parallelizationFactor: 1, // シャードあたり起動させる関数の数
       reportBatchItemFailures: true, // エラー処理のレポート
       retryAttempts: 5, // リトライ回数
-      startingPosition: lambda_.StartingPosition.TRIM_HORIZON,
-      onFailure: new SqsDlq(this.dlq),
+      startingPosition: lambda.StartingPosition.TRIM_HORIZON,
+      onFailure: new eventSource.SqsDlq(this.dlq),
       filters: [{ notificationFlag: [true] }]
     }
     const eventSourceMapping = this.kdsConsumerFunction.addEventSourceMapping(
@@ -134,7 +134,7 @@ export class KdsLambdaConsumer extends Construct {
         }
       })
       const cfnEventSourceMapping = eventSourceMapping.node
-        .defaultChild as lambda_.CfnEventSourceMapping
+        .defaultChild as lambda.CfnEventSourceMapping
       cfnEventSourceMapping.addPropertyOverride('FilterCriteria', {
         Filters: cfnFilters
       })

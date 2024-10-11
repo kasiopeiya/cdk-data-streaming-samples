@@ -1,10 +1,10 @@
-import { Stack, Tags, type StackProps } from 'aws-cdk-lib'
 import { type Construct } from 'constructs'
-import * as dynamodb from 'aws-cdk-lib/aws-dynamodb'
-import { type Vpc } from 'aws-cdk-lib/aws-ec2'
-import { StreamMode, type CfnStream } from 'aws-cdk-lib/aws-kinesis'
-import { type Alarm } from 'aws-cdk-lib/aws-cloudwatch'
-import * as cwAction from 'aws-cdk-lib/aws-cloudwatch-actions'
+import { Stack, Tags, type StackProps } from 'aws-cdk-lib'
+import { aws_dynamodb as dynamodb } from 'aws-cdk-lib'
+import { aws_ec2 as ec2 } from 'aws-cdk-lib'
+import { aws_kinesis as kds } from 'aws-cdk-lib'
+import { aws_cloudwatch as cw } from 'aws-cdk-lib'
+import { aws_cloudwatch_actions as cwAction } from 'aws-cdk-lib'
 
 import { KdsApiGwProducer } from '../construct/kdsApiGwProducer'
 import { KdsLambdaConsumer } from '../construct/kdsLambdaConsumer'
@@ -15,7 +15,7 @@ import { KdsScaleOutLambda } from '../construct/kdsScaleOutLambda'
 interface ApiGwKdsLambdaStackProps extends StackProps {
   prefix: string
   /** Private APIGW使用時にエンドポイントを作成するVPC */
-  vpc?: Vpc
+  vpc?: ec2.Vpc
 }
 
 /**
@@ -53,14 +53,14 @@ export class ApiGwKdsLambdaStack extends Stack {
     * Monitoring
     -------------------------------------------------------------------------- */
     // Alarm
-    const writePrvAlarm: Alarm = kdsDataStream.createWriteProvisionedAlarm()
-    const readPrvAlarm: Alarm = kdsDataStream.createReadProvisionedAlarm()
-    const iteratorAgeAlarm: Alarm = kdsDataStream.createIteratorAgeAlarm()
-    const apiGwClientErrorAlarm: Alarm = producer.createClientErrorAlarm()
-    const apiGwServerErrorAlarm: Alarm = producer.createServerErrorAlarm()
-    const lambdaErrorsAlarm: Alarm = consumer.createLambdaErrorsAlarm()
-    const dlqMessageSentAlarm: Alarm = consumer.createDLQMessagesSentAlarm()
-    const cwAlarms: Alarm[] = [
+    const writePrvAlarm: cw.Alarm = kdsDataStream.createWriteProvisionedAlarm()
+    const readPrvAlarm: cw.Alarm = kdsDataStream.createReadProvisionedAlarm()
+    const iteratorAgeAlarm: cw.Alarm = kdsDataStream.createIteratorAgeAlarm()
+    const apiGwClientErrorAlarm: cw.Alarm = producer.createClientErrorAlarm()
+    const apiGwServerErrorAlarm: cw.Alarm = producer.createServerErrorAlarm()
+    const lambdaErrorsAlarm: cw.Alarm = consumer.createLambdaErrorsAlarm()
+    const dlqMessageSentAlarm: cw.Alarm = consumer.createDLQMessagesSentAlarm()
+    const cwAlarms: cw.Alarm[] = [
       writePrvAlarm,
       readPrvAlarm,
       iteratorAgeAlarm,
@@ -71,10 +71,10 @@ export class ApiGwKdsLambdaStack extends Stack {
     ]
 
     // Alarm Action
-    const cfnStream = kdsDataStream.dataStream.node.defaultChild as CfnStream
-    const capacityMode = (cfnStream.streamModeDetails as CfnStream.StreamModeDetailsProperty)
+    const cfnStream = kdsDataStream.dataStream.node.defaultChild as kds.CfnStream
+    const capacityMode = (cfnStream.streamModeDetails as kds.CfnStream.StreamModeDetailsProperty)
       .streamMode
-    if (capacityMode === StreamMode.PROVISIONED) {
+    if (capacityMode === kds.StreamMode.PROVISIONED) {
       // BUG: cdkのバグで同じLambda関数を複数のAlarm Actionに設定するとエラーになるため、複数のLambdaを用意
       const kdsScaleOutLambda1 = new KdsScaleOutLambda(this, 'KdsScaleOutLambda1', {
         dataStream: kdsDataStream.dataStream
