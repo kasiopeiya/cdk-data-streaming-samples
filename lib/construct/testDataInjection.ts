@@ -8,7 +8,7 @@ import { aws_logs as logs } from 'aws-cdk-lib'
 import { aws_iam as iam } from 'aws-cdk-lib'
 
 interface TestDataInjectionProps {
-  testResourceBucket: s3.Bucket
+  testResourceBucket: s3.IBucket
   computeType?: codebuild.ComputeType
 }
 

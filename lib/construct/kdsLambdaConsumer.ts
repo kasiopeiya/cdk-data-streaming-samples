@@ -13,7 +13,7 @@ import { aws_kinesis as kds } from 'aws-cdk-lib'
 import { aws_cloudwatch as cw } from 'aws-cdk-lib'
 
 interface KdsLambdaConsumerProps {
-  dataStream: kds.Stream
+  dataStream: kds.IStream
   /** Lambda関数のhandlerモジュールファイルパス */
   lambdaEntry: string
   /** Lambda Event Source Mappiing設定  */
@@ -27,9 +27,9 @@ interface KdsLambdaConsumerProps {
  * DynamoDBによる重複排除処理を含む
  */
 export class KdsLambdaConsumer extends Construct {
-  public readonly kdsConsumerFunction: lambda.Function
-  public readonly logGroup: logs.LogGroup
-  public readonly dlq: sqs.Queue
+  public readonly kdsConsumerFunction: lambda.IFunction
+  public readonly logGroup: logs.ILogGroup
+  public readonly dlq: sqs.IQueue
 
   constructor(scope: Construct, id: string, props: KdsLambdaConsumerProps) {
     super(scope, id)

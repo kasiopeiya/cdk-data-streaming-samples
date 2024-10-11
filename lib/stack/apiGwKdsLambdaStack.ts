@@ -5,6 +5,8 @@ import { aws_ec2 as ec2 } from 'aws-cdk-lib'
 import { aws_kinesis as kds } from 'aws-cdk-lib'
 import { aws_cloudwatch as cw } from 'aws-cdk-lib'
 import { aws_cloudwatch_actions as cwAction } from 'aws-cdk-lib'
+import { aws_lambda as lambda } from 'aws-cdk-lib'
+import { aws_sqs as sqs } from 'aws-cdk-lib'
 
 import { KdsApiGwProducer } from '../construct/kdsApiGwProducer'
 import { KdsLambdaConsumer } from '../construct/kdsLambdaConsumer'
@@ -15,7 +17,7 @@ import { KdsScaleOutLambda } from '../construct/kdsScaleOutLambda'
 interface ApiGwKdsLambdaStackProps extends StackProps {
   prefix: string
   /** Private APIGW使用時にエンドポイントを作成するVPC */
-  vpc?: ec2.Vpc
+  vpc?: ec2.IVpc
 }
 
 /**
@@ -91,8 +93,8 @@ export class ApiGwKdsLambdaStack extends Stack {
       alarms: cwAlarms,
       dataStream: kdsDataStream.dataStream,
       restApi: producer.restApi,
-      lambdaFunction: consumer.kdsConsumerFunction,
-      lambdaDlq: consumer.dlq
+      lambdaFunction: consumer.kdsConsumerFunction as lambda.Function,
+      lambdaDlq: consumer.dlq as sqs.Queue
     })
 
     /*

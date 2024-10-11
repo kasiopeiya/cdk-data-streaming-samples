@@ -11,7 +11,7 @@ export const LogEvent = {
 
 interface TrailDataStreamProps {
   /** CloudTrailのログ保存先S3 Bucket */
-  trailBucket: s3.Bucket
+  trailBucket: s3.IBucket
   /**
    * 記録するログイベントの種類
    * @default LogEvent.WRITEONLY

@@ -9,7 +9,7 @@ import { aws_iam as iam } from 'aws-cdk-lib'
 import { aws_logs as logs } from 'aws-cdk-lib'
 
 interface KdsShardCountMetricsProps {
-  dataStream: kds.Stream
+  dataStream: kds.IStream
   nameSpace: string
   metricName: string
 }

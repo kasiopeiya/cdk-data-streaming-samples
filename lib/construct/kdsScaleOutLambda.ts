@@ -9,7 +9,7 @@ import { aws_lambda as lambda } from 'aws-cdk-lib'
 import { aws_iam as iam } from 'aws-cdk-lib'
 
 interface KdsScaleOutLambdaProps {
-  dataStream: kds.Stream
+  dataStream: kds.IStream
 }
 
 /**
@@ -17,7 +17,7 @@ interface KdsScaleOutLambdaProps {
  * 主にCW Alarm Actionでの使用を想定
  */
 export class KdsScaleOutLambda extends Construct {
-  public readonly func: lambda.Function
+  public readonly func: lambda.IFunction
 
   constructor(scope: Construct, id: string, props: KdsScaleOutLambdaProps) {
     super(scope, id)

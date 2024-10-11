@@ -9,11 +9,11 @@ import { aws_ssm as ssm } from 'aws-cdk-lib'
 import { aws_cloudwatch as cw } from 'aws-cdk-lib'
 
 interface KdsApiGwProducerProps {
-  dataStream: kds.Stream
+  dataStream: kds.IStream
   /* APIGWのタイプ, Privateの場合はVPCの指定が必須 */
   type?: apigw.EndpointType.PRIVATE | apigw.EndpointType.REGIONAL
   /* Private APIの場合に指定、VPC Endpointを作成するVPC */
-  vpc?: ec2.Vpc
+  vpc?: ec2.IVpc
   /* Logging, X-Rayトレーシングなど詳細モニタリング設定の有効化 */
   enableDetailMonitoring?: boolean
 }
@@ -153,7 +153,7 @@ export class KdsApiGwProducer extends Construct {
    * Private APIのためのVPCエンドポイント作成
    * @param vpc_ エンドポイントを作成するVPC
    */
-  createVPCEndpoint(vpc_: ec2.Vpc): ec2.InterfaceVpcEndpoint {
+  createVPCEndpoint(vpc_: ec2.IVpc): ec2.InterfaceVpcEndpoint {
     // SG
     const vpcEndpointSecurityGroup = new ec2.SecurityGroup(this, 'VpcEndpointSG', {
       vpc: vpc_
@@ -218,7 +218,7 @@ export class KdsApiGwProducer extends Construct {
    * KDS PutRecords API統合用の設定作成
    * @param dataStream
    */
-  createPutRecordsIntegrationOption(dataStream: kds.Stream): apigw.IntegrationOptions {
+  createPutRecordsIntegrationOption(dataStream: kds.IStream): apigw.IntegrationOptions {
     return {
       requestParameters: {
         'integration.request.header.Content-Type': "'x-amz-json-1.1'"
@@ -286,7 +286,7 @@ export class KdsApiGwProducer extends Construct {
    * KDS PutRecord API統合用のオプション作成
    * @param dataStream
    */
-  createPutRecordIntegrationOption(dataStream: kds.Stream): apigw.IntegrationOptions {
+  createPutRecordIntegrationOption(dataStream: kds.IStream): apigw.IntegrationOptions {
     return {
       requestParameters: {
         'integration.request.header.Content-Type': "'x-amz-json-1.1'"

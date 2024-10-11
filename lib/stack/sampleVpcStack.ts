@@ -6,7 +6,7 @@ import { aws_ec2 as ec2 } from 'aws-cdk-lib'
  * VPC, Subnet(Public✖️1, Private✖️1), NatGatewayを構築する
  */
 export class SampleVpcStack extends Stack {
-  public readonly vpc: ec2.Vpc
+  public readonly vpc: ec2.IVpc
 
   constructor(scope: Construct, id: string, props?: StackProps) {
     super(scope, id, props)

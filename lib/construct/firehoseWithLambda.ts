@@ -15,7 +15,7 @@ import * as kinesisfirehose_destination_alpha from '@aws-cdk/aws-kinesisfirehose
 
 interface FirehoseWithLambdaProps {
   /** KDS Data Stream */
-  sourceStream: kds.Stream
+  sourceStream: kds.IStream
   /** Firehoseと連携するLambda関数コードのパス */
   lambdaEntry: string
   /** 配信先S3バケット */

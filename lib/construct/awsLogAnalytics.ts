@@ -6,7 +6,7 @@ import { aws_athena as athena } from 'aws-cdk-lib'
 
 export interface CloudTrailLogAnalyticsProps {
   /** CloudTrailのログが保存されているS3 Bucket */
-  dataBucket: s3.Bucket
+  dataBucket: s3.IBucket
 }
 
 /**

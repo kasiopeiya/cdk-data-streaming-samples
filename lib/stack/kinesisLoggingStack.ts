@@ -6,7 +6,7 @@ import { TrailDataStream } from '../construct/trailDataStream'
 import { CloudTrailLogAnalytics } from '../construct/awsLogAnalytics'
 
 interface KinesisLoggingStackProps extends StackProps {
-  trailBucket: s3.Bucket
+  trailBucket: s3.IBucket
 }
 
 /**

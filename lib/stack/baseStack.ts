@@ -12,7 +12,7 @@ import { AlarmNotificationHandler } from '../construct/alarmNotificationHandler'
  * ステートフルなリソースを構築する
  */
 export class BaseStack extends Stack {
-  public readonly trailBucket: s3.Bucket
+  public readonly trailBucket: s3.IBucket
 
   constructor(scope: Construct, id: string, props?: StackProps) {
     super(scope, id, props)
