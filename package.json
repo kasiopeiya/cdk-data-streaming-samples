@@ -45,7 +45,7 @@
     "@aws-sdk/client-cloudwatch": "^3.675.0",
     "@aws-sdk/client-dynamodb": "^3.658.1",
     "@aws-sdk/client-kinesis": "^3.670.0",
-    "@aws-sdk/lib-dynamodb": "^3.670.0",
+    "@aws-sdk/lib-dynamodb": "^3.675.0",
     "@middy/core": "^5.5.0",
     "aws-cdk": "2.162.1",
     "aws-cdk-lib": "2.160.0",
