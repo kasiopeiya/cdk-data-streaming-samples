@@ -23,7 +23,7 @@
   "devDependencies": {
     "@commitlint/cli": "^19.5.0",
     "@commitlint/config-conventional": "^19.5.0",
-    "@eslint/js": "^9.12.0",
+    "@eslint/js": "^9.14.0",
     "@types/jest": "^29.5.14",
     "@types/node": "20.16.9",
     "depcheck": "^1.4.7",
@@ -36,20 +36,20 @@
     "prettier": "^3.3.3",
     "standard-version": "^9.5.0",
     "ts-jest": "^29.2.5",
-    "typescript-eslint": "^8.11.0"
+    "typescript-eslint": "^8.12.2"
   },
   "dependencies": {
     "@aws-cdk/aws-kinesisfirehose-alpha": "^2.160.0-alpha.0",
     "@aws-cdk/aws-kinesisfirehose-destinations-alpha": "^2.160.0-alpha.0",
     "@aws-lambda-powertools/tracer": "^2.10.0",
     "@aws-sdk/client-cloudwatch": "^3.679.0",
-    "@aws-sdk/client-dynamodb": "^3.679.0",
+    "@aws-sdk/client-dynamodb": "^3.682.0",
     "@aws-sdk/client-kinesis": "^3.679.0",
     "@aws-sdk/lib-dynamodb": "^3.679.0",
     "@middy/core": "^5.5.1",
-    "aws-cdk": "2.164.1",
+    "aws-cdk": "2.165.0",
     "aws-cdk-lib": "2.160.0",
-    "cdk-nag": "^2.29.19",
+    "cdk-nag": "^2.31.1",
     "constructs": "^10.4.2",
     "esbuild": "^0.24.0",
     "husky": "^9.1.6",
