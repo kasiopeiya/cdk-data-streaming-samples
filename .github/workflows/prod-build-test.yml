@@ -41,6 +41,9 @@ jobs:
           echo "DEV_ACCOUNT_ID=${{ secrets.DEV_ACCOUNT_ID }}" >> $GITHUB_ENV
           echo "PROD_ACCOUNT_ID=${{ secrets.PROD_ACCOUNT_ID }}" >> $GITHUB_ENV
 
+      - name: setup node
+        uses: ./.github/workflows/setup-node
+
       - name: build test
         uses: ./.github/workflows/build_test
         env:

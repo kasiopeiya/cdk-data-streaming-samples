@@ -9,23 +9,6 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - name: Use Node.js 18.18.x
-      uses: actions/setup-node@v4
-      with:
-        node-version: 18.18.x
-
-    - name: Cache dependencies
-      id: node_modules_cache_id
-      uses: actions/cache@v4
-      with:
-        path: '**/node_modules'
-        key: node-modules-${{ hashFiles('**/package-lock.json') }}
-
-    - name: Setup dependencies
-      if: ${{ steps.node_modules_cache_id.outputs.cache-hit != 'true' }}
-      run: npm ci
-      shell: bash
-
     - name:  depcheck
       run: npm run depcheck
       shell: bash
