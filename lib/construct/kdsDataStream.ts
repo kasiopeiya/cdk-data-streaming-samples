@@ -21,8 +21,7 @@ export class KdsDataStream extends Construct {
     * Kinesis Data Streams
     -------------------------------------------------------------------------- */
     this.dataStream = new kds.Stream(this, 'Resource', {
-      shardCount: 1,
-      streamMode: kds.StreamMode.PROVISIONED,
+      streamMode: kds.StreamMode.ON_DEMAND,
       removalPolicy: RemovalPolicy.DESTROY,
       ...props?.dataStreamProps
     })
