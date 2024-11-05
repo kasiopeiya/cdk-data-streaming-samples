@@ -4,7 +4,16 @@ services:
     build: ./
     tty: true
     volumes:
+      - cdk-out:/workspace/cdk.out
+      - node-modules:/workspace/node_modules
       - ${HOME}/.aws/credentials:/root/.aws/credentials:ro
       - ${HOME}/.aws/config:/root/.aws/config:ro
       - ./script/.vimrc:/root/.vimrc:ro
       - ./:/workspace:cached
+    environment:
+      TZ: Japan
+volumes:
+  cdk-out:
+  node-modules:
+
+    

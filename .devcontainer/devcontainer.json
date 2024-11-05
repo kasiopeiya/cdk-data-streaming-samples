@@ -8,7 +8,6 @@
             "extensions": [
                 "stevencl.adddoccomments",
                 "esbenp.prettier-vscode",
-                "amazonwebservices.aws-toolkit-vscode",
                 "editorconfig.editorconfig",
                 "dbaeumer.vscode-eslint",
                 "oderwat.indent-rainbow",
