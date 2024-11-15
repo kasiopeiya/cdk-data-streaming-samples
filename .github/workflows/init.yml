@@ -61,8 +61,8 @@ jobs:
           echo "ENV_NAME=${{ env.ENV_NAME }}" >> $GITHUB_ENV
           echo "DEV_ACCOUNT_ID=${{ secrets.DEV_ACCOUNT_ID }}" >> $GITHUB_ENV
           echo "PROD_ACCOUNT_ID=${{ secrets.PROD_ACCOUNT_ID }}" >> $GITHUB_ENV
-          if [ ${{ env.ENV_NAME }} = dev ]; then ACCOUNT_ID=${{ secrets.DEV_ACCOUNT_ID }}" >> $GITHUB_ENV; fi
-          if [ ${{ env.ENV_NAME }} = prd ]; then ACCOUNT_ID=${{ secrets.PROD_ACCOUNT_ID }}" >> $GITHUB_ENV; fi
+          if [ "${{ env.ENV_NAME }}" = dev ]; then ACCOUNT_ID=${{ secrets.DEV_ACCOUNT_ID }}" >> $GITHUB_ENV; fi
+          if [ "${{ env.ENV_NAME }}" = prd ]; then ACCOUNT_ID=${{ secrets.PROD_ACCOUNT_ID }}" >> $GITHUB_ENV; fi
 
       - name: setup node
         uses: ./.github/workflows/setup-node
@@ -74,4 +74,4 @@ jobs:
             --http-tokens required
 
       - name: CDK Bootstrap
-        run: npx cdk bootstrap ${{ env.ACCOUNT_ID }}/${{ github.event.inputs.region }}
+        run: npx cdk bootstrap "${{ env.ACCOUNT_ID }}/${{ github.event.inputs.region }}"
