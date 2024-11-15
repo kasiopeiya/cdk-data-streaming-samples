@@ -830,11 +830,179 @@ exports[`apiGwKdsLambdaStack 1`] = `
       },
       "Type": "AWS::CloudWatch::Dashboard",
     },
+    "KdsCWDashboradKdsShardCountMetricsLambdaFuncB64F90B0": {
+      "DependsOn": [
+        "KdsCWDashboradKdsShardCountMetricsLambdaFuncServiceRoleDefaultPolicy4E8CAE1A",
+        "KdsCWDashboradKdsShardCountMetricsLambdaFuncServiceRole7D1FEA0A",
+      ],
+      "Properties": {
+        "Architectures": [
+          "arm64",
+        ],
+        "Code": {
+          "S3Bucket": {
+            "Fn::Sub": "cdk-hnb659fds-assets-\${AWS::AccountId}-ap-northeast-1",
+          },
+          "S3Key": "HASH-REPLACED.zip",
+        },
+        "Environment": {
+          "Variables": {
+            "DATA_STREAM_NAME": {
+              "Ref": "KdsDataStream7B329BF0",
+            },
+            "METRIC_NAME": "OpenShardCount",
+            "NAMESPACE": "Custom/KinesisMetrics",
+          },
+        },
+        "FunctionName": "dev-data-str-sample-apigw-kds-lambda-stack-put-metrics-func",
+        "Handler": "index.handler",
+        "Role": {
+          "Fn::GetAtt": [
+            "KdsCWDashboradKdsShardCountMetricsLambdaFuncServiceRole7D1FEA0A",
+            "Arn",
+          ],
+        },
+        "Runtime": "nodejs18.x",
+        "Tags": [
+          {
+            "Key": "StackName",
+            "Value": "dev-data-str-sample-apigw-kds-lambda-stack",
+          },
+        ],
+      },
+      "Type": "AWS::Lambda::Function",
+    },
+    "KdsCWDashboradKdsShardCountMetricsLambdaFuncServiceRole7D1FEA0A": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "lambda.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
+              ],
+            ],
+          },
+        ],
+        "Tags": [
+          {
+            "Key": "StackName",
+            "Value": "dev-data-str-sample-apigw-kds-lambda-stack",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+    },
+    "KdsCWDashboradKdsShardCountMetricsLambdaFuncServiceRoleDefaultPolicy4E8CAE1A": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "cloudwatch:PutMetricStream",
+                "cloudwatch:PutMetricData",
+                "kinesis:DescribeStreamSummary",
+              ],
+              "Effect": "Allow",
+              "Resource": "*",
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "KdsCWDashboradKdsShardCountMetricsLambdaFuncServiceRoleDefaultPolicy4E8CAE1A",
+        "Roles": [
+          {
+            "Ref": "KdsCWDashboradKdsShardCountMetricsLambdaFuncServiceRole7D1FEA0A",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "KdsCWDashboradKdsShardCountMetricsLambdaLogGroup2A6CB74F": {
+      "DeletionPolicy": "Delete",
+      "Properties": {
+        "LogGroupName": {
+          "Fn::Join": [
+            "",
+            [
+              "/aws/lambda/",
+              {
+                "Ref": "KdsCWDashboradKdsShardCountMetricsLambdaFuncB64F90B0",
+              },
+            ],
+          ],
+        },
+        "RetentionInDays": 1,
+        "Tags": [
+          {
+            "Key": "StackName",
+            "Value": "dev-data-str-sample-apigw-kds-lambda-stack",
+          },
+        ],
+      },
+      "Type": "AWS::Logs::LogGroup",
+      "UpdateReplacePolicy": "Delete",
+    },
+    "KdsCWDashboradKdsShardCountMetricsRule2E0C274D": {
+      "Properties": {
+        "ScheduleExpression": "cron(0/1 * * * ? *)",
+        "State": "ENABLED",
+        "Targets": [
+          {
+            "Arn": {
+              "Fn::GetAtt": [
+                "KdsCWDashboradKdsShardCountMetricsLambdaFuncB64F90B0",
+                "Arn",
+              ],
+            },
+            "Id": "Target0",
+            "RetryPolicy": {
+              "MaximumRetryAttempts": 3,
+            },
+          },
+        ],
+      },
+      "Type": "AWS::Events::Rule",
+    },
+    "KdsCWDashboradKdsShardCountMetricsRuleAllowEventRuledevdatastrsampleapigwkdslambdastackKdsCWDashboradKdsShardCountMetricsLambdaFunc0BFE1E76E0BC950A": {
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "KdsCWDashboradKdsShardCountMetricsLambdaFuncB64F90B0",
+            "Arn",
+          ],
+        },
+        "Principal": "events.amazonaws.com",
+        "SourceArn": {
+          "Fn::GetAtt": [
+            "KdsCWDashboradKdsShardCountMetricsRule2E0C274D",
+            "Arn",
+          ],
+        },
+      },
+      "Type": "AWS::Lambda::Permission",
+    },
     "KdsDataStream7B329BF0": {
       "DeletionPolicy": "Delete",
       "Properties": {
         "RetentionPeriodHours": 24,
-        "ShardCount": 1,
         "StreamEncryption": {
           "Fn::If": [
             "AwsCdkKinesisEncryptedStreamsUnsupportedRegions",
@@ -848,7 +1016,7 @@ exports[`apiGwKdsLambdaStack 1`] = `
           ],
         },
         "StreamModeDetails": {
-          "StreamMode": "PROVISIONED",
+          "StreamMode": "ON_DEMAND",
         },
         "Tags": [
           {
@@ -904,14 +1072,6 @@ exports[`apiGwKdsLambdaStack 1`] = `
     },
     "KdsDataStreamreadProvisionedAlarm3EE73403": {
       "Properties": {
-        "AlarmActions": [
-          {
-            "Fn::GetAtt": [
-              "KdsScaleOutLambda2LambdaFuncC6EB0D2A",
-              "Arn",
-            ],
-          },
-        ],
         "AlarmName": "kds-read-provisioned-alarm-dev-data-str-sample-apigw-kds-lambda-stack",
         "ComparisonOperator": "GreaterThanOrEqualToThreshold",
         "DatapointsToAlarm": 5,
@@ -941,14 +1101,6 @@ exports[`apiGwKdsLambdaStack 1`] = `
     },
     "KdsDataStreamwriteProvisionedAlarmD89876F3": {
       "Properties": {
-        "AlarmActions": [
-          {
-            "Fn::GetAtt": [
-              "KdsScaleOutLambda1LambdaFuncB992ECA1",
-              "Arn",
-            ],
-          },
-        ],
         "AlarmName": "kds-write-provisioned-alarm-dev-data-str-sample-apigw-kds-lambda-stack",
         "ComparisonOperator": "GreaterThanOrEqualToThreshold",
         "DatapointsToAlarm": 5,
@@ -1396,364 +1548,6 @@ exports[`apiGwKdsLambdaStack 1`] = `
         "TreatMissingData": "notBreaching",
       },
       "Type": "AWS::CloudWatch::Alarm",
-    },
-    "KdsScaleOutLambda1CustomLayer6BC07A9F": {
-      "DeletionPolicy": "Delete",
-      "Properties": {
-        "CompatibleArchitectures": [
-          "x86_64",
-          "arm64",
-        ],
-        "Content": {
-          "S3Bucket": {
-            "Fn::Sub": "cdk-hnb659fds-assets-\${AWS::AccountId}-ap-northeast-1",
-          },
-          "S3Key": "HASH-REPLACED.zip",
-        },
-      },
-      "Type": "AWS::Lambda::LayerVersion",
-      "UpdateReplacePolicy": "Delete",
-    },
-    "KdsScaleOutLambda1LambdaFuncAlarmPermissionAB374451": {
-      "Properties": {
-        "Action": "lambda:InvokeFunction",
-        "FunctionName": {
-          "Fn::GetAtt": [
-            "KdsScaleOutLambda1LambdaFuncB992ECA1",
-            "Arn",
-          ],
-        },
-        "Principal": "lambda.alarms.cloudwatch.amazonaws.com",
-        "SourceAccount": {
-          "Ref": "AWS::AccountId",
-        },
-        "SourceArn": {
-          "Fn::GetAtt": [
-            "KdsDataStreamwriteProvisionedAlarmD89876F3",
-            "Arn",
-          ],
-        },
-      },
-      "Type": "AWS::Lambda::Permission",
-    },
-    "KdsScaleOutLambda1LambdaFuncB992ECA1": {
-      "DependsOn": [
-        "KdsScaleOutLambda1LambdaFuncServiceRoleDefaultPolicy4BF8F6B3",
-        "KdsScaleOutLambda1LambdaFuncServiceRoleE1B21DF0",
-      ],
-      "Properties": {
-        "Architectures": [
-          "arm64",
-        ],
-        "Code": {
-          "S3Bucket": {
-            "Fn::Sub": "cdk-hnb659fds-assets-\${AWS::AccountId}-ap-northeast-1",
-          },
-          "S3Key": "HASH-REPLACED.zip",
-        },
-        "Environment": {
-          "Variables": {
-            "DATA_STREAM_NAME": {
-              "Ref": "KdsDataStream7B329BF0",
-            },
-          },
-        },
-        "Handler": "index.handler",
-        "Layers": [
-          {
-            "Ref": "KdsScaleOutLambda1CustomLayer6BC07A9F",
-          },
-        ],
-        "LoggingConfig": {
-          "LogFormat": "JSON",
-          "SystemLogLevel": "WARN",
-        },
-        "Role": {
-          "Fn::GetAtt": [
-            "KdsScaleOutLambda1LambdaFuncServiceRoleE1B21DF0",
-            "Arn",
-          ],
-        },
-        "Runtime": "nodejs20.x",
-        "Tags": [
-          {
-            "Key": "StackName",
-            "Value": "dev-data-str-sample-apigw-kds-lambda-stack",
-          },
-        ],
-        "Timeout": 180,
-      },
-      "Type": "AWS::Lambda::Function",
-    },
-    "KdsScaleOutLambda1LambdaFuncServiceRoleDefaultPolicy4BF8F6B3": {
-      "Properties": {
-        "PolicyDocument": {
-          "Statement": [
-            {
-              "Action": [
-                "kinesis:DescribeStreamSummary",
-                "kinesis:UpdateShardCount",
-              ],
-              "Effect": "Allow",
-              "Resource": {
-                "Fn::GetAtt": [
-                  "KdsDataStream7B329BF0",
-                  "Arn",
-                ],
-              },
-            },
-          ],
-          "Version": "2012-10-17",
-        },
-        "PolicyName": "KdsScaleOutLambda1LambdaFuncServiceRoleDefaultPolicy4BF8F6B3",
-        "Roles": [
-          {
-            "Ref": "KdsScaleOutLambda1LambdaFuncServiceRoleE1B21DF0",
-          },
-        ],
-      },
-      "Type": "AWS::IAM::Policy",
-    },
-    "KdsScaleOutLambda1LambdaFuncServiceRoleE1B21DF0": {
-      "Properties": {
-        "AssumeRolePolicyDocument": {
-          "Statement": [
-            {
-              "Action": "sts:AssumeRole",
-              "Effect": "Allow",
-              "Principal": {
-                "Service": "lambda.amazonaws.com",
-              },
-            },
-          ],
-          "Version": "2012-10-17",
-        },
-        "ManagedPolicyArns": [
-          {
-            "Fn::Join": [
-              "",
-              [
-                "arn:",
-                {
-                  "Ref": "AWS::Partition",
-                },
-                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
-              ],
-            ],
-          },
-        ],
-        "Tags": [
-          {
-            "Key": "StackName",
-            "Value": "dev-data-str-sample-apigw-kds-lambda-stack",
-          },
-        ],
-      },
-      "Type": "AWS::IAM::Role",
-    },
-    "KdsScaleOutLambda1LambdaLogGroup05FE4D4C": {
-      "DeletionPolicy": "Delete",
-      "Properties": {
-        "LogGroupName": {
-          "Fn::Join": [
-            "",
-            [
-              "/aws/lambda/",
-              {
-                "Ref": "KdsScaleOutLambda1LambdaFuncB992ECA1",
-              },
-            ],
-          ],
-        },
-        "RetentionInDays": 1,
-        "Tags": [
-          {
-            "Key": "StackName",
-            "Value": "dev-data-str-sample-apigw-kds-lambda-stack",
-          },
-        ],
-      },
-      "Type": "AWS::Logs::LogGroup",
-      "UpdateReplacePolicy": "Delete",
-    },
-    "KdsScaleOutLambda2CustomLayer55D28AD6": {
-      "DeletionPolicy": "Delete",
-      "Properties": {
-        "CompatibleArchitectures": [
-          "x86_64",
-          "arm64",
-        ],
-        "Content": {
-          "S3Bucket": {
-            "Fn::Sub": "cdk-hnb659fds-assets-\${AWS::AccountId}-ap-northeast-1",
-          },
-          "S3Key": "HASH-REPLACED.zip",
-        },
-      },
-      "Type": "AWS::Lambda::LayerVersion",
-      "UpdateReplacePolicy": "Delete",
-    },
-    "KdsScaleOutLambda2LambdaFuncAlarmPermissionCC68733B": {
-      "Properties": {
-        "Action": "lambda:InvokeFunction",
-        "FunctionName": {
-          "Fn::GetAtt": [
-            "KdsScaleOutLambda2LambdaFuncC6EB0D2A",
-            "Arn",
-          ],
-        },
-        "Principal": "lambda.alarms.cloudwatch.amazonaws.com",
-        "SourceAccount": {
-          "Ref": "AWS::AccountId",
-        },
-        "SourceArn": {
-          "Fn::GetAtt": [
-            "KdsDataStreamreadProvisionedAlarm3EE73403",
-            "Arn",
-          ],
-        },
-      },
-      "Type": "AWS::Lambda::Permission",
-    },
-    "KdsScaleOutLambda2LambdaFuncC6EB0D2A": {
-      "DependsOn": [
-        "KdsScaleOutLambda2LambdaFuncServiceRoleDefaultPolicy2A46B899",
-        "KdsScaleOutLambda2LambdaFuncServiceRoleA3484CD6",
-      ],
-      "Properties": {
-        "Architectures": [
-          "arm64",
-        ],
-        "Code": {
-          "S3Bucket": {
-            "Fn::Sub": "cdk-hnb659fds-assets-\${AWS::AccountId}-ap-northeast-1",
-          },
-          "S3Key": "HASH-REPLACED.zip",
-        },
-        "Environment": {
-          "Variables": {
-            "DATA_STREAM_NAME": {
-              "Ref": "KdsDataStream7B329BF0",
-            },
-          },
-        },
-        "Handler": "index.handler",
-        "Layers": [
-          {
-            "Ref": "KdsScaleOutLambda2CustomLayer55D28AD6",
-          },
-        ],
-        "LoggingConfig": {
-          "LogFormat": "JSON",
-          "SystemLogLevel": "WARN",
-        },
-        "Role": {
-          "Fn::GetAtt": [
-            "KdsScaleOutLambda2LambdaFuncServiceRoleA3484CD6",
-            "Arn",
-          ],
-        },
-        "Runtime": "nodejs20.x",
-        "Tags": [
-          {
-            "Key": "StackName",
-            "Value": "dev-data-str-sample-apigw-kds-lambda-stack",
-          },
-        ],
-        "Timeout": 180,
-      },
-      "Type": "AWS::Lambda::Function",
-    },
-    "KdsScaleOutLambda2LambdaFuncServiceRoleA3484CD6": {
-      "Properties": {
-        "AssumeRolePolicyDocument": {
-          "Statement": [
-            {
-              "Action": "sts:AssumeRole",
-              "Effect": "Allow",
-              "Principal": {
-                "Service": "lambda.amazonaws.com",
-              },
-            },
-          ],
-          "Version": "2012-10-17",
-        },
-        "ManagedPolicyArns": [
-          {
-            "Fn::Join": [
-              "",
-              [
-                "arn:",
-                {
-                  "Ref": "AWS::Partition",
-                },
-                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
-              ],
-            ],
-          },
-        ],
-        "Tags": [
-          {
-            "Key": "StackName",
-            "Value": "dev-data-str-sample-apigw-kds-lambda-stack",
-          },
-        ],
-      },
-      "Type": "AWS::IAM::Role",
-    },
-    "KdsScaleOutLambda2LambdaFuncServiceRoleDefaultPolicy2A46B899": {
-      "Properties": {
-        "PolicyDocument": {
-          "Statement": [
-            {
-              "Action": [
-                "kinesis:DescribeStreamSummary",
-                "kinesis:UpdateShardCount",
-              ],
-              "Effect": "Allow",
-              "Resource": {
-                "Fn::GetAtt": [
-                  "KdsDataStream7B329BF0",
-                  "Arn",
-                ],
-              },
-            },
-          ],
-          "Version": "2012-10-17",
-        },
-        "PolicyName": "KdsScaleOutLambda2LambdaFuncServiceRoleDefaultPolicy2A46B899",
-        "Roles": [
-          {
-            "Ref": "KdsScaleOutLambda2LambdaFuncServiceRoleA3484CD6",
-          },
-        ],
-      },
-      "Type": "AWS::IAM::Policy",
-    },
-    "KdsScaleOutLambda2LambdaLogGroup894B39AA": {
-      "DeletionPolicy": "Delete",
-      "Properties": {
-        "LogGroupName": {
-          "Fn::Join": [
-            "",
-            [
-              "/aws/lambda/",
-              {
-                "Ref": "KdsScaleOutLambda2LambdaFuncC6EB0D2A",
-              },
-            ],
-          ],
-        },
-        "RetentionInDays": 1,
-        "Tags": [
-          {
-            "Key": "StackName",
-            "Value": "dev-data-str-sample-apigw-kds-lambda-stack",
-          },
-        ],
-      },
-      "Type": "AWS::Logs::LogGroup",
-      "UpdateReplacePolicy": "Delete",
     },
     "LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8aFD4BFC8A": {
       "DependsOn": [
@@ -4780,11 +4574,179 @@ exports[`deliveryS3Stack 1`] = `
       },
       "Type": "AWS::CloudWatch::Dashboard",
     },
+    "KdsCWDashboradKdsShardCountMetricsLambdaFuncB64F90B0": {
+      "DependsOn": [
+        "KdsCWDashboradKdsShardCountMetricsLambdaFuncServiceRoleDefaultPolicy4E8CAE1A",
+        "KdsCWDashboradKdsShardCountMetricsLambdaFuncServiceRole7D1FEA0A",
+      ],
+      "Properties": {
+        "Architectures": [
+          "arm64",
+        ],
+        "Code": {
+          "S3Bucket": {
+            "Fn::Sub": "cdk-hnb659fds-assets-\${AWS::AccountId}-ap-northeast-1",
+          },
+          "S3Key": "HASH-REPLACED.zip",
+        },
+        "Environment": {
+          "Variables": {
+            "DATA_STREAM_NAME": {
+              "Ref": "KdsDataStream7B329BF0",
+            },
+            "METRIC_NAME": "OpenShardCount",
+            "NAMESPACE": "Custom/KinesisMetrics",
+          },
+        },
+        "FunctionName": "dev-data-str-sample-delivery-s3-stack-put-metrics-func",
+        "Handler": "index.handler",
+        "Role": {
+          "Fn::GetAtt": [
+            "KdsCWDashboradKdsShardCountMetricsLambdaFuncServiceRole7D1FEA0A",
+            "Arn",
+          ],
+        },
+        "Runtime": "nodejs18.x",
+        "Tags": [
+          {
+            "Key": "StackName",
+            "Value": "dev-data-str-sample-delivery-s3-stack",
+          },
+        ],
+      },
+      "Type": "AWS::Lambda::Function",
+    },
+    "KdsCWDashboradKdsShardCountMetricsLambdaFuncServiceRole7D1FEA0A": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "lambda.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
+              ],
+            ],
+          },
+        ],
+        "Tags": [
+          {
+            "Key": "StackName",
+            "Value": "dev-data-str-sample-delivery-s3-stack",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+    },
+    "KdsCWDashboradKdsShardCountMetricsLambdaFuncServiceRoleDefaultPolicy4E8CAE1A": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "cloudwatch:PutMetricStream",
+                "cloudwatch:PutMetricData",
+                "kinesis:DescribeStreamSummary",
+              ],
+              "Effect": "Allow",
+              "Resource": "*",
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "KdsCWDashboradKdsShardCountMetricsLambdaFuncServiceRoleDefaultPolicy4E8CAE1A",
+        "Roles": [
+          {
+            "Ref": "KdsCWDashboradKdsShardCountMetricsLambdaFuncServiceRole7D1FEA0A",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "KdsCWDashboradKdsShardCountMetricsLambdaLogGroup2A6CB74F": {
+      "DeletionPolicy": "Delete",
+      "Properties": {
+        "LogGroupName": {
+          "Fn::Join": [
+            "",
+            [
+              "/aws/lambda/",
+              {
+                "Ref": "KdsCWDashboradKdsShardCountMetricsLambdaFuncB64F90B0",
+              },
+            ],
+          ],
+        },
+        "RetentionInDays": 1,
+        "Tags": [
+          {
+            "Key": "StackName",
+            "Value": "dev-data-str-sample-delivery-s3-stack",
+          },
+        ],
+      },
+      "Type": "AWS::Logs::LogGroup",
+      "UpdateReplacePolicy": "Delete",
+    },
+    "KdsCWDashboradKdsShardCountMetricsRule2E0C274D": {
+      "Properties": {
+        "ScheduleExpression": "cron(0/1 * * * ? *)",
+        "State": "ENABLED",
+        "Targets": [
+          {
+            "Arn": {
+              "Fn::GetAtt": [
+                "KdsCWDashboradKdsShardCountMetricsLambdaFuncB64F90B0",
+                "Arn",
+              ],
+            },
+            "Id": "Target0",
+            "RetryPolicy": {
+              "MaximumRetryAttempts": 3,
+            },
+          },
+        ],
+      },
+      "Type": "AWS::Events::Rule",
+    },
+    "KdsCWDashboradKdsShardCountMetricsRuleAllowEventRuledevdatastrsampledeliverys3stackKdsCWDashboradKdsShardCountMetricsLambdaFunc9AA52D8CEEE44BF1": {
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "KdsCWDashboradKdsShardCountMetricsLambdaFuncB64F90B0",
+            "Arn",
+          ],
+        },
+        "Principal": "events.amazonaws.com",
+        "SourceArn": {
+          "Fn::GetAtt": [
+            "KdsCWDashboradKdsShardCountMetricsRule2E0C274D",
+            "Arn",
+          ],
+        },
+      },
+      "Type": "AWS::Lambda::Permission",
+    },
     "KdsDataStream7B329BF0": {
       "DeletionPolicy": "Delete",
       "Properties": {
         "RetentionPeriodHours": 24,
-        "ShardCount": 1,
         "StreamEncryption": {
           "Fn::If": [
             "AwsCdkKinesisEncryptedStreamsUnsupportedRegions",
@@ -4798,7 +4760,7 @@ exports[`deliveryS3Stack 1`] = `
           ],
         },
         "StreamModeDetails": {
-          "StreamMode": "PROVISIONED",
+          "StreamMode": "ON_DEMAND",
         },
         "Tags": [
           {
@@ -4854,14 +4816,6 @@ exports[`deliveryS3Stack 1`] = `
     },
     "KdsDataStreamreadProvisionedAlarm3EE73403": {
       "Properties": {
-        "AlarmActions": [
-          {
-            "Fn::GetAtt": [
-              "KdsScaleOutLambda2LambdaFuncC6EB0D2A",
-              "Arn",
-            ],
-          },
-        ],
         "AlarmName": "kds-read-provisioned-alarm-dev-data-str-sample-delivery-s3-stack",
         "ComparisonOperator": "GreaterThanOrEqualToThreshold",
         "DatapointsToAlarm": 5,
@@ -4891,14 +4845,6 @@ exports[`deliveryS3Stack 1`] = `
     },
     "KdsDataStreamwriteProvisionedAlarmD89876F3": {
       "Properties": {
-        "AlarmActions": [
-          {
-            "Fn::GetAtt": [
-              "KdsScaleOutLambda1LambdaFuncB992ECA1",
-              "Arn",
-            ],
-          },
-        ],
         "AlarmName": "kds-write-provisioned-alarm-dev-data-str-sample-delivery-s3-stack",
         "ComparisonOperator": "GreaterThanOrEqualToThreshold",
         "DatapointsToAlarm": 5,
@@ -4925,364 +4871,6 @@ exports[`deliveryS3Stack 1`] = `
         "TreatMissingData": "notBreaching",
       },
       "Type": "AWS::CloudWatch::Alarm",
-    },
-    "KdsScaleOutLambda1CustomLayer6BC07A9F": {
-      "DeletionPolicy": "Delete",
-      "Properties": {
-        "CompatibleArchitectures": [
-          "x86_64",
-          "arm64",
-        ],
-        "Content": {
-          "S3Bucket": {
-            "Fn::Sub": "cdk-hnb659fds-assets-\${AWS::AccountId}-ap-northeast-1",
-          },
-          "S3Key": "HASH-REPLACED.zip",
-        },
-      },
-      "Type": "AWS::Lambda::LayerVersion",
-      "UpdateReplacePolicy": "Delete",
-    },
-    "KdsScaleOutLambda1LambdaFuncAlarmPermissionAB374451": {
-      "Properties": {
-        "Action": "lambda:InvokeFunction",
-        "FunctionName": {
-          "Fn::GetAtt": [
-            "KdsScaleOutLambda1LambdaFuncB992ECA1",
-            "Arn",
-          ],
-        },
-        "Principal": "lambda.alarms.cloudwatch.amazonaws.com",
-        "SourceAccount": {
-          "Ref": "AWS::AccountId",
-        },
-        "SourceArn": {
-          "Fn::GetAtt": [
-            "KdsDataStreamwriteProvisionedAlarmD89876F3",
-            "Arn",
-          ],
-        },
-      },
-      "Type": "AWS::Lambda::Permission",
-    },
-    "KdsScaleOutLambda1LambdaFuncB992ECA1": {
-      "DependsOn": [
-        "KdsScaleOutLambda1LambdaFuncServiceRoleDefaultPolicy4BF8F6B3",
-        "KdsScaleOutLambda1LambdaFuncServiceRoleE1B21DF0",
-      ],
-      "Properties": {
-        "Architectures": [
-          "arm64",
-        ],
-        "Code": {
-          "S3Bucket": {
-            "Fn::Sub": "cdk-hnb659fds-assets-\${AWS::AccountId}-ap-northeast-1",
-          },
-          "S3Key": "HASH-REPLACED.zip",
-        },
-        "Environment": {
-          "Variables": {
-            "DATA_STREAM_NAME": {
-              "Ref": "KdsDataStream7B329BF0",
-            },
-          },
-        },
-        "Handler": "index.handler",
-        "Layers": [
-          {
-            "Ref": "KdsScaleOutLambda1CustomLayer6BC07A9F",
-          },
-        ],
-        "LoggingConfig": {
-          "LogFormat": "JSON",
-          "SystemLogLevel": "WARN",
-        },
-        "Role": {
-          "Fn::GetAtt": [
-            "KdsScaleOutLambda1LambdaFuncServiceRoleE1B21DF0",
-            "Arn",
-          ],
-        },
-        "Runtime": "nodejs20.x",
-        "Tags": [
-          {
-            "Key": "StackName",
-            "Value": "dev-data-str-sample-delivery-s3-stack",
-          },
-        ],
-        "Timeout": 180,
-      },
-      "Type": "AWS::Lambda::Function",
-    },
-    "KdsScaleOutLambda1LambdaFuncServiceRoleDefaultPolicy4BF8F6B3": {
-      "Properties": {
-        "PolicyDocument": {
-          "Statement": [
-            {
-              "Action": [
-                "kinesis:DescribeStreamSummary",
-                "kinesis:UpdateShardCount",
-              ],
-              "Effect": "Allow",
-              "Resource": {
-                "Fn::GetAtt": [
-                  "KdsDataStream7B329BF0",
-                  "Arn",
-                ],
-              },
-            },
-          ],
-          "Version": "2012-10-17",
-        },
-        "PolicyName": "KdsScaleOutLambda1LambdaFuncServiceRoleDefaultPolicy4BF8F6B3",
-        "Roles": [
-          {
-            "Ref": "KdsScaleOutLambda1LambdaFuncServiceRoleE1B21DF0",
-          },
-        ],
-      },
-      "Type": "AWS::IAM::Policy",
-    },
-    "KdsScaleOutLambda1LambdaFuncServiceRoleE1B21DF0": {
-      "Properties": {
-        "AssumeRolePolicyDocument": {
-          "Statement": [
-            {
-              "Action": "sts:AssumeRole",
-              "Effect": "Allow",
-              "Principal": {
-                "Service": "lambda.amazonaws.com",
-              },
-            },
-          ],
-          "Version": "2012-10-17",
-        },
-        "ManagedPolicyArns": [
-          {
-            "Fn::Join": [
-              "",
-              [
-                "arn:",
-                {
-                  "Ref": "AWS::Partition",
-                },
-                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
-              ],
-            ],
-          },
-        ],
-        "Tags": [
-          {
-            "Key": "StackName",
-            "Value": "dev-data-str-sample-delivery-s3-stack",
-          },
-        ],
-      },
-      "Type": "AWS::IAM::Role",
-    },
-    "KdsScaleOutLambda1LambdaLogGroup05FE4D4C": {
-      "DeletionPolicy": "Delete",
-      "Properties": {
-        "LogGroupName": {
-          "Fn::Join": [
-            "",
-            [
-              "/aws/lambda/",
-              {
-                "Ref": "KdsScaleOutLambda1LambdaFuncB992ECA1",
-              },
-            ],
-          ],
-        },
-        "RetentionInDays": 1,
-        "Tags": [
-          {
-            "Key": "StackName",
-            "Value": "dev-data-str-sample-delivery-s3-stack",
-          },
-        ],
-      },
-      "Type": "AWS::Logs::LogGroup",
-      "UpdateReplacePolicy": "Delete",
-    },
-    "KdsScaleOutLambda2CustomLayer55D28AD6": {
-      "DeletionPolicy": "Delete",
-      "Properties": {
-        "CompatibleArchitectures": [
-          "x86_64",
-          "arm64",
-        ],
-        "Content": {
-          "S3Bucket": {
-            "Fn::Sub": "cdk-hnb659fds-assets-\${AWS::AccountId}-ap-northeast-1",
-          },
-          "S3Key": "HASH-REPLACED.zip",
-        },
-      },
-      "Type": "AWS::Lambda::LayerVersion",
-      "UpdateReplacePolicy": "Delete",
-    },
-    "KdsScaleOutLambda2LambdaFuncAlarmPermissionCC68733B": {
-      "Properties": {
-        "Action": "lambda:InvokeFunction",
-        "FunctionName": {
-          "Fn::GetAtt": [
-            "KdsScaleOutLambda2LambdaFuncC6EB0D2A",
-            "Arn",
-          ],
-        },
-        "Principal": "lambda.alarms.cloudwatch.amazonaws.com",
-        "SourceAccount": {
-          "Ref": "AWS::AccountId",
-        },
-        "SourceArn": {
-          "Fn::GetAtt": [
-            "KdsDataStreamreadProvisionedAlarm3EE73403",
-            "Arn",
-          ],
-        },
-      },
-      "Type": "AWS::Lambda::Permission",
-    },
-    "KdsScaleOutLambda2LambdaFuncC6EB0D2A": {
-      "DependsOn": [
-        "KdsScaleOutLambda2LambdaFuncServiceRoleDefaultPolicy2A46B899",
-        "KdsScaleOutLambda2LambdaFuncServiceRoleA3484CD6",
-      ],
-      "Properties": {
-        "Architectures": [
-          "arm64",
-        ],
-        "Code": {
-          "S3Bucket": {
-            "Fn::Sub": "cdk-hnb659fds-assets-\${AWS::AccountId}-ap-northeast-1",
-          },
-          "S3Key": "HASH-REPLACED.zip",
-        },
-        "Environment": {
-          "Variables": {
-            "DATA_STREAM_NAME": {
-              "Ref": "KdsDataStream7B329BF0",
-            },
-          },
-        },
-        "Handler": "index.handler",
-        "Layers": [
-          {
-            "Ref": "KdsScaleOutLambda2CustomLayer55D28AD6",
-          },
-        ],
-        "LoggingConfig": {
-          "LogFormat": "JSON",
-          "SystemLogLevel": "WARN",
-        },
-        "Role": {
-          "Fn::GetAtt": [
-            "KdsScaleOutLambda2LambdaFuncServiceRoleA3484CD6",
-            "Arn",
-          ],
-        },
-        "Runtime": "nodejs20.x",
-        "Tags": [
-          {
-            "Key": "StackName",
-            "Value": "dev-data-str-sample-delivery-s3-stack",
-          },
-        ],
-        "Timeout": 180,
-      },
-      "Type": "AWS::Lambda::Function",
-    },
-    "KdsScaleOutLambda2LambdaFuncServiceRoleA3484CD6": {
-      "Properties": {
-        "AssumeRolePolicyDocument": {
-          "Statement": [
-            {
-              "Action": "sts:AssumeRole",
-              "Effect": "Allow",
-              "Principal": {
-                "Service": "lambda.amazonaws.com",
-              },
-            },
-          ],
-          "Version": "2012-10-17",
-        },
-        "ManagedPolicyArns": [
-          {
-            "Fn::Join": [
-              "",
-              [
-                "arn:",
-                {
-                  "Ref": "AWS::Partition",
-                },
-                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
-              ],
-            ],
-          },
-        ],
-        "Tags": [
-          {
-            "Key": "StackName",
-            "Value": "dev-data-str-sample-delivery-s3-stack",
-          },
-        ],
-      },
-      "Type": "AWS::IAM::Role",
-    },
-    "KdsScaleOutLambda2LambdaFuncServiceRoleDefaultPolicy2A46B899": {
-      "Properties": {
-        "PolicyDocument": {
-          "Statement": [
-            {
-              "Action": [
-                "kinesis:DescribeStreamSummary",
-                "kinesis:UpdateShardCount",
-              ],
-              "Effect": "Allow",
-              "Resource": {
-                "Fn::GetAtt": [
-                  "KdsDataStream7B329BF0",
-                  "Arn",
-                ],
-              },
-            },
-          ],
-          "Version": "2012-10-17",
-        },
-        "PolicyName": "KdsScaleOutLambda2LambdaFuncServiceRoleDefaultPolicy2A46B899",
-        "Roles": [
-          {
-            "Ref": "KdsScaleOutLambda2LambdaFuncServiceRoleA3484CD6",
-          },
-        ],
-      },
-      "Type": "AWS::IAM::Policy",
-    },
-    "KdsScaleOutLambda2LambdaLogGroup894B39AA": {
-      "DeletionPolicy": "Delete",
-      "Properties": {
-        "LogGroupName": {
-          "Fn::Join": [
-            "",
-            [
-              "/aws/lambda/",
-              {
-                "Ref": "KdsScaleOutLambda2LambdaFuncC6EB0D2A",
-              },
-            ],
-          ],
-        },
-        "RetentionInDays": 1,
-        "Tags": [
-          {
-            "Key": "StackName",
-            "Value": "dev-data-str-sample-delivery-s3-stack",
-          },
-        ],
-      },
-      "Type": "AWS::Logs::LogGroup",
-      "UpdateReplacePolicy": "Delete",
     },
   },
   "Rules": {
