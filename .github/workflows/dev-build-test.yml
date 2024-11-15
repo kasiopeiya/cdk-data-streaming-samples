@@ -32,6 +32,7 @@ jobs:
       # Bashトレーシングオプション
       - run: set -x
 
+      # 前提情報の出力
       - run: cat $GITHUB_EVENT_PATH
       - run: lsb_release -d
       - run: gh --version
