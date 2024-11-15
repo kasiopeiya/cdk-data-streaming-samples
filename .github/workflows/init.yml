@@ -17,6 +17,16 @@ on:
           type: string
           description: target region
           default: ap-northeast-1
+# 全パーミッションの無効化
+permissions: {}
+# デフォルトシェルでパイプエラーを有効化
+defaults:
+  run:
+    shell: bash
+# ワークフローが複数起動したら自動キャンセル
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 jobs:
   test-data-injection:
     runs-on: ubuntu-latest
@@ -27,6 +37,9 @@ jobs:
       contents: read
       id-token: write
     steps:
+      # Bashトレーシングオプション
+      - run: set -x
+
       - run: cat $GITHUB_EVENT_PATH
       - run: lsb_release -d
       - run: gh --version
