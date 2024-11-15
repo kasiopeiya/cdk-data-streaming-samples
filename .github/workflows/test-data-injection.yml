@@ -28,7 +28,16 @@ on:
             - apiGwPutRecord
             - apiGwPutRecords
             - sdkPutRecords
-
+# 全パーミッションの無効化
+permissions: {}
+# デフォルトシェルでパイプエラーを有効化
+defaults:
+  run:
+    shell: bash
+# ワークフローが複数起動したら自動キャンセル
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 jobs:
   test-data-injection:
     runs-on: ubuntu-latest
@@ -36,9 +45,14 @@ jobs:
       contents: write
       id-token: write
     steps:
+      # Bashトレーシングオプション
+      - run: set -x
+
+      # 前提情報の出力
       - run: cat $GITHUB_EVENT_PATH
       - run: lsb_release -d
       - run: gh --version
+
 
       - uses: actions/checkout@v4
 

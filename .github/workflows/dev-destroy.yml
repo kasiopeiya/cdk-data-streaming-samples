@@ -19,19 +19,30 @@ on:
           - dev/data-str*
           - dev/data-str-sample-apigw-kds-lambda-stack
           - dev/data-str-sample-delivery-s3-stack
+# 全パーミッションの無効化
+permissions: {}
+# デフォルトシェルでパイプエラーを有効化
+defaults:
+  run:
+    shell: bash
+# ワークフローが複数起動したら自動キャンセル
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 jobs:
   destroy:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 20
     environment:
       name: dev
     permissions:
       id-token: write
       contents: read
     steps:
+      # Bashトレーシングオプション
+      - run: set -x
+
+      # 前提情報の出力
       - run: cat $GITHUB_EVENT_PATH
       - run: lsb_release -d
       - run: gh --version
@@ -57,4 +68,6 @@ jobs:
           echo "DEV_ACCOUNT_ID=${{ secrets.DEV_ACCOUNT_ID }}" >> $GITHUB_ENV
           echo "PROD_ACCOUNT_ID=${{ secrets.PROD_ACCOUNT_ID }}" >> $GITHUB_ENV
 
-      - run: npx cdk destroy -f ${{ github.event.inputs.stack || 'dev/data-str*' }}
+      - run: npx cdk destroy -f "${{ env.STACK_NAME || 'dev/data-str*' }}"
+        env:
+          STACK_NAME: ${{ github.event.inputs.stack }}

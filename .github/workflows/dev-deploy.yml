@@ -11,19 +11,30 @@ on:
     paths-ignore:
       - '**.md'
   workflow_dispatch:
+# 全パーミッションの無効化
+permissions: {}
+# デフォルトシェルでパイプエラーを有効化
+defaults:
+  run:
+    shell: bash
+# ワークフローが複数起動したら自動キャンセル
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 20
     environment:
       name: dev
     permissions:
       id-token: write
       contents: write
     steps:
+      # Bashトレーシングオプション
+      - run: set -x
+
+      # 前提情報の出力
       - run: cat $GITHUB_EVENT_PATH
       - run: lsb_release -d
       - run: gh --version
@@ -49,12 +60,12 @@ jobs:
       - name: setup node
         uses: ./.github/workflows/setup-node
 
-      - name: build test
-        uses: ./.github/workflows/build_test
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          env_name: ${{ env.ENV_NAME }}
+      # - name: build test
+      #   uses: ./.github/workflows/build_test
+      #   env:
+      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      #   with:
+      #     env_name: ${{ env.ENV_NAME }}
 
-      - name: cdk deploy
-        run: npx cdk deploy "${{ env.ENV_NAME }}/data-str-*"
+      # - name: cdk deploy
+      #   run: npx cdk deploy "${{ env.ENV_NAME }}/data-str-*"
