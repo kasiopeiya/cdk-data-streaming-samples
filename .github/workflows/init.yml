@@ -1,0 +1,64 @@
+##################################################################################
+# CDK初期セットアップ
+##################################################################################
+
+name: init
+run-name: ${{ github.workflow }} workflow
+on:
+  workflow_dispatch:
+    inputs:
+        github_env:
+          type: choice
+          description: target env
+          options:
+            - dev
+            - prd
+        region:
+          type: string
+          description: target region
+          default: ap-northeast-1
+jobs:
+  test-data-injection:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment:
+      name: ${{ github.event.inputs.github_env }}
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - run: cat $GITHUB_EVENT_PATH
+      - run: lsb_release -d
+      - run: gh --version
+      - run: aws --version
+
+      - uses: actions/checkout@v4
+
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.ROLE_TO_ASSUME }}
+          aws-region: ap-northeast-1
+      - run: aws sts get-caller-identity
+
+      - name: set env variables
+        env:
+          ENV_NAME: ${{ vars.ENV_NAME }}
+        run: |
+          echo "ENV_NAME=${{ env.ENV_NAME }}"
+          echo "ENV_NAME=${{ env.ENV_NAME }}" >> $GITHUB_ENV
+          echo "DEV_ACCOUNT_ID=${{ secrets.DEV_ACCOUNT_ID }}" >> $GITHUB_ENV
+          echo "PROD_ACCOUNT_ID=${{ secrets.PROD_ACCOUNT_ID }}" >> $GITHUB_ENV
+          if [ ${{ env.ENV_NAME }} = dev ]; then ACCOUNT_ID=${{ secrets.DEV_ACCOUNT_ID }}" >> $GITHUB_ENV; fi
+          if [ ${{ env.ENV_NAME }} = prd ]; then ACCOUNT_ID=${{ secrets.PROD_ACCOUNT_ID }}" >> $GITHUB_ENV; fi
+
+      - name: setup node
+        uses: ./.github/workflows/setup-node
+
+      - name: modify instance metadata default
+        run: |
+          aws ec2 modify-instance-metadata-defaults \
+            --region ${{ github.event.inputs.region }}
+            --http-tokens required
+
+      - name: CDK Bootstrap
+        run: npx cdk bootstrap ${{ env.ACCOUNT_ID }}/${{ github.event.inputs.region }}
