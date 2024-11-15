@@ -12,7 +12,7 @@ on:
           description: target env
           options:
             - dev
-            - stg
+            - prd
         stack_name:
           type: choice
           description: target stack name
