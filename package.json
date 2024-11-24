@@ -21,7 +21,7 @@
     "depcheck": "depcheck"
   },
   "devDependencies": {
-    "@commitlint/cli": "^19.5.0",
+    "@commitlint/cli": "^19.6.0",
     "@commitlint/config-conventional": "^19.5.0",
     "@eslint/js": "^9.15.0",
     "@types/jest": "^29.5.14",
@@ -36,7 +36,7 @@
     "prettier": "^3.3.3",
     "standard-version": "^9.5.0",
     "ts-jest": "^29.2.5",
-    "typescript-eslint": "^8.14.0"
+    "typescript-eslint": "^8.15.0"
   },
   "dependencies": {
     "@aws-cdk/aws-kinesisfirehose-alpha": "^2.160.0-alpha.0",
@@ -52,7 +52,7 @@
     "cdk-nag": "^2.34.2",
     "constructs": "^10.4.2",
     "esbuild": "^0.24.0",
-    "husky": "^9.1.6",
+    "husky": "^9.1.7",
     "tsx": "^4.19.2",
     "typescript": "~5.6.3",
     "winston": "^3.16.0"
