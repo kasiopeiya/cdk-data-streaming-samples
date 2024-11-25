@@ -1,33 +1,7 @@
+queue_rules: []
+
 pull_request_rules:
-  - name: automatic merge of Dependabot PRs
+  - name: automatic merge + automatic merge of Dependabot PRs
+    conditions: []
     actions:
       queue:
-        name: default
-        method: squash
-        commit_message_template: |-
-          {{ title }} (#{{ number }})
-          {{ body }}
-    conditions:
-      - -title~=(WIP|wip)
-      - -label~=(blocked|do-not-merge)
-      - -merged
-      - -closed
-      - author=dependabot[bot]
-      - status-success=build-test
-  - name: automatic merge
-    actions:
-      queue:
-        name: default
-        method: squash
-        commit_message_template: |-
-          {{ title }} (#{{ number }})
-          {{ body }}
-    conditions:
-      - base!=release
-      - -title~=(WIP|wip)
-      - -label~=(blocked|do-not-merge|no-squash)
-      - -merged
-      - -closed
-      - author!=dependabot[bot]
-      - author!=dependabot-preview[bot]
-      - '#approved-reviews-by>=1'
