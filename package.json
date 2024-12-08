@@ -36,7 +36,7 @@
     "prettier": "^3.4.1",
     "standard-version": "^9.5.0",
     "ts-jest": "^29.2.5",
-    "typescript-eslint": "^8.16.0"
+    "typescript-eslint": "^8.17.0"
   },
   "dependencies": {
     "@aws-cdk/aws-kinesisfirehose-alpha": "^2.160.0-alpha.0",
@@ -49,7 +49,7 @@
     "@middy/core": "^5.5.1",
     "aws-cdk": "2.171.1",
     "aws-cdk-lib": "2.160.0",
-    "cdk-nag": "^2.34.12",
+    "cdk-nag": "^2.34.19",
     "constructs": "^10.4.2",
     "esbuild": "^0.24.0",
     "husky": "^9.1.7",
