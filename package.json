@@ -47,7 +47,7 @@
     "@aws-sdk/client-kinesis": "^3.699.0",
     "@aws-sdk/lib-dynamodb": "^3.705.0",
     "@middy/core": "^5.5.1",
-    "aws-cdk": "2.171.1",
+    "aws-cdk": "2.172.0",
     "aws-cdk-lib": "2.160.0",
     "cdk-nag": "^2.34.19",
     "constructs": "^10.4.2",
