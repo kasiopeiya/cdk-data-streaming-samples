@@ -36,14 +36,14 @@
     "prettier": "^3.4.2",
     "standard-version": "^9.5.0",
     "ts-jest": "^29.2.5",
-    "typescript-eslint": "^8.19.1"
+    "typescript-eslint": "^8.20.0"
   },
   "dependencies": {
     "@aws-cdk/aws-kinesisfirehose-alpha": "^2.160.0-alpha.0",
     "@aws-cdk/aws-kinesisfirehose-destinations-alpha": "^2.160.0-alpha.0",
-    "@aws-lambda-powertools/tracer": "^2.12.0",
+    "@aws-lambda-powertools/tracer": "^2.13.0",
     "@aws-sdk/client-cloudwatch": "^3.726.1",
-    "@aws-sdk/client-dynamodb": "^3.726.1",
+    "@aws-sdk/client-dynamodb": "^3.731.1",
     "@aws-sdk/client-kinesis": "^3.726.1",
     "@aws-sdk/lib-dynamodb": "^3.726.1",
     "@middy/core": "^6.0.0",
