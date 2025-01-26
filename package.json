@@ -23,7 +23,7 @@
   "devDependencies": {
     "@commitlint/cli": "^19.6.1",
     "@commitlint/config-conventional": "^19.6.0",
-    "@eslint/js": "^9.18.0",
+    "@eslint/js": "^9.19.0",
     "@types/jest": "^29.5.14",
     "@types/node": "20.16.9",
     "depcheck": "^1.4.7",
@@ -49,7 +49,7 @@
     "@middy/core": "^6.0.0",
     "aws-cdk": "2.176.0",
     "aws-cdk-lib": "2.160.0",
-    "cdk-nag": "^2.34.23",
+    "cdk-nag": "^2.35.0",
     "constructs": "^10.4.2",
     "esbuild": "^0.24.2",
     "husky": "^9.1.7",
