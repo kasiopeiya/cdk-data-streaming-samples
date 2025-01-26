@@ -44,7 +44,7 @@
     "@aws-lambda-powertools/tracer": "^2.13.0",
     "@aws-sdk/client-cloudwatch": "^3.734.0",
     "@aws-sdk/client-dynamodb": "^3.731.1",
-    "@aws-sdk/client-kinesis": "^3.731.1",
+    "@aws-sdk/client-kinesis": "^3.734.0",
     "@aws-sdk/lib-dynamodb": "^3.731.1",
     "@middy/core": "^6.0.0",
     "aws-cdk": "2.177.0",
