@@ -29,14 +29,14 @@
     "depcheck": "^1.4.7",
     "eslint": "^9.20.0",
     "eslint-plugin-simple-import-sort": "^12.1.1",
-    "globals": "^15.14.0",
+    "globals": "^15.15.0",
     "jest": "^29.7.0",
     "lint-staged": "^15.4.3",
     "markdownlint-cli2": "^0.17.2",
     "prettier": "^3.5.1",
     "standard-version": "^9.5.0",
     "ts-jest": "^29.2.5",
-    "typescript-eslint": "^8.23.0"
+    "typescript-eslint": "^8.24.0"
   },
   "dependencies": {
     "@aws-cdk/aws-kinesisfirehose-alpha": "^2.160.0-alpha.0",
