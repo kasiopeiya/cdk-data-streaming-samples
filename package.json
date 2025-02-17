@@ -48,7 +48,7 @@
     "@aws-sdk/lib-dynamodb": "^3.749.0",
     "@middy/core": "^6.0.0",
     "aws-cdk": "2.178.2",
-    "aws-cdk-lib": "2.160.0",
+    "aws-cdk-lib": "2.178.2",
     "cdk-nag": "^2.35.20",
     "constructs": "^10.4.2",
     "esbuild": "^0.25.0",
