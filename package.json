@@ -36,7 +36,7 @@
     "prettier": "^3.5.3",
     "standard-version": "^9.5.0",
     "ts-jest": "^29.2.6",
-    "typescript-eslint": "^8.27.0"
+    "typescript-eslint": "^8.28.0"
   },
   "dependencies": {
     "@aws-cdk/aws-kinesisfirehose-alpha": "^2.160.0-alpha.0",
@@ -44,12 +44,12 @@
     "@aws-lambda-powertools/tracer": "^2.17.0",
     "@aws-sdk/client-cloudwatch": "^3.772.0",
     "@aws-sdk/client-dynamodb": "^3.772.0",
-    "@aws-sdk/client-kinesis": "^3.772.0",
+    "@aws-sdk/client-kinesis": "^3.777.0",
     "@aws-sdk/lib-dynamodb": "^3.772.0",
     "@middy/core": "^6.1.6",
     "aws-cdk": "2.1005.0",
     "aws-cdk-lib": "2.160.0",
-    "cdk-nag": "^2.35.53",
+    "cdk-nag": "^2.35.59",
     "constructs": "^10.4.2",
     "esbuild": "^0.25.1",
     "husky": "^9.1.7",
