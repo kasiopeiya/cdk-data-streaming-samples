@@ -35,7 +35,7 @@
     "markdownlint-cli2": "^0.17.2",
     "prettier": "^3.5.3",
     "standard-version": "^9.5.0",
-    "ts-jest": "^29.3.0",
+    "ts-jest": "^29.3.1",
     "typescript-eslint": "^8.28.0"
   },
   "dependencies": {
@@ -47,7 +47,7 @@
     "@aws-sdk/client-kinesis": "^3.777.0",
     "@aws-sdk/lib-dynamodb": "^3.782.0",
     "@middy/core": "^6.1.6",
-    "aws-cdk": "2.1006.0",
+    "aws-cdk": "2.1007.0",
     "aws-cdk-lib": "2.160.0",
     "cdk-nag": "^2.35.59",
     "constructs": "^10.4.2",
