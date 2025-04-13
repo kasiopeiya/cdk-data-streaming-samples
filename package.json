@@ -36,7 +36,7 @@
     "prettier": "^3.5.3",
     "standard-version": "^9.5.0",
     "ts-jest": "^29.3.1",
-    "typescript-eslint": "^8.29.0"
+    "typescript-eslint": "^8.29.1"
   },
   "dependencies": {
     "@aws-cdk/aws-kinesisfirehose-alpha": "^2.160.0-alpha.0",
