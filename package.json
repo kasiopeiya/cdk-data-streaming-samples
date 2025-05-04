@@ -49,7 +49,7 @@
     "@middy/core": "^6.1.6",
     "aws-cdk": "2.1007.0",
     "aws-cdk-lib": "2.160.0",
-    "cdk-nag": "^2.35.69",
+    "cdk-nag": "^2.35.88",
     "constructs": "^10.4.2",
     "esbuild": "^0.25.2",
     "husky": "^9.1.7",
