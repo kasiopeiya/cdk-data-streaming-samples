@@ -42,7 +42,7 @@
     "@aws-cdk/aws-kinesisfirehose-alpha": "^2.160.0-alpha.0",
     "@aws-cdk/aws-kinesisfirehose-destinations-alpha": "^2.160.0-alpha.0",
     "@aws-lambda-powertools/tracer": "^2.17.0",
-    "@aws-sdk/client-cloudwatch": "^3.787.0",
+    "@aws-sdk/client-cloudwatch": "^3.812.0",
     "@aws-sdk/client-dynamodb": "^3.772.0",
     "@aws-sdk/client-kinesis": "^3.782.0",
     "@aws-sdk/lib-dynamodb": "^3.782.0",
